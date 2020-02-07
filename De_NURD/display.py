@@ -41,7 +41,7 @@ for i in range(seqence_Len):
         #cv2.imshow('step_process',gray_video1)  
 
         # raws 
-        img_path2 = operatedir_video + str(i+10)+ ".jpg"
+        img_path2 = operatedir_video + str(i+555)+ ".jpg"
         video2 = cv2.imread(img_path2)
         gray_video2  =   cv2.cvtColor(video2, cv2.COLOR_BGR2GRAY)
          

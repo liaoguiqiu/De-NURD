@@ -60,7 +60,8 @@ class VIDEO_PEOCESS:
     def de_distortion(image,path,sequence_num,addition_window_shift):
         new= image
         h, w= image.shape
-        new=new*0+np.nan # Nan pixel will be filled by intepolation processing
+        new=new*0  # Nan pixel will be filled by intepolation processing
+        mask =  new  + 255
         shift_diff= path +addition_window_shift - int(Window_LEN/2)  # additional compensation 
         shift_integral = shift_diff # not += : this is iteration way
         #every line will be moved to a new postion
@@ -74,13 +75,18 @@ class VIDEO_PEOCESS:
                 new_position= new_position -w
             #move this line to new position
             new[:,int(new_position)] = image[:,i]
+            mask[:,int(new_position)] = 0
 
         # connect the statrt and end before the interpilate          
         #modified to  # connect the statrt and end before the interpilate
         long_3_img  = np.append(new,new,axis=1) 
         long_3_img = np.append(long_3_img,new,axis=1) # cascade
-        interp_img = VIDEO_PEOCESS.img_interpilate(long_3_img) # interpolate by row
-        new= long_3_img[:,w:2*w] # take the middle one 
+        longmask  = np.append(mask,mask,axis=1) 
+        longmask  = np.append(longmask,mask,axis=1) 
+
+        interp_img=cv2.inpaint(long_3_img, longmask, 2, cv2.INPAINT_TELEA)
+        #interp_img = VIDEO_PEOCESS.img_interpilate(long_3_img) # interpolate by row
+        new= interp_img[:,w:2*w] # take the middle one 
         return new
 #----------------------#
 
@@ -94,10 +100,13 @@ class VIDEO_PEOCESS:
         #mat = cv2.resize(mat, (Resample_size,Resample_size), interpolation=cv2.INTER_AREA)
 
 
-        start_point= PATH.find_the_starting(mat) # starting point for path searching
-        middle_point  =  PATH.calculate_ave_mid(mat)
-        path1,path_cost1=PATH.search_a_path(mat,start_point) # get the path and average cost of the path
-        path1 =path1 *0 + corre_shifting 
+        #start_point= PATH.find_the_starting(mat) # starting point for path searching
+        #middle_point  =  PATH.calculate_ave_mid(mat)
+        #path1,path_cost1=PATH.search_a_path(mat,start_point) # get the path and average cost of the path
+       
+       
+        path1 =np.zeros(W) + corre_shifting 
+        path_cost1  = 0
         #path1 = gaussian_filter1d(path1,3) # smooth the path 
 
 
@@ -186,13 +195,15 @@ for i in range(seqence_Len):
             # shifting used is zero in costmatrix caculation
             #Costmatrix,shift_used = COSTMtrix.matrix_cal_corre_full_version_2(steam,0) 
             overall_shifting,shift_used1 = COSTMtrix.Img_fully_shifting_correlation(steam[Len_steam-1,:,:],
-                                                      steam[0,:,:],  addition_window_shift) 
-            #Costmatrix,shift_used = COSTMtrix.matrix_cal_Euler_GPU(steam,0) 
-            Costmatrix2,shift_used2 = COSTMtrix.matrix_cal_corre_full_version3_2GPU(steam2[Len_steam-1,:,:],
-                                                      steam2[Len_steam-2,:,:],  addition_window_shift) 
-            #Costmatrix,shift_used = COSTMtrix.matrix_cal_Euler_GPU(steam,0) 
-            Costmatrix = Costmatrix2
-            Costmatrix  = myfilter.gauss_filter_s (Costmatrix) # smooth matrix
+                                                      steam[Len_steam-2,:,:],  addition_window_shift) 
+    
+            #Costmatrix2,shift_used2 = COSTMtrix.matrix_cal_corre_full_version3_2GPU(steam2[Len_steam-1,:,:],
+            #                                          steam2[Len_steam-2,:,:],  addition_window_shift) 
+            ##Costmatrix,shift_used = COSTMtrix.matrix_cal_Euler_GPU(steam,0) 
+            #Costmatrix  = myfilter.gauss_filter_s (Costmatrix) # smooth matrix
+
+
+            Costmatrix = np.zeros ((Window_LEN, W))
 
             #get path and correct image
             #Corrected_img,path,path_cost=   VIDEO_PEOCESS.correct_video(gray_video,Costmatrix,int(i),addition_window_shift +Kp )
