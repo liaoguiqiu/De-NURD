@@ -185,8 +185,8 @@ for i in range(seqence_Len):
             steam2= np.delete(steam2 , 0,axis=0)
             # shifting used is zero in costmatrix caculation
             #Costmatrix,shift_used = COSTMtrix.matrix_cal_corre_full_version_2(steam,0) 
-            Costmatrix1,shift_used1 = COSTMtrix.matrix_cal_corre_full_version3_2GPU(steam[Len_steam-1,:,:],
-                                                      steam[0,:,:],  addition_window_shift) 
+            Costmatrix1,shift_used1 = COSTMtrix.Img_fully_shifting_correlation(steam[Len_steam-1,:,:],
+                                                      steam[Len_steam-2,:,:],  addition_window_shift) 
             #Costmatrix,shift_used = COSTMtrix.matrix_cal_Euler_GPU(steam,0) 
             Costmatrix2,shift_used2 = COSTMtrix.matrix_cal_corre_full_version3_2GPU(steam2[Len_steam-1,:,:],
                                                       steam2[Len_steam-2,:,:],  addition_window_shift) 
