@@ -52,7 +52,7 @@ ret, frame = cap.read()
 if ret == True:
     H,W,_ = frame.shape
 H_start = 0
-H_end = 100
+H_end = W
  
 steam=np.zeros((Len_steam,H_end-H_start,W))
 steam2=np.zeros((Len_steam,H_end-H_start,W))
