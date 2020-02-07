@@ -20,7 +20,7 @@ from scipy.stats.stats import pearsonr
 #    return  result
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-Window_LEN = 800
+Window_LEN = 70
 class COSTMtrix:
 
     def matrix_cal_corre(sequence):
@@ -84,7 +84,9 @@ class COSTMtrix:
        len,h,w = sequence.shape
 
        present_img = sequence[len-1,:,:]
-       previous_img = sequence[len-2,:,:]
+       #previous_img = sequence[len-2,:,:] #  use the corrected  near img
+       previous_img = sequence[0,:,:] #  use the first Img
+
        pre_previous = sequence[len-3,:,:]
        #connect 3 scanning images together to make the correlation can be done out of the boundary
        add_3_img  = np.append(previous_img,previous_img,axis=1) # cascade
