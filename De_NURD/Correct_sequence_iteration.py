@@ -214,6 +214,7 @@ for i in range(seqence_Len):
             path_mean_error = (np.mean(path)- int(Window_LEN/2))
             
             addition_window_shift =  path_mean_error +addition_window_shift
+            #addition_window_shift = 0
             #Kp = -0.055* path_mean_error
             #re！！！！！Next time remenber to remove the un-corrected image from the stream
             steam=np.append(steam,[Corrected_img[H_start:H_end,:] ],axis=0) # save sequence
