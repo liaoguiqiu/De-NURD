@@ -86,7 +86,7 @@ class VIDEO_PEOCESS:
 
 #----------------------#
 #correct and save /display results
-    def correct_video( image,mat,sequence_num,addition_window_shift):
+    def correct_video( image,corre_shifting,mat,sequence_num,addition_window_shift):
         H,W= mat.shape  #get size of image
         show1 =  mat.astype(float)
         #small the initial to speed path finding 
@@ -97,7 +97,7 @@ class VIDEO_PEOCESS:
         start_point= PATH.find_the_starting(mat) # starting point for path searching
         middle_point  =  PATH.calculate_ave_mid(mat)
         path1,path_cost1=PATH.search_a_path(mat,start_point) # get the path and average cost of the path
-        #path1 =path1 *0 + middle_point 
+        path1 =path1 *0 + corre_shifting 
         #path1 = gaussian_filter1d(path1,3) # smooth the path 
 
 
@@ -152,7 +152,7 @@ seqence_Len = len(read_sequence)    # get all file number
 img_path = operatedir_video +   "555.jpg"
 video = cv2.imread(img_path)  #read the first one to get the image size
 gray_video  =   cv2.cvtColor(video, cv2.COLOR_BGR2GRAY)
-Len_steam =5
+Len_steam =3
 H,W= gray_video.shape  #get size of image
 H_start = 20
 H_end = 200
@@ -185,18 +185,18 @@ for i in range(seqence_Len):
             steam2= np.delete(steam2 , 0,axis=0)
             # shifting used is zero in costmatrix caculation
             #Costmatrix,shift_used = COSTMtrix.matrix_cal_corre_full_version_2(steam,0) 
-            Costmatrix1,shift_used1 = COSTMtrix.Img_fully_shifting_correlation(steam[Len_steam-1,:,:],
-                                                      steam[Len_steam-2,:,:],  addition_window_shift) 
+            overall_shifting,shift_used1 = COSTMtrix.Img_fully_shifting_correlation(steam[Len_steam-1,:,:],
+                                                      steam[0,:,:],  addition_window_shift) 
             #Costmatrix,shift_used = COSTMtrix.matrix_cal_Euler_GPU(steam,0) 
             Costmatrix2,shift_used2 = COSTMtrix.matrix_cal_corre_full_version3_2GPU(steam2[Len_steam-1,:,:],
                                                       steam2[Len_steam-2,:,:],  addition_window_shift) 
             #Costmatrix,shift_used = COSTMtrix.matrix_cal_Euler_GPU(steam,0) 
-            Costmatrix = (Costmatrix1 + Costmatrix2)/2
+            Costmatrix = Costmatrix2
             Costmatrix  = myfilter.gauss_filter_s (Costmatrix) # smooth matrix
 
             #get path and correct image
             #Corrected_img,path,path_cost=   VIDEO_PEOCESS.correct_video(gray_video,Costmatrix,int(i),addition_window_shift +Kp )
-            Corrected_img,path,path_cost=   VIDEO_PEOCESS.correct_video(gray_video,Costmatrix,int(i),shift_used1 )
+            Corrected_img,path,path_cost=   VIDEO_PEOCESS.correct_video(gray_video,overall_shifting,Costmatrix,int(i),shift_used1 )
 
             # remove the central shifting 
             #addition_window_shift = -0.00055*(np.mean(path)- int(Window_LEN/2))+addition_window_shift
