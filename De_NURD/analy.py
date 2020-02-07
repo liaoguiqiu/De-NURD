@@ -6,7 +6,7 @@ import math
 import numpy as np
 import os
 import random
-#from matplotlib.pyplot import *
+from matplotlib.pyplot import *
 #from mpl_toolkits.mplot3d import Axes3D
 from median_filter_special import  myfilter
 from cost_matrix import  COSTMtrix
