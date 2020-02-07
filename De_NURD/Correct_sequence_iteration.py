@@ -97,7 +97,7 @@ class VIDEO_PEOCESS:
         start_point= PATH.find_the_starting(mat) # starting point for path searching
         middle_point  =  PATH.calculate_ave_mid(mat)
         path1,path_cost1=PATH.search_a_path(mat,start_point) # get the path and average cost of the path
-        path1 =path1 *0 + middle_point 
+        #path1 =path1 *0 + middle_point 
         #path1 = gaussian_filter1d(path1,3) # smooth the path 
 
 
@@ -154,10 +154,10 @@ video = cv2.imread(img_path)  #read the first one to get the image size
 gray_video  =   cv2.cvtColor(video, cv2.COLOR_BGR2GRAY)
 Len_steam =5
 H,W= gray_video.shape  #get size of image
-H_start = 0
-H_end = 100
+H_start = 20
+H_end = 200
 steam=np.zeros((Len_steam,H_end-H_start,W))
-steam2=np.zeros((Len_steam,H_end-H_start,W))
+steam2=np.zeros((Len_steam,H,W))
 save_sequence_num = 0  # processing iteration initial 
 addition_window_shift=0 # innitial shifting parameter
 Kp=0 # initial shifting paramerter
@@ -175,24 +175,28 @@ for i in range(seqence_Len):
             steam= np.delete(steam , 0,axis=0)
       
 
-            #steam2=np.append(steam2,[gray_video],axis=0) # save sequence
-            #steam2= np.delete(steam2 , 0,axis=0)
+            steam2=np.append(steam2,[gray_video],axis=0) # save sequence
+            steam2= np.delete(steam2 , 0,axis=0)
         else:
             steam=np.append(steam,[gray_video[H_start:H_end,:] ],axis=0) # save sequence
             # no longer delete the fist  one
             steam= np.delete(steam , 1,axis=0)
-            #steam2=np.append(steam2,[gray_video],axis=0) # save sequence
-            #steam2= np.delete(steam2 , 0,axis=0)
+            steam2=np.append(steam2,[gray_video],axis=0) # save sequence
+            steam2= np.delete(steam2 , 0,axis=0)
             # shifting used is zero in costmatrix caculation
             #Costmatrix,shift_used = COSTMtrix.matrix_cal_corre_full_version_2(steam,0) 
-            Costmatrix,shift_used = COSTMtrix.matrix_cal_corre_full_version_2GPU(steam,addition_window_shift) 
+            Costmatrix1,shift_used1 = COSTMtrix.matrix_cal_corre_full_version3_2GPU(steam[Len_steam-1,:,:],
+                                                      steam[0,:,:],  addition_window_shift) 
             #Costmatrix,shift_used = COSTMtrix.matrix_cal_Euler_GPU(steam,0) 
-
+            Costmatrix2,shift_used2 = COSTMtrix.matrix_cal_corre_full_version3_2GPU(steam2[Len_steam-1,:,:],
+                                                      steam2[Len_steam-2,:,:],  addition_window_shift) 
+            #Costmatrix,shift_used = COSTMtrix.matrix_cal_Euler_GPU(steam,0) 
+            Costmatrix = (Costmatrix1 + Costmatrix2)/2
             Costmatrix  = myfilter.gauss_filter_s (Costmatrix) # smooth matrix
 
             #get path and correct image
             #Corrected_img,path,path_cost=   VIDEO_PEOCESS.correct_video(gray_video,Costmatrix,int(i),addition_window_shift +Kp )
-            Corrected_img,path,path_cost=   VIDEO_PEOCESS.correct_video(gray_video,Costmatrix,int(i),shift_used )
+            Corrected_img,path,path_cost=   VIDEO_PEOCESS.correct_video(gray_video,Costmatrix,int(i),shift_used1 )
 
             # remove the central shifting 
             #addition_window_shift = -0.00055*(np.mean(path)- int(Window_LEN/2))+addition_window_shift
@@ -205,6 +209,10 @@ for i in range(seqence_Len):
             # no longer delete the fist  one
        
             steam= np.delete(steam , 1,axis=0)
+            steam2=np.append(steam2,[Corrected_img  ],axis=0) # save sequence
+            # no longer delete the fist  one
+       
+            steam2= np.delete(steam2 , 1,axis=0)
 
             if(Save_signal_flag==True):
       
