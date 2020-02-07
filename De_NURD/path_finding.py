@@ -18,7 +18,7 @@ from DeepPathsearch.image_trans import BaseTransform
 from scipy.ndimage import gaussian_filter1d
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 from cost_matrix import Window_LEN 
-dir_netD  = "..\\DeepPathFinding\\out\\netD_epoch_30.pth"
+dir_netD  = "..\\..\\DeepPathFinding\\out\\netD_epoch_50.pth"
 transform = BaseTransform(  Resample_size,[104])
 netD = gan_body._netD_Resnet()
 print('load weights for Path_ find ing')
