@@ -3,13 +3,14 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>07b9d663-4bc8-4016-8977-35b22d05cc4c</ProjectGuid>
-    <ProjectHome>.</ProjectHome>
-    <StartupFile>Correct_sequence_iteration.py</StartupFile>
+    <ProjectHome>
+    </ProjectHome>
+    <StartupFile>Dataset_generator.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
-    <Name>De_NURD</Name>
+    <Name>De_NURD_Data_set_generator</Name>
     <RootNamespace>De_NURD</RootNamespace>
     <InterpreterId>Global|ContinuumAnalytics|Anaconda36-64</InterpreterId>
   </PropertyGroup>
@@ -32,6 +33,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="cost_matrix.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Dataset_generator.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="DeepPathsearch\analy.py" />

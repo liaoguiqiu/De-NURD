@@ -87,7 +87,7 @@ class COSTMtrix:
 
        present_img = sequence[len-1,:,:]
        #previous_img = sequence[len-2,:,:] #  use the corrected  near img
-       previous_img = sequence[0,:,:] #  use the first Img
+       previous_img = sequence[len-2,:,:] #  use the first Img
 
        pre_previous = sequence[len-3,:,:]
        #connect 3 scanning images together to make the correlation can be done out of the boundary
