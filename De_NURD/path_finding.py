@@ -72,8 +72,17 @@ class PATH:
         new = img[:,0:Window_LEN]
         line=new.sum(axis=1)
         starting_piont =  np.argmin(line)
-
         return starting_piont
+
+    def calculate_ave_mid(img):
+        starting_piont=int(Window_LEN/2)
+        h, w= img.shape
+
+        new = img[:,0:2:w]
+        line=new.sum(axis=1)
+        mid_point =  np.argmin(line)
+
+        return mid_point
 
     #apply deep learning to find the path
     def search_a_path_GPU(img): # input should be torch tensor
