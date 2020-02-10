@@ -155,7 +155,7 @@ class VIDEO_PEOCESS:
 
 
 #---------main schedule-------------#
-    def main( ):
+    def main():
         read_sequence = os.listdir(operatedir_video) # read all file name
         seqence_Len = len(read_sequence)    # get all file number 
         img_path = operatedir_video +   "555.jpg"
