@@ -19,14 +19,16 @@ from matplotlib.pyplot import *
 from mpl_toolkits.mplot3d import Axes3D
 from  path_finding import PATH
 
+Display_signal_flag = False
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-from analy import MY_ANALYSIS
-#show the stastics results
-saved_stastics  = MY_ANALYSIS()
-saved_stastics=saved_stastics.read_my_signal_results()
-saved_stastics.display()
+if Display_signal_flag == True:
+    from analy import MY_ANALYSIS
+    #show the stastics results
+    saved_stastics  = MY_ANALYSIS()
+    saved_stastics=saved_stastics.read_my_signal_results()
+    saved_stastics.display()
 
 
 #show the image results
@@ -34,14 +36,14 @@ read_sequence = os.listdir(savedir_path)
 seqence_Len = len(read_sequence)
 for i in range(seqence_Len):
 #for i in os.listdir("E:\\estimagine\\vs_project\\PythonApplication_data_au\\pic\\"):     
-        # processed
+        # processe
         img_path1 = savedir_path + str(i+10)+ ".jpg"
         video1 = cv2.imread(img_path1)
         gray_video1  =   cv2.cvtColor(video1, cv2.COLOR_BGR2GRAY)
         #cv2.imshow('step_process',gray_video1)  
 
         # raws 
-        img_path2 = operatedir_video + str(i+10)+ ".jpg"
+        img_path2 = operatedir_video + str(i+555)+ ".jpg"
         video2 = cv2.imread(img_path2)
         gray_video2  =   cv2.cvtColor(video2, cv2.COLOR_BGR2GRAY)
          
@@ -65,5 +67,5 @@ for i in range(seqence_Len):
         show_2 = np.append(show_2,gray_video1[:,300:W-300],axis=1) # cascade
         cv2.imshow('combin video',show_2 ) 
 
-        if cv2.waitKey(12) & 0xFF == ord('q'):
+        if cv2.waitKey(1) & 0xFF == ord('q'):
           break

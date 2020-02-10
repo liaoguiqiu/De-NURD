@@ -4,7 +4,7 @@ import os
 from analy import MY_ANALYSIS
 from analy import Save_signal_enum
 from scipy import signal 
-from image_trans import BaseTransform  
+from DeepPathsearch.image_trans import BaseTransform  
 Batch_size = 128
 Resample_size =128
 Path_length = 128

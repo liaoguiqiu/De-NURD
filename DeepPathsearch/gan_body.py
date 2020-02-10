@@ -1,11 +1,12 @@
 import torch
 import torch.nn as nn
-import arg_parse
-from arg_parse import kernels, strides, pads
-from dataset import Path_length
-nz = int(arg_parse.opt.nz)
-ngf = int(arg_parse.opt.ngf)
-ndf = int(arg_parse.opt.ndf)
+import DeepPathsearch.arg_parse
+from DeepPathsearch.arg_parse import kernels, strides, pads
+from DeepPathsearch.dataset import Path_length
+import torchvision.models
+nz = int(DeepPathsearch.arg_parse.opt.nz)
+ngf = int(DeepPathsearch.arg_parse.opt.ngf)
+ndf = int(DeepPathsearch.arg_parse.opt.ndf)
 nc = 1
 
 
@@ -175,9 +176,6 @@ class _netD_8(nn.Module):
                 nn.LeakyReLU(0.2, inplace=True)
                 )
             #self.layers.append(this_layer)
-
- 
-
     def forward(self, x):
         #output = self.main(input)
         #layer_len = len(kernels)
@@ -190,4 +188,48 @@ class _netD_8(nn.Module):
             x = self.layers[i](x)
 
 
+        return x 
+
+
+# mainly based on the resnet     
+class _netD_Resnet(nn.Module):
+    def __init__(self):
+        super(_netD_Resnet, self).__init__()
+
+        layer_len = len(kernels)
+        #create the layer list
+        self.layers = nn.ModuleList()
+        #self.resnet18 = torchvision.models.resnet18(pretrained = False, **kwargs)
+        self.resnet18 = torchvision.models.resnet18(pretrained = False)
+        #self.resnet34 = torchvision.models.resnet34(pretrained = False)
+        #self.resnet101 = torchvision.models.resnet101(pretrained = False)
+
+
+
+        self.layers.append (self.resnet18)
+        self.layers.append (
+                nn.LeakyReLU(0.2, inplace=True)
+                )
+        self.layers.append(
+                nn.Linear(1000, Path_length, bias=False),          
+                 )
+                #self.layers.append (
+                #nn.BatchNorm2d(Path_length),
+                #   )
+        self.layers.append(
+                nn.Sigmoid()
+                 )
+            #self.layers.append(this_layer)
+    def forward(self, x):
+        #output = self.main(input)
+        #layer_len = len(kernels)
+        #for layer_point in range(layer_len):
+        #    if(layer_len==0):
+        #        output = self.layers[layer_point](input)
+        #    else:
+        #        output = self.layers[layer_point](output)
+        #for i, name in enumerate(self.layers):
+        #    x = self.layers[i](x)
+        for i, name in enumerate(self.layers):
+            x = self.layers[i](x)
         return x 

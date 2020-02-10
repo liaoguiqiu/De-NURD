@@ -12,12 +12,20 @@ import scipy.signal as signal
  
 import random
 from torch.autograd import Variable
- 
+from DeepPathsearch.dataset import myDataloader,Batch_size,Resample_size, Path_length
+from DeepPathsearch import gan_body
+from DeepPathsearch.image_trans import BaseTransform 
 from scipy.ndimage import gaussian_filter1d
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 from cost_matrix import Window_LEN 
-dir_netD  = "..\\DeepPathFinding\\out\\netD_epoch_40.pth"
- 
+dir_netD  = "..\\..\\DeepPathFinding\\out\\netD_epoch_50.pth"
+transform = BaseTransform(  Resample_size,[104])
+netD = gan_body._netD_Resnet()
+print('load weights for Path_ find ing')
+netD.load_state_dict(torch.load(dir_netD))
+print(netD)
+netD.cuda()
+netD.eval()
 class PATH:
 
     def search_a_path(img,start_p):
@@ -64,21 +72,28 @@ class PATH:
         new = img[:,0:Window_LEN]
         line=new.sum(axis=1)
         starting_piont =  np.argmin(line)
-
         return starting_piont
+
+    def calculate_ave_mid(img):
+        starting_piont=int(Window_LEN/2)
+        h, w= img.shape
+
+        new = img[:,0:2:w]
+        line=new.sum(axis=1)
+        mid_point =  np.argmin(line)
+
+        return mid_point
 
     #apply deep learning to find the path
     def search_a_path_GPU(img): # input should be torch tensor
         #img2 = cv2.cvtColor(img2,cv2.COLOR_GRAY2RGB)
         H,W= img.shape  #get size of image
         piece_num = 10 # the number of the squers 
-        piece_W = W/piece_num
+        piece_W = int(W/piece_num)
         input_batch = np.zeros((piece_num,3,Resample_size,Resample_size)) # a batch with piece num
 
         for  slice_point in range (piece_num):
-            star_pt = int(slice_point*piece_W) # int
-            end_pt = int ((slice_point+1)*piece_W) # int
-            img_piece = img[:,star_pt:end_pt]
+            img_piece = img[:,slice_point*piece_W:(slice_point+1)*piece_W]
             img_piece = cv2.resize(img_piece, (Resample_size,Resample_size), interpolation=cv2.INTER_AREA)
             input_batch[slice_point,0,:,:] = transform(img_piece)[0]
             input_batch[slice_point,1,:,:] = transform(img_piece)[0]
@@ -100,15 +115,12 @@ class PATH:
 
         #inputv = Variable(input.unsqueeze(0))
         output = netD(inputv)
-        output = output.cpu().detach().numpy()
-
         path_upsam = np.zeros(W)
-        connected_path = []
+        output = output.cpu().detach().numpy()
         for connect_point in range (piece_num):
-                connected_path= np.append(connected_path,output[connect_point,:])
-        path_upsam = signal.resample(connected_path,W)*H
-        path_upsam = gaussian_filter1d (path_upsam ,1)
-
+            path_upsam[connect_point*piece_W:(connect_point+1)*piece_W] = signal.resample(
+                output[connect_point,:], piece_W)
+        path_upsam = path_upsam *Window_LEN
         #long_out  = np.append(np.flip(output),output)
         #long_out  = np.append(long_out,np.flip(output))
         #long_out = gaussian_filter1d (long_out ,1)

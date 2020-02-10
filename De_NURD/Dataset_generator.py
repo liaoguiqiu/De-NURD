@@ -45,14 +45,14 @@ class DATA_Generator(object):
             cv2.imwrite(self.data_pair1_root  + str(Image_ID) +".jpg", original_IMG)
             cv2.imwrite(self.data_pair2_root  + str(Image_ID) +".jpg", Shifted_IMG)
             ## validation 
-            #steam[Len_steam-1,:,:]  = original_IMG  # un-correct 
-            #steam[Len_steam-2,:,:]  = Shifted_IMG  # correct 
-            #Costmatrix,shift_used = COSTMtrix.matrix_cal_corre_full_version_2GPU(steam,0) 
-            #Costmatrix  = myfilter.gauss_filter_s (Costmatrix) # smooth matrix
-            #show1 =  Costmatrix 
-            #for i in range ( len(path)):
-            #    show1[int(path[i]),i]=254
-            #cv2.imwrite(self.data_mat_root  + str(Image_ID) +".jpg", show1)
+            steam[Len_steam-1,:,:]  = original_IMG  # un-correct 
+            steam[Len_steam-2,:,:]  = Shifted_IMG  # correct 
+            Costmatrix,shift_used = COSTMtrix.matrix_cal_corre_full_version3_2GPU(original_IMG,Shifted_IMG,0) 
+            Costmatrix  = myfilter.gauss_filter_s (Costmatrix) # smooth matrix
+            show1 =  Costmatrix 
+            for i in range ( len(path)):
+                show1[int(path[i]),i]=254
+            cv2.imwrite(self.data_mat_root  + str(Image_ID) +".jpg", show1)
 
 
 
@@ -61,7 +61,7 @@ class DATA_Generator(object):
             read_id +=1
 
 
-
-generator   = DATA_Generator()
-generator.generate()
+if __name__ == '__main__':
+        generator   = DATA_Generator()
+        generator.generate()
 
