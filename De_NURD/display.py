@@ -40,13 +40,13 @@ seqence_Len = len(read_sequence)
 for i in range(seqence_Len):
 #for i in os.listdir("E:\\estimagine\\vs_project\\PythonApplication_data_au\\pic\\"):     
         # processe
-        img_path1 = savedir_path + str(i+900)+ ".jpg"
+        img_path1 = savedir_path + str(i+10)+ ".jpg"
         video1 = cv2.imread(img_path1)
         gray_video1  =   cv2.cvtColor(video1, cv2.COLOR_BGR2GRAY)
         #cv2.imshow('step_process',gray_video1)  
 
         # raws 
-        img_path2 = operatedir_video + str(i+905)+ ".jpg"
+        img_path2 = operatedir_video + str(i+15)+ ".jpg"
         video2 = cv2.imread(img_path2)
         gray_video2  =   cv2.cvtColor(video2, cv2.COLOR_BGR2GRAY)
          

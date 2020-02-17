@@ -28,7 +28,7 @@ import random
 from  path_finding import PATH
 from median_filter_special import  myfilter
 from cost_matrix import  COSTMtrix
-from cost_matrix import Window_LEN 
+from cost_matrix import Window_LEN ,Overall_shiftting_WinLen
 from scipy.ndimage import gaussian_filter1d
 from time import time
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -53,6 +53,41 @@ class VIDEO_PEOCESS:
            s = pd.Series(image[i,:])
            image[i,:] = s.interpolate()
         return image
+#----------------------#
+
+#----------------------#
+# apply the path (shift) and shift compensation to correct
+    def de_distortion_overall_shifting(image,path,sequence_num,addition_window_shift):
+        new= image
+        h, w= image.shape
+        new=new*0  # Nan pixel will be filled by intepolation processing
+        mask =  new  + 255
+        shift_diff= path +addition_window_shift - int(Overall_shiftting_WinLen/2)  # additional compensation 
+        shift_integral = shift_diff # not += : this is iteration way
+        #every line will be moved to a new postion
+        for i in range ( len(shift_diff)):
+            #limit the integral             
+            new_position  = int(shift_integral[i]+i)
+            # deal with the boundary exceeding
+            if(new_position<0):
+                new_position = w+new_position
+            if (new_position>=w):
+                new_position= new_position -w
+            #move this line to new position
+            new[:,int(new_position)] = image[:,i]
+            mask[:,int(new_position)] = 0
+
+        # connect the statrt and end before the interpilate          
+        #modified to  # connect the statrt and end before the interpilate
+        long_3_img  = np.append(new,new,axis=1) 
+        long_3_img = np.append(long_3_img,new,axis=1) # cascade
+        longmask  = np.append(mask,mask,axis=1) 
+        longmask  = np.append(longmask,mask,axis=1) 
+
+        interp_img=cv2.inpaint(long_3_img, longmask, 2, cv2.INPAINT_TELEA)
+        #interp_img = VIDEO_PEOCESS.img_interpilate(long_3_img) # interpolate by row
+        new= interp_img[:,w:2*w] # take the middle one 
+        return new
 #----------------------#
 
 #----------------------#
@@ -99,7 +134,7 @@ class VIDEO_PEOCESS:
    
         path1 = corre_shifting + path1      
         path_cost1  = 0       
-        img_corrected = VIDEO_PEOCESS.de_distortion(image,path1,sequence_num,addition_window_shift)
+        img_corrected = VIDEO_PEOCESS.de_distortion_overall_shifting(image,path1,sequence_num,addition_window_shift)
         return img_corrected,path1,path_cost1
 
 #----------------------#
@@ -116,14 +151,15 @@ class VIDEO_PEOCESS:
 
         start_point= PATH.find_the_starting(mat) # starting point for path searching
         ##middle_point  =  PATH.calculate_ave_mid(mat)
-        path1,path_cost1=PATH.search_a_path(mat,start_point) # get the path and average cost of the path
+        #path1,path_cost1=PATH.search_a_path(mat,start_point) # get the path and average cost of the path
+        path1,path_cost1=PATH.search_a_path_Deep_Mat2longpath(mat) # get the path and average cost of the path
        
         #path1 = corre_shifting + path1
        
         #path1 =0.5 * path1 + 0.5 * corre_shifting 
         path_cost1  = 0
         path1 = gaussian_filter1d(path1,3) # smooth the path 
-        #path1 = path1 -np.mean(path1) +corre_shifting
+        #path1 = path1 -0.5*(np.mean(path1) - (Window_LEN/2)) # remove the meaning shifting
 
         #long_out  = np.append(np.flip(path1),path1) # flip to make the the start point and end point to be perfect interpolit
         #long_out  = np.append(long_out, np. flip ( path1))
@@ -168,7 +204,7 @@ class VIDEO_PEOCESS:
         img_path = operatedir_video +   "5.jpg"
         video = cv2.imread(img_path)  #read the first one to get the image size
         gray_video  =   cv2.cvtColor(video, cv2.COLOR_BGR2GRAY)
-        Len_steam =3
+        Len_steam =5
         H,W= gray_video.shape  #get size of image
         H_start = 20
         H_end = 200
@@ -176,6 +212,8 @@ class VIDEO_PEOCESS:
         steam2=np.zeros((Len_steam,H ,W))
         save_sequence_num = 0  # processing iteration initial 
         addition_window_shift=0 # innitial shifting parameter
+        Window_ki_error = 0
+        Window_kp_error = 0
         Kp=0 # initial shifting paramerter
         for sequence_num in range(seqence_Len):
         #for i in os.listdir("E:\\estimagine\\vs_project\\PythonApplication_data_au\\pic\\"):
@@ -184,7 +222,7 @@ class VIDEO_PEOCESS:
                 img_path = operatedir_video + str(sequence_num+0)+ ".jpg" # starting from 10
                 video = cv2.imread(img_path)
                 gray_video  =   cv2.cvtColor(video, cv2.COLOR_BGR2GRAY)
-                if(sequence_num<Len_steam):
+                if(sequence_num<10):
                     # bffer a resized one to coputer the path and cost matrix
                     steam=np.append(steam,[gray_video[H_start:H_end,:] ],axis=0) # save sequence
                     # normal beffer process
@@ -202,30 +240,31 @@ class VIDEO_PEOCESS:
                     # shifting used is zero in costmatrix caculation
                     #Costmatrix,shift_used = COSTMtrix.matrix_cal_corre_full_version_2(steam,0) 
                     overall_shifting,shift_used1 = COSTMtrix.Img_fully_shifting_correlation(steam[Len_steam-1,:,:],
-                                                              steam[Len_steam-2,:,:],  addition_window_shift) 
+                                                              steam[0,:,:],  addition_window_shift) 
                     Corrected_img,path,path_cost=   VIDEO_PEOCESS.correct_video_with_shifting(gray_video,overall_shifting,int(sequence_num),shift_used1 )
 
                     Costmatrix = np.zeros ((Window_LEN, W))
                     #test_show = steam2[Len_steam-2,:,:]
                     #cv2.imshow('correcr video',test_show.astype(np.uint8))
-                    #Costmatrix,shift_used2 = COSTMtrix.matrix_cal_corre_full_version3_2GPU (Corrected_img,
-                    #                                          steam2[Len_steam-2,:,:],  0) 
+                    Costmatrix,shift_used2 = COSTMtrix.matrix_cal_corre_full_version3_2GPU (Corrected_img,
+                                                              steam2[Len_steam-2,:,:],  0) 
                     #Costmatrix = Costmatrix2
                     ###Costmatrix = cv2.blur(Costmatrix,(5,5))
-                    #Costmatrix  = myfilter.gauss_filter_s (Costmatrix) # smooth matrix
+                    Costmatrix  = myfilter.gauss_filter_s (Costmatrix) # smooth matrix
 
                     #get path and correct image
                     #Corrected_img,path,path_cost=   VIDEO_PEOCESS.correct_video(gray_video,Costmatrix,int(i),addition_window_shift +Kp )
-                    #Corrected_img,path,path_cost=   VIDEO_PEOCESS.correct_video(Corrected_img,overall_shifting,Costmatrix,int(sequence_num),shift_used2 )
+                    Corrected_img,path,path_cost=   VIDEO_PEOCESS.correct_video(Corrected_img,overall_shifting,Costmatrix,int(sequence_num),shift_used2+Window_ki_error+Window_kp_error )
 
                     # remove the central shifting 
                     #addition_window_shift = -0.00055*(np.mean(path)- int(Window_LEN/2))+addition_window_shift
-                    #path_mean_error = (np.mean(path)- int(Window_LEN/2))
-                    path_mean_error = int(overall_shifting- int(Window_LEN/2))
+                    path_mean_error = (np.mean(path)- int(Window_LEN/2))
+                    shift_mean_error = int(overall_shifting- int(Overall_shiftting_WinLen/2))
             
-                    addition_window_shift =  path_mean_error +addition_window_shift
+                    addition_window_shift =  shift_mean_error  +addition_window_shift
                     #addition_window_shift = 0
-                    #Kp = -0.055* path_mean_error
+                    Window_kp_error =  - 0.05* path_mean_error
+                    #Window_ki_error = -0.000005*path_mean_error+Window_ki_error
                     #re！！！！！Next time remenber to remove the un-corrected image from the stream
                     steam=np.append(steam,[Corrected_img[H_start:H_end,:] ],axis=0) # save sequence
                     # no longer delete the fist  one

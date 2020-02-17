@@ -22,7 +22,8 @@ from scipy.ndimage import gaussian_filter1d
 #    return  result
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-Window_LEN = 80
+Window_LEN = 70
+Overall_shiftting_WinLen = 40
 class COSTMtrix:
 
     def matrix_cal_corre(sequence):
@@ -270,8 +271,8 @@ class COSTMtrix:
 # use the delayed one to realize full image correction
     def Img_fully_shifting_correlation(present_img,previous_img,window_shift):
 
-       window_wid= Window_LEN
-       window_cntr= int(Window_LEN/2)  # check
+       window_wid= Overall_shiftting_WinLen
+       window_cntr= int(Overall_shiftting_WinLen/2)  # check
        h,w = present_img.shape
 
        #present_img = sequence[len-1,:,:]

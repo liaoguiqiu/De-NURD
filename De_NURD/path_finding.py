@@ -12,18 +12,19 @@ import scipy.signal as signal
  
 import random
 from torch.autograd import Variable
-from DeepPathsearch.dataset import myDataloader,Batch_size,Resample_size, Path_length
-from DeepPathsearch import gan_body
+from DeepPathsearch.dataset import myDataloader,Batch_size,Resample_size, Path_length,Resample_H,Resample_W
+from DeepPathsearch import PathNetbody
 from DeepPathsearch.image_trans import BaseTransform 
 from scipy.ndimage import gaussian_filter1d
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 from cost_matrix import Window_LEN 
-dir_netD  = "..\\..\\DeepPathFinding\\out\\netD_epoch_50.pth"
+dir_netD  = "..\\..\\DeepPathFinding\\out\\netD_epoch_10.pth"
 transform = BaseTransform(  Resample_size,[104])
-netD = gan_body._netD_Resnet()
+netD = PathNetbody._Path_net()
+print(netD)
+
 print('load weights for Path_ find ing')
 netD.load_state_dict(torch.load(dir_netD))
-print(netD)
 netD.cuda()
 netD.eval()
 class PATH:
@@ -128,6 +129,38 @@ class PATH:
         #path_upsam = long_path_upsam[W:2*W]
         return path_upsam, 0
 
+    #apply deep learning to find the path
+    def search_a_path_Deep_Mat2longpath(img): # input should be torch tensor
+        #img2 = cv2.cvtColor(img2,cv2.COLOR_GRAY2RGB)
+        H,W= img.shape  #get size of image
+ 
+        input_batch = np.zeros((1,3,Resample_H,Resample_W)) # a batch with piece num
+        resize_img = cv2.resize(img, (Resample_W,Resample_H), interpolation=cv2.INTER_AREA)
+        input_batch[0,0,:,:] = resize_img
+        input_batch[0,1,:,:] = resize_img
+        input_batch[0,2,:,:] = resize_img
+         
+        input = torch.from_numpy(np.float32(input_batch)) 
+        input = input.to(device) 
+
+ 
+
+        inputv = Variable(input)
+
+        #inputv = Variable(input.unsqueeze(0))
+        output = netD(inputv)
+        path_upsam = np.zeros(W)
+        output = output.cpu().detach().numpy()
+         
+
+        path_upsam  = signal.resample(output[0,:], W)
+        path_upsam = path_upsam *Window_LEN
+        #long_out  = np.append(np.flip(output),output)
+        #long_out  = np.append(long_out,np.flip(output))
+        #long_out = gaussian_filter1d (long_out ,1)
+        #long_path_upsam  = signal.resample(long_out, 3*W)*Window_LEN
+        #path_upsam = long_path_upsam[W:2*W]
+        return path_upsam, 0
 
      
 #test of this algorithm
