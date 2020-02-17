@@ -4,11 +4,14 @@
 #operatedir_video =  "..\\..\\OCT\\P-ID_Name_25092019164030.avi"
 #E:\PhD\trying\OCT\OCT aligment
 operatedir_video =  "..\\..\\OCT\\OCT aligment\\22JAN2020AUTO_01.avi"
+#operatedir_video =  "..\\..\\OCT\\OCT aligment\\phantom-01_2412020121234.avi"
 
-#operatedir_video =  "..\\..\\OCT\\P-ID_Name_25092019161813-7500rpm-G1_0.05_4_25_extracted.avi"
+#phantom-01_2412020121234
+#operatedir_video =  "..\\..\\OCT\\P-ID_Name_25092019160318VIDEO.avi"
 savedir_matrix  = "..\\..\\saved_matrix\\"
 savedir_original  = "..\\..\\saved_original\\"
 savedir_filtered_OCT  = "..\\..\\saved_filtered_img\\"
+savedir_original_circular = "..\\..\\saved_original_circular\\"
 
 #used python packages
 import cv2
@@ -83,11 +86,20 @@ while(cap.isOpened()):
     #cv2.imshow('steamfilter',stea_filter.astype(np.uint8))
     #cv2.imshow('ffilter',filter_img)
     #cv2.imshow('costmatrix',Costmatrix.astype(np.uint8))
-
+    new_frame2=cv2.rotate(gray,rotateCode = 2) 
+    new_frame3= new_frame2.astype(float)
+    H,W= new_frame2.shape
+    circular3=np.ones((H,W))
+    circular2=circular3.astype(float)
+    circular = circular2*2
+    circular = cv2.linearPolar(new_frame3, (int(W/2) , int(H/2)),400, cv2.WARP_INVERSE_MAP)
+    circular=circular.astype(np.uint8)
 
     #cv2.imwrite(savedir_matrix  + str(save_sequence_num) +".jpg", Costmatrix)
     cv2.imwrite(savedir_original  + str(save_sequence_num) +".jpg", crop_H_test)
     cv2.imwrite(savedir_filtered_OCT  + str(save_sequence_num) +".jpg", filter_img)
+    cv2.imwrite(savedir_original_circular  + str(save_sequence_num) +".jpg", circular)
+
     save_sequence_num+=1
     print ("[%s]   is processed." % (save_sequence_num))
     

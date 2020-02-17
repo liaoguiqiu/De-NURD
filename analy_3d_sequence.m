@@ -2,8 +2,8 @@
 clc;
 close all;
 clear all;
-test_rate = 0.8;       % ????????
-fileFolder=fullfile('.\saved_processed\');
+test_rate = 0.9;       % ????????
+fileFolder=fullfile('..\\saved_processed\\');
 dirOutput=dir(fullfile(fileFolder,'*'));
 fileNames={dirOutput.name}';
 fullfile = char(fileNames{3:end,:});

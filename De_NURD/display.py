@@ -20,7 +20,7 @@ from mpl_toolkits.mplot3d import Axes3D
 from  path_finding import PATH
 
 Display_signal_flag = False
-
+Display_Matrix_flag = False
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 if Display_signal_flag == True:
@@ -34,16 +34,19 @@ if Display_signal_flag == True:
 #show the image results
 read_sequence = os.listdir(savedir_path)
 seqence_Len = len(read_sequence)
+
+
+
 for i in range(seqence_Len):
 #for i in os.listdir("E:\\estimagine\\vs_project\\PythonApplication_data_au\\pic\\"):     
         # processe
-        img_path1 = savedir_path + str(i+10)+ ".jpg"
+        img_path1 = savedir_path + str(i+900)+ ".jpg"
         video1 = cv2.imread(img_path1)
         gray_video1  =   cv2.cvtColor(video1, cv2.COLOR_BGR2GRAY)
         #cv2.imshow('step_process',gray_video1)  
 
         # raws 
-        img_path2 = operatedir_video + str(i+555)+ ".jpg"
+        img_path2 = operatedir_video + str(i+905)+ ".jpg"
         video2 = cv2.imread(img_path2)
         gray_video2  =   cv2.cvtColor(video2, cv2.COLOR_BGR2GRAY)
          
@@ -61,11 +64,25 @@ for i in range(seqence_Len):
         img_path3 = operatedir_matrix + str(i+10)+ ".jpg"
         MATRIX_RESULT = cv2.imread(img_path3)
         MATRIX_RESULT  =   cv2.cvtColor(MATRIX_RESULT, cv2.COLOR_BGR2GRAY)
+        if Display_Matrix_flag == False:
+             MATRIX_RESULT = MATRIX_RESULT *0
+
         #cv2.imshow('matrix',MATRIX_RESULT) 
         Rotate_matr = cv2.rotate(MATRIX_RESULT,rotateCode = 2) 
         show_2  = np.append(circular[:,300:W-300],Rotate_matr,axis=1) # cascade
         show_2 = np.append(show_2,gray_video1[:,300:W-300],axis=1) # cascade
+
+        if(i == 0): # initialize the color sequence 
+            stream=np.zeros((show_2.shape[0],show_2.shape[1],3))
+        else:
+            new_frame   = np.zeros((show_2.shape[0],show_2.shape[1],1))
+            new_frame[:,:,0]  = show_2
+            stream=np.append(stream,new_frame,axis=2) # save sequence
+            stream= np.delete(stream , 0,axis=2)
+            
+
         cv2.imshow('combin video',show_2 ) 
+        cv2.imshow('show 3 imgs sequence with color',stream.astype(np.uint8) ) 
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
           break
