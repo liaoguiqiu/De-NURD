@@ -22,8 +22,8 @@ from scipy.ndimage import gaussian_filter1d
 #    return  result
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-Window_LEN = 70
-Overall_shiftting_WinLen = 40
+Window_LEN = 100
+Overall_shiftting_WinLen = 100
 class COSTMtrix:
 
     def matrix_cal_corre(sequence):
@@ -361,7 +361,7 @@ class COSTMtrix:
 
        # copy frome the GPU
        error_sum2=torch.Tensor.cpu(error_sum2).detach().numpy()
-       error_sum2 = gaussian_filter1d(error_sum2,3) # smooth the path 
+       error_sum2 = gaussian_filter1d(error_sum2,7) # smooth the path 
        mid_point =  np.argmin(error_sum2)
        return mid_point,int(window_shift)
 #########################

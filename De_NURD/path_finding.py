@@ -18,7 +18,7 @@ from DeepPathsearch.image_trans import BaseTransform
 from scipy.ndimage import gaussian_filter1d
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 from cost_matrix import Window_LEN 
-dir_netD  = "..\\..\\DeepPathFinding\\out\\netD_epoch_10.pth"
+dir_netD  = "..\\..\\DeepPathFinding\\out\\netD_epoch_45.pth"
 transform = BaseTransform(  Resample_size,[104])
 netD = PathNetbody._Path_net()
 print(netD)

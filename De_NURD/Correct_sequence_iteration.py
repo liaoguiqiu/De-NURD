@@ -159,7 +159,7 @@ class VIDEO_PEOCESS:
         #path1 =0.5 * path1 + 0.5 * corre_shifting 
         path_cost1  = 0
         path1 = gaussian_filter1d(path1,3) # smooth the path 
-        #path1 = path1 -0.5*(np.mean(path1) - (Window_LEN/2)) # remove the meaning shifting
+        path1 = path1 -(np.mean(path1) - int(Window_LEN/2)) # remove the meaning shifting
 
         #long_out  = np.append(np.flip(path1),path1) # flip to make the the start point and end point to be perfect interpolit
         #long_out  = np.append(long_out, np. flip ( path1))
@@ -206,7 +206,7 @@ class VIDEO_PEOCESS:
         gray_video  =   cv2.cvtColor(video, cv2.COLOR_BGR2GRAY)
         Len_steam =5
         H,W= gray_video.shape  #get size of image
-        H_start = 20
+        H_start = 80
         H_end = 200
         steam=np.zeros((Len_steam,H_end-H_start,W))
         steam2=np.zeros((Len_steam,H ,W))
@@ -239,22 +239,29 @@ class VIDEO_PEOCESS:
                     steam2= np.delete(steam2 , 0,axis=0)
                     # shifting used is zero in costmatrix caculation
                     #Costmatrix,shift_used = COSTMtrix.matrix_cal_corre_full_version_2(steam,0) 
-                    overall_shifting,shift_used1 = COSTMtrix.Img_fully_shifting_correlation(steam[Len_steam-1,:,:],
-                                                              steam[0,:,:],  addition_window_shift) 
+                    overall_shifting,shift_used1 = COSTMtrix.Img_fully_shifting_distance (steam2[Len_steam-1,:,:],
+                                                              steam2[Len_steam -2,:,:],  addition_window_shift)
+                    #overall_shifting0,shift_used0 = COSTMtrix.Img_fully_shifting_correlation(steam[Len_steam-1,:,:],
+                    #                                          steam[Len_steam-2,:,:],  addition_window_shift) 
+                    #overall_shifting =  overall_shifting 
                     Corrected_img,path,path_cost=   VIDEO_PEOCESS.correct_video_with_shifting(gray_video,overall_shifting,int(sequence_num),shift_used1 )
 
                     Costmatrix = np.zeros ((Window_LEN, W))
                     #test_show = steam2[Len_steam-2,:,:]
                     #cv2.imshow('correcr video',test_show.astype(np.uint8))
-                    Costmatrix,shift_used2 = COSTMtrix.matrix_cal_corre_full_version3_2GPU (Corrected_img,
-                                                              steam2[Len_steam-2,:,:],  0) 
-                    #Costmatrix = Costmatrix2
-                    ###Costmatrix = cv2.blur(Costmatrix,(5,5))
-                    Costmatrix  = myfilter.gauss_filter_s (Costmatrix) # smooth matrix
+                    #Costmatrix,shift_used2 = COSTMtrix.matrix_cal_corre_full_version3_2GPU (Corrected_img ,
+                    #                                          steam2[Len_steam-2,:,:],  0) 
+                    ###Costmatrix = Costmatrix2
+                    #####Costmatrix = cv2.blur(Costmatrix,(5,5))
+                    #Costmatrix  = myfilter.gauss_filter_s (Costmatrix) # smooth matrix
 
-                    #get path and correct image
-                    #Corrected_img,path,path_cost=   VIDEO_PEOCESS.correct_video(gray_video,Costmatrix,int(i),addition_window_shift +Kp )
-                    Corrected_img,path,path_cost=   VIDEO_PEOCESS.correct_video(Corrected_img,overall_shifting,Costmatrix,int(sequence_num),shift_used2+Window_ki_error+Window_kp_error )
+                    ###get path and correct image
+                    ###Corrected_img,path,path_cost=   VIDEO_PEOCESS.correct_video(gray_video,Costmatrix,int(i),addition_window_shift +Kp )
+                    #Corrected_img,path,path_cost=   VIDEO_PEOCESS.correct_video(Corrected_img,overall_shifting,Costmatrix,int(sequence_num),
+                                                                                #shift_used2+Window_ki_error+Window_kp_error )
+                    #overall_shifting3,shift_used3 = COSTMtrix.Img_fully_shifting_correlation(Corrected_img[H_start:H_end,:],
+                    #                                          steam[0,:,:],  0) 
+                    #Corrected_img,path,path_cost=   VIDEO_PEOCESS.correct_video_with_shifting(Corrected_img,overall_shifting3,int(sequence_num),shift_used3 )
 
                     # remove the central shifting 
                     #addition_window_shift = -0.00055*(np.mean(path)- int(Window_LEN/2))+addition_window_shift
@@ -263,7 +270,7 @@ class VIDEO_PEOCESS:
             
                     addition_window_shift =  shift_mean_error  +addition_window_shift
                     #addition_window_shift = 0
-                    Window_kp_error =  - 0.05* path_mean_error
+                    #Window_kp_error =  - 0.1* path_mean_error
                     #Window_ki_error = -0.000005*path_mean_error+Window_ki_error
                     #re！！！！！Next time remenber to remove the un-corrected image from the stream
                     steam=np.append(steam,[Corrected_img[H_start:H_end,:] ],axis=0) # save sequence
