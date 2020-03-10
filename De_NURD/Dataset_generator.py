@@ -23,6 +23,8 @@ class DATA_Generator(object):
         self.saved_stastics.all_statics_dir = os.path.join(self.data_signal_root, 'signals.pkl')
 
         self.path_DS =  self.saved_stastics.read_my_signal_results()
+        self.path_DS.all_statics_dir  =  self.saved_stastics.all_statics_dir
+
      def generate(self):
          #read one from the original
             #random select one IMG frome the oringinal 
@@ -84,7 +86,10 @@ class DATA_Generator(object):
             Image_ID = int( self.path_DS.signals[Save_signal_enum.image_iD.value, read_id])
             #get the path
             path  = self.path_DS.path_saving[read_id,:]
+            #change the signal too
+            self.path_DS.path_saving[read_id,:] = path* 0 + random_shifting
             path =  signal.resample(path, W)*0 + random_shifting  #resample the path
+            
             #resave the signal
 
             # create the shifted image
@@ -92,15 +97,16 @@ class DATA_Generator(object):
             # save all the result
             cv2.imwrite(self.data_pair1_root  + str(Image_ID) +".jpg", original_IMG)
             cv2.imwrite(self.data_pair2_root  + str(Image_ID) +".jpg", Shifted_IMG)
+            self.path_DS.save()
             ## validation 
             #steam[Len_steam-1,:,:]  = original_IMG  # un-correct 
             #steam[Len_steam-2,:,:]  = Shifted_IMG  # correct 
-            Costmatrix,shift_used = COSTMtrix.matrix_cal_corre_full_version3_2GPU(original_IMG,Shifted_IMG,0) 
-            #Costmatrix  = myfilter.gauss_filter_s (Costmatrix) # smooth matrix
-            show1 =  Costmatrix 
-            for i in range ( len(path)):
-                show1[int(path[i]),i]=254
-            cv2.imwrite(self.data_mat_root  + str(Image_ID) +".jpg", show1)
+            #Costmatrix,shift_used = COSTMtrix.matrix_cal_corre_full_version3_2GPU(original_IMG,Shifted_IMG,0) 
+            ##Costmatrix  = myfilter.gauss_filter_s (Costmatrix) # smooth matrix
+            #show1 =  Costmatrix 
+            #for i in range ( len(path)):
+            #    show1[int(path[i]),i]=254
+            #cv2.imwrite(self.data_mat_root  + str(Image_ID) +".jpg", show1)
 
 
 

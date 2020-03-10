@@ -71,6 +71,11 @@ class MY_ANALYSIS(object):
             #self.path_saving.append(this_path)
 
             # display and save 2 :using the visdom
+    def save(self):
+            #save
+             
+        with open(self.all_statics_dir, 'wb') as f:
+            pickle.dump(self , f, pickle.HIGHEST_PROTOCOL)
     def display_and_save2(self,iteration_num,new):
         #save
         if(int(iteration_num)%2==0):

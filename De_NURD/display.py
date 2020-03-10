@@ -4,6 +4,8 @@ operatedir_one =  "..\\..\\saved_matrix\\126.jpg"
 operatedir_video = "..\\..\\saved_original\\"
 #operatedir_video = "E:\\PhD\\trying\\saved_filtered_img\\"
 savedir_path = "..\\..\\saved_processed\\"
+save_display_dir = "..\\..\\saved_display_compare\\"
+
 
 import cv2
 import math 
@@ -64,13 +66,12 @@ for i in range(seqence_Len):
         img_path3 = operatedir_matrix + str(i+10)+ ".jpg"
         MATRIX_RESULT = cv2.imread(img_path3)
         MATRIX_RESULT  =   cv2.cvtColor(MATRIX_RESULT, cv2.COLOR_BGR2GRAY)
-        if Display_Matrix_flag == False:
-             MATRIX_RESULT = MATRIX_RESULT *0
-
+        if Display_Matrix_flag == True:
+            Rotate_matr = cv2.rotate(MATRIX_RESULT,rotateCode = 2) 
+            show_2  = np.append(circular[:,300:W-300],Rotate_matr,axis=1) # cascade
+            show_2 = np.append(show_2,gray_video1[:,300:W-300],axis=1) # cascade
         #cv2.imshow('matrix',MATRIX_RESULT) 
-        Rotate_matr = cv2.rotate(MATRIX_RESULT,rotateCode = 2) 
-        show_2  = np.append(circular[:,300:W-300],Rotate_matr,axis=1) # cascade
-        show_2 = np.append(show_2,gray_video1[:,300:W-300],axis=1) # cascade
+        show_2  = np.append(circular[:,300:W-300],gray_video1[:,300:W-300],axis=1) # cascade
 
         if(i == 0): # initialize the color sequence 
             stream=np.zeros((show_2.shape[0],show_2.shape[1],3))
@@ -83,6 +84,7 @@ for i in range(seqence_Len):
 
         cv2.imshow('combin video',show_2 ) 
         cv2.imshow('show 3 imgs sequence with color',stream.astype(np.uint8) ) 
+        cv2.imwrite(save_display_dir  + str(i) +".jpg",stream )
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
           break

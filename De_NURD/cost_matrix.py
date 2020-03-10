@@ -22,8 +22,8 @@ from scipy.ndimage import gaussian_filter1d
 #    return  result
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-Window_LEN = 100
-Overall_shiftting_WinLen = 100
+Window_LEN = 71
+Overall_shiftting_WinLen = 71
 class COSTMtrix:
 
     def matrix_cal_corre(sequence):
