@@ -8,13 +8,17 @@ import random
 from random import seed
 from median_filter_special import myfilter
 from Correct_sequence_iteration import VIDEO_PEOCESS
-from cost_matrix import COSTMtrix ,Overall_shiftting_WinLen 
+ 
+
+from cost_matrix import COSTMtrix ,Overall_shiftting_WinLen , Window_LEN
 class DATA_Generator(object):
      def __init__(self):
         self.original_root = "..\\..\\saved_original_for_generator\\"
         self.data_pair1_root = "..\\..\\saved_pair1\\"
         self.data_pair2_root = "..\\..\\saved_pair2\\"
         self.data_mat_root = "..\\..\\saved_matrix\\"
+        self.data_mat_root_origin = "..\\..\\saved_matrix_unprocessed\\"
+
         self.data_signal_root  = "..\\..\\saved_stastics_for_generator\\"
         self.H  = 1024
         self.W = 780
@@ -25,7 +29,23 @@ class DATA_Generator(object):
         self.path_DS =  self.saved_stastics.read_my_signal_results()
         self.path_DS.all_statics_dir  =  self.saved_stastics.all_statics_dir
 
-     def generate(self):
+
+        #the  validation functionfor check the matrix and can also be used for validate the correction result
+     def validation(self,original_IMG,Shifted_IMG,path,Image_ID):
+        Costmatrix,shift_used = COSTMtrix.matrix_cal_corre_full_version3_2GPU(original_IMG,Shifted_IMG,0) 
+        Costmatrix  = myfilter.gauss_filter_s (Costmatrix) # smooth matrix
+        show1 =  Costmatrix 
+        cv2.imwrite(self.data_mat_root_origin  + str(Image_ID) +".jpg", show1)
+
+        for i in range ( len(path)):
+            painter = min(path[i],Window_LEN-1)
+            show1[int(painter),i]=254
+        cv2.imwrite( self.data_mat_root  + str(Image_ID) +".jpg", show1)
+
+
+         
+
+     def generate_NURD(self):
          #read one from the original
             #random select one IMG frome the oringinal 
         read_id = 0
@@ -51,14 +71,15 @@ class DATA_Generator(object):
             cv2.imwrite(self.data_pair1_root  + str(Image_ID) +".jpg", original_IMG)
             cv2.imwrite(self.data_pair2_root  + str(Image_ID) +".jpg", Shifted_IMG)
             ## validation 
-            steam[Len_steam-1,:,:]  = original_IMG  # un-correct 
-            steam[Len_steam-2,:,:]  = Shifted_IMG  # correct 
-            Costmatrix,shift_used = COSTMtrix.matrix_cal_corre_full_version3_2GPU(original_IMG,Shifted_IMG,0) 
-            Costmatrix  = myfilter.gauss_filter_s (Costmatrix) # smooth matrix
-            show1 =  Costmatrix 
-            for i in range ( len(path)):
-                show1[int(path[i]),i]=254
-            cv2.imwrite(self.data_mat_root  + str(Image_ID) +".jpg", show1)
+            self.validation(original_IMG,Shifted_IMG,path,Image_ID) 
+            #steam[Len_steam-1,:,:]  = original_IMG  # un-correct 
+            #steam[Len_steam-2,:,:]  = Shifted_IMG  # correct 
+            #Costmatrix,shift_used = COSTMtrix.matrix_cal_corre_full_version3_2GPU(original_IMG,Shifted_IMG,0) 
+            #Costmatrix  = myfilter.gauss_filter_s (Costmatrix) # smooth matrix
+            #show1 =  Costmatrix 
+            #for i in range ( len(path)):
+            #    show1[int(path[i]),i]=254
+            #cv2.imwrite(self.data_mat_root  + str(Image_ID) +".jpg", show1)
 
 
 
@@ -114,8 +135,12 @@ class DATA_Generator(object):
 
             read_id +=1
 
+     def generate_NURD_overall_shifting(self):
+         pass
+
+
 
 if __name__ == '__main__':
         generator   = DATA_Generator()
-        generator.generate_overall_shifting()
+        generator.generate_NURD()
 
