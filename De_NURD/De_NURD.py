@@ -4,10 +4,10 @@
 #operatedir_video =  "..\\..\\OCT\\P-ID_Name_25092019161813-7500rpm-G1_0.05_4_25_extracted.avi"
 #E:\PhD\trying\OCT\OCT aligment
 #operatedir_video =  "..\\..\\OCT\\OCT aligment\\22JAN2020AUTO_01.avi"
-operatedir_video =  "..\\..\\OCT\\OCT aligment\\phantom-01_2412020121234.avi"
+#operatedir_video =  "..\\..\\OCT\\OCT aligment\\phantom-01_2412020121234.avi"
 
 #phantom-01_2412020121234
-#operatedir_video =  "..\\..\\OCT\\P-ID_Name_25092019160318VIDEO.avi"
+operatedir_video =  "..\\..\\OCT\\P-ID_Name_25092019160318VIDEO.avi"
 savedir_matrix  = "..\\..\\saved_matrix\\"
 savedir_original  = "..\\..\\saved_original\\"
 savedir_filtered_OCT  = "..\\..\\saved_filtered_img\\"

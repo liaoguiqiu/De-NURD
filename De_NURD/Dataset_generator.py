@@ -8,7 +8,7 @@ import random
 from random import seed
 from median_filter_special import myfilter
 from Correct_sequence_iteration import VIDEO_PEOCESS
- 
+from  path_finding import PATH
 
 from cost_matrix import COSTMtrix ,Overall_shiftting_WinLen , Window_LEN
 class DATA_Generator(object):
@@ -33,13 +33,26 @@ class DATA_Generator(object):
         #the  validation functionfor check the matrix and can also be used for validate the correction result
      def validation(self,original_IMG,Shifted_IMG,path,Image_ID):
         Costmatrix,shift_used = COSTMtrix.matrix_cal_corre_full_version3_2GPU(original_IMG,Shifted_IMG,0) 
-        Costmatrix  = myfilter.gauss_filter_s (Costmatrix) # smooth matrix
+        Costmatrix  = myfilter.gauss_filter_s(Costmatrix) # smooth matrix
+        #tradition way to find path
+ 
+        start_point= PATH.find_the_starting(Costmatrix) # starting point for path searching
+
+        path_tradition,pathcost1  = PATH.search_a_path(Costmatrix,start_point) # get the path and average cost of the path
+        path_deep,path_cost2=PATH.search_a_path_Deep_Mat2longpath(Costmatrix) # get the path and average cost of the path
+        ##middle_point  =  PATH.calculate_ave_mid(mat)
+        #path1,path_cost1=PATH.search_a_path(mat,start_point) # get the path and average cost of the path
         show1 =  Costmatrix 
         cv2.imwrite(self.data_mat_root_origin  + str(Image_ID) +".jpg", show1)
 
-        for i in range ( len(path)):
+        for i in range ( len(path_tradition)):
             painter = min(path[i],Window_LEN-1)
+            painter2= min(path_tradition[i],Window_LEN-1)
+            painter3 = min(path_deep[i],Window_LEN-1) 
             show1[int(painter),i]=254
+            show1[int(painter2),i]=128
+            show1[int(painter3),i]=64
+
         cv2.imwrite( self.data_mat_root  + str(Image_ID) +".jpg", show1)
 
 
@@ -119,6 +132,8 @@ class DATA_Generator(object):
             cv2.imwrite(self.data_pair1_root  + str(Image_ID) +".jpg", original_IMG)
             cv2.imwrite(self.data_pair2_root  + str(Image_ID) +".jpg", Shifted_IMG)
             self.path_DS.save()
+            self.validation(original_IMG,Shifted_IMG,path,Image_ID) 
+
             ## validation 
             #steam[Len_steam-1,:,:]  = original_IMG  # un-correct 
             #steam[Len_steam-2,:,:]  = Shifted_IMG  # correct 
@@ -143,4 +158,3 @@ class DATA_Generator(object):
 if __name__ == '__main__':
         generator   = DATA_Generator()
         generator.generate_NURD()
-
