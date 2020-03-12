@@ -85,6 +85,7 @@ class DATA_Generator(object):
             cv2.imwrite(self.data_pair2_root  + str(Image_ID) +".jpg", Shifted_IMG)
             ## validation 
             self.validation(original_IMG,Shifted_IMG,path,Image_ID) 
+
             #steam[Len_steam-1,:,:]  = original_IMG  # un-correct 
             #steam[Len_steam-2,:,:]  = Shifted_IMG  # correct 
             #Costmatrix,shift_used = COSTMtrix.matrix_cal_corre_full_version3_2GPU(original_IMG,Shifted_IMG,0) 

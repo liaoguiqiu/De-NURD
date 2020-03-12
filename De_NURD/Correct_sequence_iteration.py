@@ -159,7 +159,7 @@ class VIDEO_PEOCESS:
         #path1 =0.5 * path1 + 0.5 * corre_shifting 
         path_cost1  = 0
         path1 = gaussian_filter1d(path1,3) # smooth the path 
-        path1 = path1 -(np.mean(path1) - int(Window_LEN/2)) # remove the meaning shifting
+        #path1 = path1 -(np.mean(path1) - int(Window_LEN/2)) # remove the meaning shifting
 
         #long_out  = np.append(np.flip(path1),path1) # flip to make the the start point and end point to be perfect interpolit
         #long_out  = np.append(long_out, np. flip ( path1))
@@ -244,21 +244,21 @@ class VIDEO_PEOCESS:
                     #overall_shifting0,shift_used0 = COSTMtrix.Img_fully_shifting_correlation(steam[Len_steam-1,:,:],
                     #                                          steam[Len_steam-2,:,:],  addition_window_shift) 
                     #overall_shifting =  overall_shifting 
-                    Corrected_img,path,path_cost=   VIDEO_PEOCESS.correct_video_with_shifting(gray_video,overall_shifting,int(sequence_num),shift_used1 )
+                    #Corrected_img,path,path_cost=   VIDEO_PEOCESS.correct_video_with_shifting(gray_video,overall_shifting,int(sequence_num),shift_used1 )
 
                     Costmatrix = np.zeros ((Window_LEN, W))
                     #test_show = steam2[Len_steam-2,:,:]
                     #cv2.imshow('correcr video',test_show.astype(np.uint8))
-                    #Costmatrix,shift_used2 = COSTMtrix.matrix_cal_corre_full_version3_2GPU (Corrected_img ,
-                    #                                          steam2[Len_steam-2,:,:],  0) 
+                    Costmatrix,shift_used2 = COSTMtrix.matrix_cal_corre_full_version3_2GPU (gray_video ,
+                                                              steam2[Len_steam-2,:,:],  0) 
                     ###Costmatrix = Costmatrix2
                     #####Costmatrix = cv2.blur(Costmatrix,(5,5))
-                    #Costmatrix  = myfilter.gauss_filter_s (Costmatrix) # smooth matrix
+                    Costmatrix  = myfilter.gauss_filter_s (Costmatrix) # smooth matrix
 
                     ###get path and correct image
                     ###Corrected_img,path,path_cost=   VIDEO_PEOCESS.correct_video(gray_video,Costmatrix,int(i),addition_window_shift +Kp )
-                    #Corrected_img,path,path_cost=   VIDEO_PEOCESS.correct_video(Corrected_img,overall_shifting,Costmatrix,int(sequence_num),
-                                                                                #shift_used2+Window_ki_error+Window_kp_error )
+                    Corrected_img,path,path_cost=   VIDEO_PEOCESS.correct_video(gray_video,overall_shifting,Costmatrix,int(sequence_num),
+                                                                                shift_used2+Window_ki_error+Window_kp_error )
                     #overall_shifting3,shift_used3 = COSTMtrix.Img_fully_shifting_correlation(Corrected_img[H_start:H_end,:],
                     #                                          steam[0,:,:],  0) 
                     #Corrected_img,path,path_cost=   VIDEO_PEOCESS.correct_video_with_shifting(Corrected_img,overall_shifting3,int(sequence_num),shift_used3 )
