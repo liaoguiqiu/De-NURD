@@ -9,17 +9,18 @@ from random import seed
 from median_filter_special import myfilter
 from Correct_sequence_iteration import VIDEO_PEOCESS
 from  path_finding import PATH
+from scipy.ndimage import gaussian_filter1d
 
 from cost_matrix import COSTMtrix ,Overall_shiftting_WinLen , Window_LEN
 class DATA_Generator(object):
      def __init__(self):
-        self.original_root = "..\\..\\saved_original_for_generator\\"
-        self.data_pair1_root = "..\\..\\saved_pair1\\"
-        self.data_pair2_root = "..\\..\\saved_pair2\\"
-        self.data_mat_root = "..\\..\\saved_matrix\\"
-        self.data_mat_root_origin = "..\\..\\saved_matrix_unprocessed\\"
+        self.original_root = "../../saved_original_for_generator/"
+        self.data_pair1_root = "../../saved_pair1/"
+        self.data_pair2_root = "../../saved_pair2/"
+        self.data_mat_root = "../../saved_matrix/"
+        self.data_mat_root_origin = "../../saved_matrix_unprocessed/"
 
-        self.data_signal_root  = "..\\..\\saved_stastics_for_generator\\"
+        self.data_signal_root  = "../../saved_stastics_for_generator/"
         self.H  = 1024
         self.W = 780
         # read the signals  just use the existing path
@@ -38,20 +39,22 @@ class DATA_Generator(object):
  
         start_point= PATH.find_the_starting(Costmatrix) # starting point for path searching
 
-        path_tradition,pathcost1  = PATH.search_a_path(Costmatrix,start_point) # get the path and average cost of the path
+        #path_tradition,pathcost1  = PATH.search_a_path(Costmatrix,start_point) # get the path and average cost of the path
         path_deep,path_cost2=PATH.search_a_path_Deep_Mat2longpath(Costmatrix) # get the path and average cost of the path
+        path_deep = gaussian_filter1d(path_deep,3) # smooth the path 
+
         ##middle_point  =  PATH.calculate_ave_mid(mat)
         #path1,path_cost1=PATH.search_a_path(mat,start_point) # get the path and average cost of the path
         show1 =  Costmatrix 
         cv2.imwrite(self.data_mat_root_origin  + str(Image_ID) +".jpg", show1)
 
-        for i in range ( len(path_tradition)):
+        for i in range ( len(path)):
             painter = min(path[i],Window_LEN-1)
-            painter2= min(path_tradition[i],Window_LEN-1)
+            #painter2= min(path_tradition[i],Window_LEN-1)
             painter3 = min(path_deep[i],Window_LEN-1) 
-            show1[int(painter),i]=254
-            show1[int(painter2),i]=128
-            show1[int(painter3),i]=64
+            show1[int(painter),i]=128
+            #show1[int(painter2),i]=128
+            show1[int(painter3),i]=254
 
         cv2.imwrite( self.data_mat_root  + str(Image_ID) +".jpg", show1)
 

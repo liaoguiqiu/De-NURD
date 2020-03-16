@@ -1,12 +1,12 @@
-operatedir_matrix  =  "..\\..\\saved_matrix\\"
-operatedir_matrix_unprocessed  =  "..\\..\\saved_matrix_unprocessed\\"
+operatedir_matrix  =  "../../saved_matrix/"
+operatedir_matrix_unprocessed  =  "../../saved_matrix_unprocessed/"
 
  #saved_matrix_unprocessed
-operatedir_one =  "..\\..\\saved_matrix\\126.jpg"
-operatedir_video = "..\\..\\saved_original\\"
-#operatedir_video = "E:\\PhD\\trying\\saved_filtered_img\\"
-savedir_path = "..\\..\\saved_processed\\"
-savedir_rectan_ = "..\\..\\saved_processed_polar\\"
+operatedir_one =  "../../saved_matrix/126.jpg"
+operatedir_video = "../../saved_original/"
+#operatedir_video = "E:/PhD/trying/saved_filtered_img/"
+savedir_path = "../../saved_processed/"
+savedir_rectan_ = "../../saved_processed_polar/"
 
 
 from analy import Save_signal_flag
@@ -216,7 +216,7 @@ class VIDEO_PEOCESS:
         Window_kp_error = 0
         Kp=0 # initial shifting paramerter
         for sequence_num in range(seqence_Len):
-        #for i in os.listdir("E:\\estimagine\\vs_project\\PythonApplication_data_au\\pic\\"):
+        #for i in os.listdir("E:/estimagine/vs_project/PythonApplication_data_au/pic/"):
                 start_time  = time()
                 # read imag for process 
                 img_path = operatedir_video + str(sequence_num+0)+ ".jpg" # starting from 10

@@ -1,19 +1,19 @@
-#operatedir_pic =  "..\\initialbackground\\"
-#operatedir_video =  "D:\\PhD\\trying\\OCT\\P-ID_Name_25092019160318VIDEO.avi"
-#operatedir_video =  "..\\..\\OCT\\P-ID_Name_25092019160318VIDEO.avi"
-#operatedir_video =  "..\\..\\OCT\\P-ID_Name_25092019161813-7500rpm-G1_0.05_4_25_extracted.avi"
+#operatedir_pic =  "../initialbackground/"
+#operatedir_video =  "D:/PhD/trying/OCT/P-ID_Name_25092019160318VIDEO.avi"
+# operatedir_video =  "../../OCT/P-ID_Name_25092019160318VIDEO.avi"
+#operatedir_video =  "../../OCT/P-ID_Name_25092019161813-7500rpm-G1_0.05_4_25_extracted.avi"
 #E:\PhD\trying\OCT\OCT aligment
-#operatedir_video =  "..\\..\\OCT\\OCT aligment\\22JAN2020AUTO_01.avi"
-operatedir_video =  "..\\..\\OCT\\OCT aligment\\phantom-01_2412020121234.avi"
-#operatedir_video =  "..\\..\\OCT\\new video\\P-ID_Name_25092019164030.avi"
+operatedir_video =  "../../OCT/OCT aligment/22JAN2020AUTO_01.avi"
+#operatedir_video =  "../../OCT/OCT aligment/phantom-01_2412020121234.avi"
+#operatedir_video =  "../../OCT/new video/P-ID_Name_25092019164030.avi"
 
 
 #phantom-01_2412020121234
-#operatedir_video =  "..\\..\\OCT\\P-ID_Name_25092019160318VIDEO.avi"
-savedir_matrix  = "..\\..\\saved_matrix\\"
-savedir_original  = "..\\..\\saved_original\\"
-savedir_filtered_OCT  = "..\\..\\saved_filtered_img\\"
-savedir_original_circular = "..\\..\\saved_original_circular\\"
+#operatedir_video =  "../../OCT/P-ID_Name_25092019160318VIDEO.avi"
+savedir_matrix  = "../../saved_matrix/"
+savedir_original  = "../../saved_original/"
+savedir_filtered_OCT  = "../../saved_filtered_img/"
+savedir_original_circular = "../../saved_original_circular/"
 
 #used python packages
 import cv2

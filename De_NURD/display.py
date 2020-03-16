@@ -1,10 +1,10 @@
-operatedir_matrix  =  "..\\..\\saved_matrix\\"
+operatedir_matrix  =  "../../saved_matrix/"
  
-operatedir_one =  "..\\..\\saved_matrix\\126.jpg"
-operatedir_video = "..\\..\\saved_original\\"
-#operatedir_video = "E:\\PhD\\trying\\saved_filtered_img\\"
-savedir_path = "..\\..\\saved_processed\\"
-save_display_dir = "..\\..\\saved_display_compare\\"
+operatedir_one =  "../../saved_matrix/126.jpg"
+operatedir_video = "../../saved_original/"
+#operatedir_video = "E:/PhD/trying/saved_filtered_img/"
+savedir_path = "../../saved_processed/"
+save_display_dir = "../../saved_display_compare/"
 
 
 import cv2
@@ -40,7 +40,7 @@ seqence_Len = len(read_sequence)
 
 
 for i in range(seqence_Len):
-#for i in os.listdir("E:\\estimagine\\vs_project\\PythonApplication_data_au\\pic\\"):     
+#for i in os.listdir("E:/estimagine/vs_project/PythonApplication_data_au/pic/"):     
         # processe
         img_path1 = savedir_path + str(i+10)+ ".jpg"
         video1 = cv2.imread(img_path1)
