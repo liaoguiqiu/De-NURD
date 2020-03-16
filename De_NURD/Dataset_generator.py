@@ -34,7 +34,7 @@ class DATA_Generator(object):
         #the  validation functionfor check the matrix and can also be used for validate the correction result
      def validation(self,original_IMG,Shifted_IMG,path,Image_ID):
         Costmatrix,shift_used = COSTMtrix.matrix_cal_corre_full_version3_2GPU(original_IMG,Shifted_IMG,0) 
-        Costmatrix  = myfilter.gauss_filter_s(Costmatrix) # smooth matrix
+        # Costmatrix  = myfilter.gauss_filter_s(Costmatrix) # smooth matrix
         #tradition way to find path
  
         start_point= PATH.find_the_starting(Costmatrix) # starting point for path searching
@@ -161,4 +161,4 @@ class DATA_Generator(object):
 
 if __name__ == '__main__':
         generator   = DATA_Generator()
-        generator.generate_NURD()
+        generator.generate_NURD ()
