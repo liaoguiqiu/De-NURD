@@ -231,6 +231,90 @@ class COSTMtrix:
        return matrix,int(window_shift)
 #########################
 ###################
+# use the delayed one to realize   correction  block  correlation 
+    def matrix_cal_corre_block_version3_3GPU(present_img,previous_img,window_shift):
+       block_wid = 5
+       block_cntr  = int(block_wid/2)
+
+       window_wid= Window_LEN
+       window_cntr= int(Window_LEN/2)  # check
+       h,w = present_img.shape
+
+       #present_img = sequence[len-1,:,:]
+       ##previous_img = sequence[len-2,:,:] #  use the corrected  near img
+       #previous_img = sequence[0,:,:] #  use the first Img
+       #connect 3 scanning images together to make the correlation can be done out of the boundary
+       add_3_img_p  = np.append(present_img,present_img,axis=1) # cascade
+       add_3_img_p = np.append(add_3_img_p,present_img,axis=1) # cascade
+       add_3_img  = np.append(previous_img,previous_img,axis=1) # cascade
+       add_3_img = np.append(add_3_img,previous_img,axis=1) # cascade
+       matrix = np.zeros ((window_wid, w))
+       a_stack= np.zeros((window_wid,w,h,block_wid))
+       b_stack= np.zeros((window_wid,w,h,block_wid))
+
+       #main loop (for every scanning line)
+       for i in range(w): # check the ending for index
+           for j in range(window_wid): #sub_loop for shift distance
+               a_stack[j,i,:,:] =add_3_img_p[:,(w+i-block_cntr):(w+i+block_cntr+1)]
+               b_stack[j,i,:,:] =add_3_img[:,(i-window_cntr+j+w + int(window_shift) -block_cntr):(i-window_cntr+j+w + int(window_shift) +block_cntr+1)]
+               #do stack beforcaculation
+               # arow staxk
+               #if (j==0):
+               #    a_row_stack = present_img[:,i]
+               #else:
+               #    a_row_stack = np.vstack( (a_row_stack,present_img[:,i]))
+               ##b_row stack   
+               #if (j==0):
+               #    b_row_stack = add_3_img[:,i-window_cntr+j+w + int(window_shift)]
+               #else:
+               #    b_row_stack = np.vstack(( b_row_stack,add_3_img[:,i-window_cntr+j+w + int(window_shift)])) 
+            #complete stack
+           #if (i==0):
+           #     a_stack = [a_row_stack]
+           #else:
+           #     a_stack = np.vstack( (a_stack,[a_row_stack]))
+           # #b_row stack   
+           #if (i==0):
+           #     b_stack = [b_row_stack]
+           #else:
+           #     b_stack = np.vstack(( b_stack,[b_row_stack])) 
+               #a = correlation_GPU(present_img[:,i],add_3_img[:,i-window_cntr+j+w + int(window_shift)])
+               #matrix[j,i] = 251-a[0]*250  
+       #matrix  = correlation_GPU (a_stack  , b_stack)
+       a_stack  =  torch.from_numpy(a_stack)
+       b_stack  =  torch.from_numpy(b_stack)
+       #mulab = torch.mul(a_stack,b_stack)
+       #mula2 = torch.mul(a_stack , a_stack)
+       #mulb2 = torch.mul(b_stack , b_stack)
+       #suma = torch.sum(a_stack,dim=2)
+       #sumb = torch.sum(b_stack,dim=2)
+       #sumab = torch.sum(mulab,dim=2)
+       #suma2 = torch.sum(mula2,dim=2)
+       #sumb2 = torch.sum(mulb2,dim=2)
+       #correlation_Mat= (h*sumab - suma*sumb)/ torch.sqrt((h*suma2-suma*suma)*(h*sumb2-sumb*sumb))
+       #correlation_Mat =  251 - correlation_Mat*250
+       #mulab = torch.mul(a_stack,b_stack)
+       #mula2 = torch.mul(a_stack , a_stack)
+       #mulb2 = torch.mul(b_stack , b_stack)
+       suma = torch.sum(a_stack,dim=2)
+       sumb = torch.sum(b_stack,dim=2)
+       sumab = torch.sum(a_stack*b_stack,dim=2)
+       suma2 = torch.sum(a_stack*a_stack,dim=2)
+       sumb2 = torch.sum(b_stack*b_stack,dim=2)
+       suma  = torch.sum (suma , dim =2)
+       sumb = torch.sum(sumb,dim=2)
+       sumab = torch.sum(sumab,dim=2)
+       suma2 = torch.sum(suma2,dim=2)
+       sumb2 = torch.sum(sumb2,dim=2)
+       correlation_Mat= (h*sumab - suma*sumb)/ torch.sqrt((h*suma2-suma*suma)*(h*sumb2-sumb*sumb))
+       correlation_Mat =  251 - correlation_Mat*250
+
+
+       # copy frome the GPU
+       matrix=torch.Tensor.cpu(correlation_Mat).detach().numpy()
+       return matrix,int(window_shift)
+#########################
+###################
 # use the delayed one to realize full image correction line correlation 
     def matrix_line_distance_version3_2GPU(present_img,previous_img,window_shift):
 
