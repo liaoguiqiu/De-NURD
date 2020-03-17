@@ -34,7 +34,7 @@ class DATA_Generator(object):
         #the  validation functionfor check the matrix and can also be used for validate the correction result
      def validation(self,original_IMG,Shifted_IMG,path,Image_ID):
         #Costmatrix,shift_used = COSTMtrix.matrix_cal_corre_full_version3_2GPU(original_IMG,Shifted_IMG,0) 
-        Costmatrix,shift_used = COSTMtrix.matrix_cal_corre_block_version3_3GPU(original_IMG,Shifted_IMG,0) 
+        Costmatrix,shift_used = COSTMtrix.matrix_cal_corre_full_version3_2GPU(original_IMG,Shifted_IMG,0) 
 
         # Costmatrix  = myfilter.gauss_filter_s(Costmatrix) # smooth matrix
         #tradition way to find path
