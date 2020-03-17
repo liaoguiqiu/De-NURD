@@ -152,7 +152,7 @@ class VIDEO_PEOCESS:
         start_point= PATH.find_the_starting(mat) # starting point for path searching
         ##middle_point  =  PATH.calculate_ave_mid(mat)
         path1,path_cost1=PATH.search_a_path(mat,start_point) # get the path and average cost of the path
-        #path1,path_cost1=PATH.search_a_path_deep_multiscal_small_window(mat) # get the path and average cost of the path
+        # path1,path_cost1=PATH.search_a_path_deep_multiscal_small_window(mat) # get the path and average cost of the path
        
         #path1 = corre_shifting + path1
        

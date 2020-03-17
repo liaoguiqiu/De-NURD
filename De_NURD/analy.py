@@ -1,4 +1,4 @@
-save_dir_analys =  "..\\..\\saved_stastics\\"
+save_dir_analys =  "../../saved_stastics/"
 #used python packages
 #import keyboard
 import cv2

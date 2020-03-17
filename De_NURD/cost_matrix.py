@@ -248,6 +248,10 @@ class COSTMtrix:
        add_3_img_p = np.append(add_3_img_p,present_img,axis=1) # cascade
        add_3_img  = np.append(previous_img,previous_img,axis=1) # cascade
        add_3_img = np.append(add_3_img,previous_img,axis=1) # cascade
+       #  uniform  
+       add_3_img_p   = add_3_img_p / 250
+       add_3_img   = add_3_img   / 250 
+
        matrix = np.zeros ((window_wid, w))
        a_stack= np.zeros((window_wid,w,h,block_wid))
        b_stack= np.zeros((window_wid,w,h,block_wid))
@@ -306,7 +310,7 @@ class COSTMtrix:
        sumab = torch.sum(sumab,dim=2)
        suma2 = torch.sum(suma2,dim=2)
        sumb2 = torch.sum(sumb2,dim=2)
-       correlation_Mat= (h*sumab - suma*sumb)/ torch.sqrt((h*suma2-suma*suma)*(h*sumb2-sumb*sumb))
+       correlation_Mat= (h*block_wid *  sumab - suma*sumb)/ torch.sqrt((h*block_wid*suma2-suma*suma)*(h*block_wid*sumb2-sumb*sumb))
        correlation_Mat =  251 - correlation_Mat*250
 
 
