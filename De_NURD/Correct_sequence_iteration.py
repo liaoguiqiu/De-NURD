@@ -152,7 +152,7 @@ class VIDEO_PEOCESS:
         start_point= PATH.find_the_starting(mat) # starting point for path searching
         ##middle_point  =  PATH.calculate_ave_mid(mat)
         #path1,path_cost1=PATH.search_a_path(mat,start_point) # get the path and average cost of the path
-        path1,path_cost1=PATH.search_a_path_Deep_Mat2longpath(mat) # get the path and average cost of the path
+        path1,path_cost1=PATH.search_a_path_deep_multiscal_small_window(mat) # get the path and average cost of the path
        
         #path1 = corre_shifting + path1
        
@@ -239,8 +239,8 @@ class VIDEO_PEOCESS:
                     steam2= np.delete(steam2 , 0,axis=0)
                     # shifting used is zero in costmatrix caculation
                     #Costmatrix,shift_used = COSTMtrix.matrix_cal_corre_full_version_2(steam,0) 
-                    overall_shifting,shift_used1 = COSTMtrix.Img_fully_shifting_distance (steam2[Len_steam-1,:,:],
-                                                              steam2[Len_steam -2,:,:],  addition_window_shift)
+                    overall_shifting,shift_used1 = COSTMtrix.Img_fully_shifting_distance (steam[Len_steam-1,:,:],
+                                                              steam[Len_steam -2,:,:],  addition_window_shift)
                     #overall_shifting0,shift_used0 = COSTMtrix.Img_fully_shifting_correlation(steam[Len_steam-1,:,:],
                     #                                          steam[Len_steam-2,:,:],  addition_window_shift) 
                     #overall_shifting =  overall_shifting 
@@ -249,7 +249,7 @@ class VIDEO_PEOCESS:
                     Costmatrix = np.zeros ((Window_LEN, W))
                     #test_show = steam2[Len_steam-2,:,:]
                     #cv2.imshow('correcr video',test_show.astype(np.uint8))
-                    Costmatrix,shift_used2 = COSTMtrix.matrix_cal_corre_full_version3_2GPU (gray_video ,
+                    Costmatrix,shift_used2 = COSTMtrix.matrix_cal_corre_full_version3_2GPU (steam2[Len_steam-1,:,:] ,
                                                               steam2[Len_steam-2,:,:],  0) 
                     ###Costmatrix = Costmatrix2
                     #####Costmatrix = cv2.blur(Costmatrix,(5,5))
@@ -275,11 +275,10 @@ class VIDEO_PEOCESS:
                     #re！！！！！Next time remenber to remove the un-corrected image from the stream
                     steam=np.append(steam,[Corrected_img[H_start:H_end,:] ],axis=0) # save sequence
                     # no longer delete the fist  one
-       
                     steam= np.delete(steam , 1,axis=0)
+
                     steam2=np.append(steam2,[Corrected_img ],axis=0) # save sequence
                     # no longer delete the fist  one
-       
                     steam2= np.delete(steam2 , 0,axis=0)
 
                     if(Save_signal_flag==True):

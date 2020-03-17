@@ -5,13 +5,13 @@ from analy import MY_ANALYSIS
 from analy import Save_signal_enum
 from scipy import signal 
 from DeepPathsearch.image_trans import BaseTransform  
-Batch_size = 1
-Resample_size =64
+Batch_size = 32
+Resample_size =71
 Resample_H = 64
 #Resample_W = 300
 Resample_W =  768
 
-Path_length = 768
+Path_length = 71
  
  
 transform = BaseTransform(  Resample_size,[104])  #gray scale data

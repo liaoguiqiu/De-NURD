@@ -40,7 +40,9 @@ class DATA_Generator(object):
         start_point= PATH.find_the_starting(Costmatrix) # starting point for path searching
 
         #path_tradition,pathcost1  = PATH.search_a_path(Costmatrix,start_point) # get the path and average cost of the path
-        path_deep,path_cost2=PATH.search_a_path_Deep_Mat2longpath(Costmatrix) # get the path and average cost of the path
+        #path_deep,path_cost2=PATH.search_a_path_Deep_Mat2longpath(Costmatrix) # get the path and average cost of the path
+        path_deep,path_cost2=PATH.search_a_path_deep_multiscal_small_window(Costmatrix) # get the path and average cost of the path
+        
         path_deep = gaussian_filter1d(path_deep,3) # smooth the path 
 
         ##middle_point  =  PATH.calculate_ave_mid(mat)
