@@ -29,13 +29,27 @@ class DATA_Generator(object):
 
         self.path_DS =  self.saved_stastics.read_my_signal_results()
         self.path_DS.all_statics_dir  =  self.saved_stastics.all_statics_dir
+     
+         
+     def add_lines_to_matrix(self,matrix):
+        value  = 128
+        H,W = matrix.shape
+        line_positions = np.arange(0,W-2*H,H)
+        for lines in line_positions:
+            for i  in np.arange (0, H):
+                matrix[i,lines+i] =value
+                matrix[i,lines+i+1] =value
+                matrix[i,lines+i+3] =value
 
+        return matrix     
 
         #the  validation functionfor check the matrix and can also be used for validate the correction result
      def validation(self,original_IMG,Shifted_IMG,path,Image_ID):
         #Costmatrix,shift_used = COSTMtrix.matrix_cal_corre_full_version3_2GPU(original_IMG,Shifted_IMG,0) 
         Costmatrix,shift_used = COSTMtrix.matrix_cal_corre_full_version3_2GPU(original_IMG,Shifted_IMG,0) 
-
+        Costmatrix=cv2.blur(Costmatrix,(15,15))
+        #Costmatrix = self.add_lines_to_matrix(Costmatrix)
+        Costmatrix=np.clip(Costmatrix, 20, 255)
         # Costmatrix  = myfilter.gauss_filter_s(Costmatrix) # smooth matrix
         #tradition way to find path
  

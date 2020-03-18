@@ -137,10 +137,75 @@ class DATA_augmentor(object):
 
             print ("[%s]   is processed. test point time is [%f] " % (a ,0.1))
 
+
+     def augment_blur(self):
+         #read one from the original
+        noise_selector=["gauss", "s&p","poisson","speckle"]
+        for img in os.listdir(self.data_mat_root_origin):
+            a, b = os.path.splitext(img)
+            if b == ".jpg":
+                original_IMG = cv2.imread(self.data_mat_root_origin+ img)
+                original_IMG  =   cv2.cvtColor(original_IMG, cv2.COLOR_BGR2GRAY)
+                 
+                Blur_IMG   =   cv2.blur(original_IMG,(5,5))
+
+            # save all the result
+            #cv2.imwrite(self.data_pair1_root  + str(Image_ID) +".jpg", original_IMG)
+                cv2.imwrite(self.data_mat_root_augmented  + a +".jpg", Blur_IMG)
+           
+         
+
+
+            print ("[%s]   is processed. test point time is [%f] " % (a ,0.1))
              
-     
+     def add_lines_to_matrix(self,matrix):
+        value  = 128
+        H,W = matrix.shape
+        line_positions = np.arange(0,W-2*H,H)
+        for lines in line_positions:
+            for i  in np.arange (0, H):
+                matrix[i,lines+i] =value
+
+        return matrix     
+     def augment_add_lines(self):
+         #read one from the original
+        for img in os.listdir(self.data_mat_root_origin):
+            a, b = os.path.splitext(img)
+            if b == ".jpg":
+                original_IMG = cv2.imread(self.data_mat_root_origin+ img)
+                original_IMG  =   cv2.cvtColor(original_IMG, cv2.COLOR_BGR2GRAY)
+                 
+                Add_line_IMG   =   self.add_lines_to_matrix(original_IMG)
+
+            # save all the result
+            #cv2.imwrite(self.data_pair1_root  + str(Image_ID) +".jpg", original_IMG)
+                cv2.imwrite(self.data_mat_root_augmented  + a +".jpg", Add_line_IMG)
+           
+         
+
+
+            print ("[%s]   is processed. test point time is [%f] " % (a ,0.1))
+     def augment_clip(self):
+         #read one from the original
+        for img in os.listdir(self.data_mat_root_origin):
+            a, b = os.path.splitext(img)
+            if b == ".jpg":
+                original_IMG = cv2.imread(self.data_mat_root_origin+ img)
+                original_IMG  =   cv2.cvtColor(original_IMG, cv2.COLOR_BGR2GRAY)
+                 
+                clip_line_IMG   =   np.clip(original_IMG,20,255)
+
+            # save all the result
+            #cv2.imwrite(self.data_pair1_root  + str(Image_ID) +".jpg", original_IMG)
+                cv2.imwrite(self.data_mat_root_augmented  + a +".jpg", clip_line_IMG)
+           
+         
+
+
+            print ("[%s]   is processed. test point time is [%f] " % (a ,0.1))
 
 
 if __name__ == '__main__':
         generator   = DATA_augmentor()
-        generator.augment_gauss_noise ()
+        #generator.augment_gauss_noise ()
+        generator.augment_clip()
