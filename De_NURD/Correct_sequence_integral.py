@@ -99,9 +99,10 @@ class VIDEO_PEOCESS:
         mask =  new  + 255
         shift_diff= path + addition_window_shift - int(Window_LEN/2)  # additional compensation 
         shift_integral = shift_integral + shift_diff  # not += : this is iteration way
+        shift_integral = gaussian_filter1d(shift_integral,10) # smooth the path 
 
         #shift_integral = shift_integral + shift_diff.astype(int) # not += : this is iteration way
-        #shift_integral = np.clip(shift_integral, - 25,25)
+        shift_integral = np.clip(shift_integral, - 35,35)
         #every line will be moved to a new postion
         for i in range ( len(shift_integral)):
             #limit the integral             
@@ -154,14 +155,14 @@ class VIDEO_PEOCESS:
 
         start_point= PATH.find_the_starting(mat) # starting point for path searching
         ##middle_point  =  PATH.calculate_ave_mid(mat)
-        path1,path_cost1=PATH.search_a_path(mat,start_point) # get the path and average cost of the path
-        # path1,path_cost1=PATH.search_a_path_deep_multiscal_small_window(mat) # get the path and average cost of the path
+        #path1,path_cost1=PATH.search_a_path(mat,start_point) # get the path and average cost of the path
+        path1,path_cost1=PATH.search_a_path_deep_multiscal_small_window(mat) # get the path and average cost of the path
        
         #path1 = corre_shifting + path1
        
         #path1 =0.5 * path1 + 0.5 * corre_shifting 
         path_cost1  = 0
-        path1 = gaussian_filter1d(path1,3) # smooth the path 
+        path1 = gaussian_filter1d(path1,10) # smooth the path 
         #path1 = path1 -(np.mean(path1) - int(Window_LEN/2)) # remove the meaning shifting
 
         #long_out  = np.append(np.flip(path1),path1) # flip to make the the start point and end point to be perfect interpolit
@@ -256,8 +257,8 @@ class VIDEO_PEOCESS:
                     Costmatrix,shift_used2 = COSTMtrix.matrix_cal_corre_full_version3_2GPU (steam2[Len_steam-1,:,:] ,
                                                               steam2[Len_steam-2,:,:],  0) 
                     ###Costmatrix = Costmatrix2
-                    Costmatrix = cv2.blur(Costmatrix,(5,5))
-                    #Costmatrix  = myfilter.gauss_filter_s (Costmatrix) # smooth matrix
+                    #Costmatrix = cv2.blur(Costmatrix,(5,5))
+                    Costmatrix  = myfilter.gauss_filter_s (Costmatrix) # smooth matrix
 
                     ###get path and correct image
                     ###Corrected_img,path,path_cost=   VIDEO_PEOCESS.correct_video(gray_video,Costmatrix,int(i),addition_window_shift +Kp )
@@ -276,11 +277,11 @@ class VIDEO_PEOCESS:
                     # remove intergral bias ( here just condsider the overal img should be in the center) 
                     # remove intergral bias ( should be combined with the overall shifting calculation) 
                     #shift_integral = shift_integral - 0.1 * np.mean(shift_integral)
-                    shift_integral = 0.8 * shift_integral
+                    shift_integral = 0.8 * shift_integral - Window_ki_error
                     addition_window_shift =  shift_mean_error  +addition_window_shift
                     addition_window_shift = 0
                     #Window_kp_error =  - 0.1* path_mean_error
-                    #Window_ki_error = -0.000005*path_mean_error+Window_ki_error
+                    Window_ki_error = 0.0005*shift_integral+Window_ki_error
                     #re！！！！！Next time remenber to remove the un-corrected image from the stream
                     #steam=np.append(steam,[Corrected_img[H_start:H_end,:] ],axis=0) # save sequence
                     ## no longer delete the fist  one

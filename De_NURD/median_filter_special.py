@@ -42,7 +42,7 @@ class myfilter:
         h, w= new.shape
       
         for i in range(h):
-            new[i,:]= gaussian_filter1d(new[i,:],5)  
+            new[i,:]= gaussian_filter1d(new[i,:],3)  
          
         return new
     def steam_filter(steam):

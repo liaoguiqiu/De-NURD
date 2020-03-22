@@ -152,7 +152,7 @@ class VIDEO_PEOCESS:
         start_point= PATH.find_the_starting(mat) # starting point for path searching
         ##middle_point  =  PATH.calculate_ave_mid(mat)
         path1,path_cost1=PATH.search_a_path(mat,start_point) # get the path and average cost of the path
-        # path1,path_cost1=PATH.search_a_path_deep_multiscal_small_window(mat) # get the path and average cost of the path
+        #path1,path_cost1=PATH.search_a_path_deep_multiscal_small_window(mat) # get the path and average cost of the path
        
         #path1 = corre_shifting + path1
        
@@ -252,7 +252,7 @@ class VIDEO_PEOCESS:
                     Costmatrix,shift_used2 = COSTMtrix.matrix_cal_corre_full_version3_2GPU (steam2[Len_steam-1,:,:] ,
                                                               steam2[Len_steam-2,:,:],  0) 
                     ###Costmatrix = Costmatrix2
-                    Costmatrix = cv2.blur(Costmatrix,(5,5))
+                    Costmatrix = cv2.blur(Costmatrix,(2,2))
                     #Costmatrix  = myfilter.gauss_filter_s (Costmatrix) # smooth matrix
 
                     ###get path and correct image
@@ -297,6 +297,7 @@ class VIDEO_PEOCESS:
                     circular = cv2.linearPolar(new_frame, (new_frame.shape[1]/2 , new_frame.shape[0]/2), 
                                                200, cv2.WARP_INVERSE_MAP)
                     for i in range ( len(path)):
+                        path = np.clip(path,0,71)
                         show1[int(path[i]),i]=254
                     cv2.imwrite(savedir_path  + str(sequence_num) +".jpg", circular)
                     cv2.imwrite(operatedir_matrix_unprocessed  + str(sequence_num) +".jpg", Costmatrix)

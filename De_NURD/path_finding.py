@@ -176,6 +176,7 @@ class PATH:
         #long_out = gaussian_filter1d (long_out ,1)
         #long_path_upsam  = signal.resample(long_out, 3*W)*Window_LEN
         path_origin = path_add3[W_origin:2*W_origin]
+        path_origin = np.clip(path_origin,0,70)
         return path_origin, 0
     #apply deep learning to find the path
     def search_a_path_Deep_Mat2longpath(img): # input should be torch tensor
