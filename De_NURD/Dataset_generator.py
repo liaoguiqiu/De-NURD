@@ -12,6 +12,12 @@ from  path_finding import PATH
 from scipy.ndimage import gaussian_filter1d
 
 from cost_matrix import COSTMtrix ,Overall_shiftting_WinLen , Window_LEN
+visdom_show_flag =True
+if visdom_show_flag == True:
+    from analy_visdom import VisdomLinePlotter
+
+
+
 class DATA_Generator(object):
      def __init__(self):
         self.original_root = "../../saved_original_for_generator/"
@@ -29,7 +35,9 @@ class DATA_Generator(object):
 
         self.path_DS =  self.saved_stastics.read_my_signal_results()
         self.path_DS.all_statics_dir  =  self.saved_stastics.all_statics_dir
-     
+         
+        if visdom_show_flag == True:
+            self.vis_ploter = VisdomLinePlotter()
          
      def add_lines_to_matrix(self,matrix):
         value  = 128
@@ -47,15 +55,17 @@ class DATA_Generator(object):
      def validation(self,original_IMG,Shifted_IMG,path,Image_ID):
         #Costmatrix,shift_used = COSTMtrix.matrix_cal_corre_full_version3_2GPU(original_IMG,Shifted_IMG,0) 
         Costmatrix,shift_used = COSTMtrix.matrix_cal_corre_full_version3_2GPU(original_IMG,Shifted_IMG,0) 
-        Costmatrix=cv2.blur(Costmatrix,(15,15))
+        #Costmatrix=cv2.blur(Costmatrix,(2,2))
+        Costmatrix  = myfilter.gauss_filter_s (Costmatrix) # smooth matrix
+
         #Costmatrix = self.add_lines_to_matrix(Costmatrix)
-        Costmatrix=np.clip(Costmatrix, 20, 255)
+        #Costmatrix=np.clip(Costmatrix, 20, 255)
         # Costmatrix  = myfilter.gauss_filter_s(Costmatrix) # smooth matrix
         #tradition way to find path
  
         start_point= PATH.find_the_starting(Costmatrix) # starting point for path searching
 
-        #path_tradition,pathcost1  = PATH.search_a_path(Costmatrix,start_point) # get the path and average cost of the path
+        path_tradition,pathcost1  = PATH.search_a_path(Costmatrix,start_point) # get the path and average cost of the path
         #path_deep,path_cost2=PATH.search_a_path_Deep_Mat2longpath(Costmatrix) # get the path and average cost of the path
         path_deep,path_cost2=PATH.search_a_path_deep_multiscal_small_window(Costmatrix) # get the path and average cost of the path
         
@@ -68,13 +78,18 @@ class DATA_Generator(object):
 
         for i in range ( len(path)):
             painter = min(path[i],Window_LEN-1)
-            #painter2= min(path_tradition[i],Window_LEN-1)
+            painter2= min(path_tradition[i],Window_LEN-1)
             painter3 = min(path_deep[i],Window_LEN-1) 
             show1[int(painter),i]=128
-            #show1[int(painter2),i]=128
+            show1[int(painter2),i]=128
             show1[int(painter3),i]=254
 
         cv2.imwrite( self.data_mat_root  + str(Image_ID) +".jpg", show1)
+        if visdom_show_flag == True:
+            x= np.arange(0, len(path))
+            self.vis_ploter.plot_multi_arrays_append(x,path,title_name=str(Image_ID),legend = 'truth' )
+            self.vis_ploter.plot_multi_arrays_append(x,path_deep,title_name=str(Image_ID),legend = 'Deep Learning' )
+            self.vis_ploter.plot_multi_arrays_append(x,path_tradition,title_name=str(Image_ID),legend = 'Traditional' )
 
 
          
