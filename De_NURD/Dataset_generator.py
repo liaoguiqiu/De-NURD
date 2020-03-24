@@ -16,6 +16,7 @@ visdom_show_flag =True
 if visdom_show_flag == True:
     from analy_visdom import VisdomLinePlotter
 
+add_noise_flag  = True
 
 
 class DATA_Generator(object):
@@ -27,6 +28,8 @@ class DATA_Generator(object):
         self.data_mat_root_origin = "../../saved_matrix_unprocessed/"
 
         self.data_signal_root  = "../../saved_stastics_for_generator/"
+        self.noise_selector=['gauss','guass','guass','guass']
+
         self.H  = 1024
         self.W = 780
         # read the signals  just use the existing path
@@ -50,6 +53,44 @@ class DATA_Generator(object):
                 matrix[i,lines+i+3] =value
 
         return matrix     
+     def noisy(self,noise_typ,image):
+       if noise_typ == "gauss":
+          row,col = image.shape
+          mean = 0
+          var = 50
+          sigma = var**0.5
+          gauss = np.random.normal(mean,sigma,(row,col )) 
+          gauss = gauss.reshape(row,col ) 
+          noisy = image + gauss
+          return np.clip(noisy,0,254)
+       elif noise_typ == 's&p':
+          row,col  = image.shape
+          s_vs_p = 0.5
+          amount = 0.004
+          out = np.copy(image)
+          # Salt mode
+          num_salt = np.ceil(amount * image.size * s_vs_p)
+          coords = [np.random.randint(0, i - 1, int(num_salt))
+                  for i in image.shape]
+          out[coords] = 1
+
+          # Pepper mode
+          num_pepper = np.ceil(amount* image.size * (1. - s_vs_p))
+          coords = [np.random.randint(0, i - 1, int(num_pepper))
+                  for i in image.shape]
+          out[coords] = 0
+          return np.clip(out,0,254)
+       elif noise_typ == 'poisson':
+          vals = len(np.unique(image))
+          vals = 2 ** np.ceil(np.log2(vals))
+          noisy = np.random.poisson(image * vals) / float(vals)
+          return np.clip(noisy,0,254)
+       elif noise_typ =='speckle':
+          row,col  = image.shape
+          gauss = np.random.randn(row,col )
+          gauss = gauss.reshape(row,col )        
+          noisy = image + image * gauss
+          return np.clip(noisy,0,254)
 
         #the  validation functionfor check the matrix and can also be used for validate the correction result
      def validation(self,original_IMG,Shifted_IMG,path,Image_ID):
@@ -187,11 +228,65 @@ class DATA_Generator(object):
 
             read_id +=1
 
+     # generate the   OCT iamge with combination of NURD and group shifting
      def generate_NURD_overall_shifting(self):
-         pass
+          #read one from the original
+            #random select one IMG frome the oringinal 
+        read_id = 0   # read pointer initialization
+        Len_steam =5 # create the buffer for validation 
+        steam=np.zeros((Len_steam,self.H,self.W)) # create video buffer
+        while (1):
+            #list all the picture for video generating, ensure the original folder has only one image
+            OriginalpathDirlist = os.listdir(self.original_root) 
+            sample = random.sample(OriginalpathDirlist, 1)  #  ramdom choose the name in folder list
+            Sample_path = self.original_root +   sample[0] # create the reading path this radom picture
+            original_IMG = cv2.imread(Sample_path) # get this image 
+            original_IMG  =   cv2.cvtColor(original_IMG, cv2.COLOR_BGR2GRAY) # to gray
+            original_IMG = cv2.resize(original_IMG, (self.W,self.H), interpolation=cv2.INTER_AREA)
+
+            #read the path and Image number from the signal file
+            #get the Id of image which should be poibnt to
+            Image_ID = int( self.path_DS.signals[Save_signal_enum.image_iD.value, read_id])
+            #get the path
+            path  = self.path_DS.path_saving[read_id,:]
+            path =  signal.resample(path, self.W)#resample the path
+            overall_shifting = Image_ID 
+            overall_shifting = min(overall_shifting,self.W/2) # limit the shifting here, maybe half the lenghth is sufficient  for the combination
+            path = path  + overall_shifting
+            # create the shifted image
+            Shifted_IMG   = VIDEO_PEOCESS.de_distortion(original_IMG,path,Image_ID,0)
+
+            # add noise to image pair for validation
+            if add_noise_flag == True:
+                noise_type  =  str(self.noise_selector[int(Image_ID)%4])
+                noise_type = "guass"
+                original_IMG  =  self.noisy(noise_type,original_IMG)
+                Shifted_IMG  =  self.noisy(noise_type,Shifted_IMG)
+
+            # save all the result
+            cv2.imwrite(self.data_pair1_root  + str(Image_ID) +".jpg", original_IMG)
+            cv2.imwrite(self.data_pair2_root  + str(Image_ID) +".jpg", Shifted_IMG)
+            ## validation 
+            self.validation(original_IMG,Shifted_IMG,path,Image_ID) 
+
+            #steam[Len_steam-1,:,:]  = original_IMG  # un-correct 
+            #steam[Len_steam-2,:,:]  = Shifted_IMG  # correct 
+            #Costmatrix,shift_used = COSTMtrix.matrix_cal_corre_full_version3_2GPU(original_IMG,Shifted_IMG,0) 
+            #Costmatrix  = myfilter.gauss_filter_s (Costmatrix) # smooth matrix
+            #show1 =  Costmatrix 
+            #for i in range ( len(path)):
+            #    show1[int(path[i]),i]=254
+            #cv2.imwrite(self.data_mat_root  + str(Image_ID) +".jpg", show1)
+
+
+
+            print ("[%s]   is processed. test point time is [%f] " % (read_id ,0.1))
+
+            read_id +=1
+ 
 
 
 
 if __name__ == '__main__':
         generator   = DATA_Generator()
-        generator.generate_NURD ()
+        generator.generate_NURD_overall_shifting ()

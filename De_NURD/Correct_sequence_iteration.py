@@ -102,7 +102,7 @@ class VIDEO_PEOCESS:
         #every line will be moved to a new postion
         for i in range ( len(shift_diff)):
             #limit the integral             
-            new_position  = int(shift_integral[i]+i)
+            new_position  = int(shift_diff[i]+i)
             # deal with the boundary exceeding
             if(new_position<0):
                 new_position = w+new_position
