@@ -28,7 +28,7 @@ class DATA_Generator(object):
         self.data_mat_root_origin = "../../saved_matrix_unprocessed/"
 
         self.data_signal_root  = "../../saved_stastics_for_generator/"
-        self.noise_selector=['gauss','guass','guass','guass']
+        self.noise_selector=['gauss_noise','gauss_noise','gauss_noise','gauss_noise']
 
         self.H  = 1024
         self.W = 780
@@ -54,43 +54,43 @@ class DATA_Generator(object):
 
         return matrix     
      def noisy(self,noise_typ,image):
-       if noise_typ == "gauss":
-          row,col = image.shape
-          mean = 0
-          var = 50
-          sigma = var**0.5
-          gauss = np.random.normal(mean,sigma,(row,col )) 
-          gauss = gauss.reshape(row,col ) 
-          noisy = image + gauss
-          return np.clip(noisy,0,254)
-       elif noise_typ == 's&p':
-          row,col  = image.shape
-          s_vs_p = 0.5
-          amount = 0.004
-          out = np.copy(image)
-          # Salt mode
-          num_salt = np.ceil(amount * image.size * s_vs_p)
-          coords = [np.random.randint(0, i - 1, int(num_salt))
-                  for i in image.shape]
-          out[coords] = 1
+           if noise_typ == "gauss_noise":
+              row,col = image.shape
+              mean = 0
+              var = 50
+              sigma = var**0.5
+              gauss = np.random.normal(mean,sigma,(row,col )) 
+              gauss = gauss.reshape(row,col ) 
+              noisy = image + gauss
+              return np.clip(noisy,0,254)
+           elif noise_typ == 's&p':
+              row,col  = image.shape
+              s_vs_p = 0.5
+              amount = 0.004
+              out = np.copy(image)
+              # Salt mode
+              num_salt = np.ceil(amount * image.size * s_vs_p)
+              coords = [np.random.randint(0, i - 1, int(num_salt))
+                      for i in image.shape]
+              out[coords] = 1
 
-          # Pepper mode
-          num_pepper = np.ceil(amount* image.size * (1. - s_vs_p))
-          coords = [np.random.randint(0, i - 1, int(num_pepper))
-                  for i in image.shape]
-          out[coords] = 0
-          return np.clip(out,0,254)
-       elif noise_typ == 'poisson':
-          vals = len(np.unique(image))
-          vals = 2 ** np.ceil(np.log2(vals))
-          noisy = np.random.poisson(image * vals) / float(vals)
-          return np.clip(noisy,0,254)
-       elif noise_typ =='speckle':
-          row,col  = image.shape
-          gauss = np.random.randn(row,col )
-          gauss = gauss.reshape(row,col )        
-          noisy = image + image * gauss
-          return np.clip(noisy,0,254)
+              # Pepper mode
+              num_pepper = np.ceil(amount* image.size * (1. - s_vs_p))
+              coords = [np.random.randint(0, i - 1, int(num_pepper))
+                      for i in image.shape]
+              out[coords] = 0
+              return np.clip(out,0,254)
+           elif noise_typ == 'poisson':
+              vals = len(np.unique(image))
+              vals = 2 ** np.ceil(np.log2(vals))
+              noisy = np.random.poisson(image * vals) / float(vals)
+              return np.clip(noisy,0,254)
+           elif noise_typ =='speckle':
+              row,col  = image.shape
+              gauss = np.random.randn(row,col )
+              gauss = gauss.reshape(row,col )        
+              noisy = image + image * gauss
+              return np.clip(noisy,0,254)
 
         #the  validation functionfor check the matrix and can also be used for validate the correction result
      def validation(self,original_IMG,Shifted_IMG,path,Image_ID):
@@ -108,22 +108,25 @@ class DATA_Generator(object):
 
         path_tradition,pathcost1  = PATH.search_a_path(Costmatrix,start_point) # get the path and average cost of the path
         #path_deep,path_cost2=PATH.search_a_path_Deep_Mat2longpath(Costmatrix) # get the path and average cost of the path
-        path_deep,path_cost2=PATH.search_a_path_deep_multiscal_small_window(Costmatrix) # get the path and average cost of the path
+        path_deep,path_cost2=PATH.search_a_path_deep_multiscal_small_window_fusion(Costmatrix) # get the path and average cost of the path
         
-        path_deep = gaussian_filter1d(path_deep,3) # smooth the path 
+        path_deep = gaussian_filter1d(path_deep,6) # smooth the path 
 
         ##middle_point  =  PATH.calculate_ave_mid(mat)
         #path1,path_cost1=PATH.search_a_path(mat,start_point) # get the path and average cost of the path
-        show1 =  Costmatrix 
+        show1 = np.zeros((Costmatrix.shape[0] , Costmatrix.shape[1],3))   
         cv2.imwrite(self.data_mat_root_origin  + str(Image_ID) +".jpg", show1)
+        show1[:,:,0] = Costmatrix
+        show1[:,:,1] = Costmatrix
+        show1[:,:,2] = Costmatrix
 
         for i in range ( len(path)):
             painter = min(path[i],Window_LEN-1)
             painter2= min(path_tradition[i],Window_LEN-1)
             painter3 = min(path_deep[i],Window_LEN-1) 
-            show1[int(painter),i]=128
-            show1[int(painter2),i]=128
-            show1[int(painter3),i]=254
+            show1[int(painter),i,:]=[255,255,255]
+            show1[int(painter2),i,:]=[254,0,0]
+            show1[int(painter3),i,:]=[0,0,254]
 
         cv2.imwrite( self.data_mat_root  + str(Image_ID) +".jpg", show1)
         if visdom_show_flag == True:
@@ -259,7 +262,7 @@ class DATA_Generator(object):
             # add noise to image pair for validation
             if add_noise_flag == True:
                 noise_type  =  str(self.noise_selector[int(Image_ID)%4])
-                noise_type = "guass"
+                #noise_type = "gauss_noise"
                 original_IMG  =  self.noisy(noise_type,original_IMG)
                 Shifted_IMG  =  self.noisy(noise_type,Shifted_IMG)
 
@@ -289,4 +292,4 @@ class DATA_Generator(object):
 
 if __name__ == '__main__':
         generator   = DATA_Generator()
-        generator.generate_NURD_overall_shifting ()
+        generator.generate_NURD  ()
