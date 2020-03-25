@@ -20,6 +20,7 @@ if visdom_show_flag == True:
 
 add_noise_flag  = False
 Clip_matrix_flag = True
+NURD_remove_shift_flag= True
 ########################class for signal##########################################
 class Save_Signal_matlab(object):
       def __init__(self):
@@ -149,7 +150,7 @@ class DATA_Generator(object):
         #path_deep,path_cost2=PATH.search_a_path_Deep_Mat2longpath(Costmatrix) # get the path and average cost of the path
         path_deep,path_cost2=PATH.search_a_path_deep_multiscal_small_window_fusion(Costmatrix) # get the path and average cost of the path
         
-        path_deep = gaussian_filter1d(path_deep,3) # smooth the path 
+        path_deep = gaussian_filter1d(path_deep,2) # smooth the path 
 
         ##middle_point  =  PATH.calculate_ave_mid(mat)
         #path1,path_cost1=PATH.search_a_path(mat,start_point) # get the path and average cost of the path
@@ -202,6 +203,8 @@ class DATA_Generator(object):
             #get the path
             path  = self.path_DS.path_saving[read_id,:]
             path =  signal.resample(path, self.W)#resample the path
+            if NURD_remove_shift_flag ==True:
+                path= path- (np.mean(path) - Window_LEN/2 )
             # create the shifted image
             Shifted_IMG   = VIDEO_PEOCESS.de_distortion(original_IMG,path,Image_ID,0)
             if add_noise_flag == True:

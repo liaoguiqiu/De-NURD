@@ -236,7 +236,7 @@ class PATH:
         output2 = output2.cpu().detach().numpy()
         for connect_point in range (piece_num-1):
             path_add3_2[connect_point*piece_W+int(piece_W/3):(connect_point+1)*piece_W + int(piece_W/3)] = signal.resample(
-                output[connect_point,:], piece_W)
+                output2[connect_point,:], piece_W)
         path_add3_2 = path_add3_2 *Window_LEN
         #long_out  = np.append(np.flip(output),output)
         #long_out  = np.append(long_out,np.flip(output))
