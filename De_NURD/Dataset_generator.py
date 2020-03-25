@@ -80,7 +80,16 @@ class DATA_Generator(object):
                 matrix[i,lines+i+1] =value
                 matrix[i,lines+i+3] =value
 
-        return matrix     
+        return matrix  
+     def random_min_clip_by_row(self,min1,min2,mat):
+         rand= np.random.random_sample()
+         rand = rand * (min2-min1) +min1
+         H,W = mat.shape
+         for i in np.arange(W):
+             rand= np.random.random_sample()
+             rand = rand * (min2-min1) +min1
+             mat[:,i] = np.clip(mat[:,i],rand,254)
+         return mat
      def noisy(self,noise_typ,image):
            if noise_typ == "gauss_noise":
               row,col = image.shape
@@ -127,7 +136,8 @@ class DATA_Generator(object):
         #Costmatrix=cv2.blur(Costmatrix,(2,2))
         Costmatrix  = myfilter.gauss_filter_s (Costmatrix) # smooth matrix
         if Clip_matrix_flag == True:
-            Costmatrix = np.clip(Costmatrix, 20,254)
+            #Costmatrix = np.clip(Costmatrix, 20,254)
+            Costmatrix=self.random_min_clip_by_row(15,30,Costmatrix)
         #Costmatrix = self.add_lines_to_matrix(Costmatrix)
         #Costmatrix=np.clip(Costmatrix, 20, 255)
         # Costmatrix  = myfilter.gauss_filter_s(Costmatrix) # smooth matrix
@@ -139,7 +149,7 @@ class DATA_Generator(object):
         #path_deep,path_cost2=PATH.search_a_path_Deep_Mat2longpath(Costmatrix) # get the path and average cost of the path
         path_deep,path_cost2=PATH.search_a_path_deep_multiscal_small_window_fusion(Costmatrix) # get the path and average cost of the path
         
-        path_deep = gaussian_filter1d(path_deep,6) # smooth the path 
+        path_deep = gaussian_filter1d(path_deep,3) # smooth the path 
 
         ##middle_point  =  PATH.calculate_ave_mid(mat)
         #path1,path_cost1=PATH.search_a_path(mat,start_point) # get the path and average cost of the path
