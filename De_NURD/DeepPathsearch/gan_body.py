@@ -462,8 +462,8 @@ class _netD_8_multiscal_fusion(nn.Module):
            if i == 15 :
                x = x.view(-1,self.fully_connect_len).squeeze(1)# squess before fully connected 
 
-        side_out  = 0.5*side_out 
-        x=0.5*x
+        side_out  = 0.6*side_out 
+        x=0.4*x
         out  = side_out.add(x)
         # return x
         # return side_out

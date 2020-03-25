@@ -4,6 +4,7 @@ import os
 from analy import MY_ANALYSIS
 from analy import Save_signal_enum
 from scipy import signal 
+import scipy.io
 import random
 from random import seed
 from median_filter_special import myfilter
@@ -12,36 +13,63 @@ from  path_finding import PATH
 from scipy.ndimage import gaussian_filter1d
 
 from cost_matrix import COSTMtrix ,Overall_shiftting_WinLen , Window_LEN
-visdom_show_flag =True
+visdom_show_flag = False
+Save_matlab_flag = True
 if visdom_show_flag == True:
     from analy_visdom import VisdomLinePlotter
 
-add_noise_flag  = True
+add_noise_flag  = False
+Clip_matrix_flag = True
+########################class for signal##########################################
+class Save_Signal_matlab(object):
+      def __init__(self):
+          self.label = []
+          self.truth = []
+          self.deep_result =[]
+          self.tradition_result = []
+          pass
+      def buffer_4(self,id,truth,deep,tradition):
+          self.label.append(id)
+          self.truth.append(truth)
+          self.deep_result.append(deep)
+          self.tradition_result.append(tradition)
+          pass
+      def save_mat(self,location):
+          scipy.io.savemat(location+'validation.mat', mdict={'arr': self})
+          pass
 
-
+#####################class for generat function#############################################
+         
 class DATA_Generator(object):
+     
      def __init__(self):
         self.original_root = "../../saved_original_for_generator/"
         self.data_pair1_root = "../../saved_pair1/"
         self.data_pair2_root = "../../saved_pair2/"
         self.data_mat_root = "../../saved_matrix/"
         self.data_mat_root_origin = "../../saved_matrix_unprocessed/"
-
         self.data_signal_root  = "../../saved_stastics_for_generator/"
         self.noise_selector=['gauss_noise','gauss_noise','gauss_noise','gauss_noise']
-
+        self.save_matlab_root = "../../saved_matlab/"
+        self.self_check_path_create(self.save_matlab_root  )
         self.H  = 1024
         self.W = 780
+        self.matlab = Save_Signal_matlab()
         # read the signals  just use the existing path
         self.saved_stastics = MY_ANALYSIS()
         self.saved_stastics.all_statics_dir = os.path.join(self.data_signal_root, 'signals.pkl')
 
         self.path_DS =  self.saved_stastics.read_my_signal_results()
         self.path_DS.all_statics_dir  =  self.saved_stastics.all_statics_dir
-         
+        
         if visdom_show_flag == True:
             self.vis_ploter = VisdomLinePlotter()
-         
+       # if there is no path, generate thsi path
+     def self_check_path_create(self,directory):
+            try:
+                os.stat(directory)
+            except:
+                os.mkdir(directory)       
      def add_lines_to_matrix(self,matrix):
         value  = 128
         H,W = matrix.shape
@@ -98,7 +126,8 @@ class DATA_Generator(object):
         Costmatrix,shift_used = COSTMtrix.matrix_cal_corre_full_version3_2GPU(original_IMG,Shifted_IMG,0) 
         #Costmatrix=cv2.blur(Costmatrix,(2,2))
         Costmatrix  = myfilter.gauss_filter_s (Costmatrix) # smooth matrix
-
+        if Clip_matrix_flag == True:
+            Costmatrix = np.clip(Costmatrix, 20,254)
         #Costmatrix = self.add_lines_to_matrix(Costmatrix)
         #Costmatrix=np.clip(Costmatrix, 20, 255)
         # Costmatrix  = myfilter.gauss_filter_s(Costmatrix) # smooth matrix
@@ -127,14 +156,19 @@ class DATA_Generator(object):
             show1[int(painter),i,:]=[255,255,255]
             show1[int(painter2),i,:]=[254,0,0]
             show1[int(painter3),i,:]=[0,0,254]
-
+        # save the  matrix to fil dir
         cv2.imwrite( self.data_mat_root  + str(Image_ID) +".jpg", show1)
+        # show the signal comparison in visdom
         if visdom_show_flag == True:
             x= np.arange(0, len(path))
             self.vis_ploter.plot_multi_arrays_append(x,path,title_name=str(Image_ID),legend = 'truth' )
             self.vis_ploter.plot_multi_arrays_append(x,path_deep,title_name=str(Image_ID),legend = 'Deep Learning' )
             self.vis_ploter.plot_multi_arrays_append(x,path_tradition,title_name=str(Image_ID),legend = 'Traditional' )
-
+        # save comparison signals to matlab
+        if Save_matlab_flag == True :
+            self.matlab.buffer_4(Image_ID,path,path_deep,path_tradition)
+            self.matlab.save_mat(self.save_matlab_root)
+            pass
 
          
 
@@ -160,7 +194,13 @@ class DATA_Generator(object):
             path =  signal.resample(path, self.W)#resample the path
             # create the shifted image
             Shifted_IMG   = VIDEO_PEOCESS.de_distortion(original_IMG,path,Image_ID,0)
+            if add_noise_flag == True:
+                noise_type  =  str(self.noise_selector[int(Image_ID)%4])
+                #noise_type = "gauss_noise"
+                original_IMG  =  self.noisy(noise_type,original_IMG)
+                Shifted_IMG  =  self.noisy(noise_type,Shifted_IMG)
             # save all the result
+
             cv2.imwrite(self.data_pair1_root  + str(Image_ID) +".jpg", original_IMG)
             cv2.imwrite(self.data_pair2_root  + str(Image_ID) +".jpg", Shifted_IMG)
             ## validation 
@@ -292,4 +332,4 @@ class DATA_Generator(object):
 
 if __name__ == '__main__':
         generator   = DATA_Generator()
-        generator.generate_NURD  ()
+        generator.generate_NURD ()
