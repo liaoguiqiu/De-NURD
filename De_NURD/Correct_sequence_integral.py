@@ -102,7 +102,7 @@ class VIDEO_PEOCESS:
         shift_integral = gaussian_filter1d(shift_integral,10) # smooth the path 
 
         #shift_integral = shift_integral + shift_diff.astype(int) # not += : this is iteration way
-        shift_integral = np.clip(shift_integral, - 35,35)
+        #shift_integral = np.clip(shift_integral, - 35,35)
         #every line will be moved to a new postion
         for i in range ( len(shift_integral)):
             #limit the integral             
@@ -156,7 +156,7 @@ class VIDEO_PEOCESS:
         start_point= PATH.find_the_starting(mat) # starting point for path searching
         ##middle_point  =  PATH.calculate_ave_mid(mat)
         #path1,path_cost1=PATH.search_a_path(mat,start_point) # get the path and average cost of the path
-        path1,path_cost1=PATH.search_a_path_deep_multiscal_small_window(mat) # get the path and average cost of the path
+        path1,path_cost1=PATH.search_a_path_deep_multiscal_small_window_fusion(mat) # get the path and average cost of the path
        
         #path1 = corre_shifting + path1
        
@@ -206,13 +206,13 @@ class VIDEO_PEOCESS:
         shift_integral = 0
         read_sequence = os.listdir(operatedir_video) # read all file name
         seqence_Len = len(read_sequence)    # get all file number 
-        img_path = operatedir_video +   "5.jpg"
+        img_path = operatedir_video +   "20.jpg"
         video = cv2.imread(img_path)  #read the first one to get the image size
         gray_video  =   cv2.cvtColor(video, cv2.COLOR_BGR2GRAY)
         Len_steam =5
         H,W= gray_video.shape  #get size of image
         H_start = 80
-        H_end = 200
+        H_end = H
         steam=np.zeros((Len_steam,H_end-H_start,W))
         steam2=np.zeros((Len_steam,H ,W))
         save_sequence_num = 0  # processing iteration initial 
@@ -220,14 +220,14 @@ class VIDEO_PEOCESS:
         Window_ki_error = 0
         Window_kp_error = 0
         Kp=0 # initial shifting paramerter
-        for sequence_num in range(seqence_Len):
+        for sequence_num in range(9,seqence_Len):
         #for i in os.listdir("E:/estimagine/vs_project/PythonApplication_data_au/pic/"):
                 start_time  = time()
                 # read imag for process 
                 img_path = operatedir_video + str(sequence_num+0)+ ".jpg" # starting from 10
                 video = cv2.imread(img_path)
                 gray_video  =   cv2.cvtColor(video, cv2.COLOR_BGR2GRAY)
-                if(sequence_num<10):
+                if(sequence_num<20):
                     # bffer a resized one to coputer the path and cost matrix
                     steam=np.append(steam,[gray_video[H_start:H_end,:] ],axis=0) # save sequence
                     # normal beffer process
@@ -244,8 +244,9 @@ class VIDEO_PEOCESS:
                     steam2= np.delete(steam2 , 0,axis=0)
                     # shifting used is zero in costmatrix caculation
                     #Costmatrix,shift_used = COSTMtrix.matrix_cal_corre_full_version_2(steam,0) 
+                    # actuall overall shifting iterative way here is the shifting between frame
                     overall_shifting,shift_used1 = COSTMtrix.Img_fully_shifting_distance (steam[Len_steam-1,:,:],
-                                                              steam[Len_steam -2,:,:],  addition_window_shift)
+                                                              steam[0,:,:],  addition_window_shift)
                     #overall_shifting0,shift_used0 = COSTMtrix.Img_fully_shifting_correlation(steam[Len_steam-1,:,:],
                     #                                          steam[Len_steam-2,:,:],  addition_window_shift) 
                     #overall_shifting =  overall_shifting 
@@ -255,7 +256,7 @@ class VIDEO_PEOCESS:
                     #test_show = steam2[Len_steam-2,:,:]
                     #cv2.imshow('correcr video',test_show.astype(np.uint8))
                     Costmatrix,shift_used2 = COSTMtrix.matrix_cal_corre_full_version3_2GPU (steam2[Len_steam-1,:,:] ,
-                                                              steam2[Len_steam-2,:,:],  0) 
+                                                              steam2[Len_steam-2,:,:], 0) 
                     ###Costmatrix = Costmatrix2
                     #Costmatrix = cv2.blur(Costmatrix,(5,5))
                     Costmatrix  = myfilter.gauss_filter_s (Costmatrix) # smooth matrix
@@ -264,7 +265,7 @@ class VIDEO_PEOCESS:
                     ###Corrected_img,path,path_cost=   VIDEO_PEOCESS.correct_video(gray_video,Costmatrix,int(i),addition_window_shift +Kp )
                     Corrected_img,path,shift_integral,path_cost=   VIDEO_PEOCESS.correct_video(gray_video,overall_shifting,Costmatrix,
                                                                                                shift_integral,int(sequence_num),
-                                                                                      shift_used2+Window_ki_error+Window_kp_error )
+                                                                                      shift_used2  )
                     #overall_shifting3,shift_used3 = COSTMtrix.Img_fully_shifting_correlation(Corrected_img[H_start:H_end,:],
                     #                                          steam[0,:,:],  0) 
                     #Corrected_img,path,path_cost=   VIDEO_PEOCESS.correct_video_with_shifting(Corrected_img,overall_shifting3,int(sequence_num),shift_used3 )
@@ -273,19 +274,21 @@ class VIDEO_PEOCESS:
                     #addition_window_shift = -0.00055*(np.mean(path)- int(Window_LEN/2))+addition_window_shift
                     path_mean_error = (np.mean(path)- int(Window_LEN/2))
                     shift_mean_error = int(overall_shifting- int(Overall_shiftting_WinLen/2))
+                    addition_window_shift =  shift_mean_error  +addition_window_shift
             
                     # remove intergral bias ( here just condsider the overal img should be in the center) 
                     # remove intergral bias ( should be combined with the overall shifting calculation) 
                     #shift_integral = shift_integral - 0.1 * np.mean(shift_integral)
-                    shift_integral = 0.8 * shift_integral - Window_ki_error
-                    addition_window_shift =  shift_mean_error  +addition_window_shift
-                    addition_window_shift = 0
+                    shift_integral = shift_integral - 0.1*(shift_integral-addition_window_shift) -  Window_ki_error
+                    #addition_window_shift = 0
                     #Window_kp_error =  - 0.1* path_mean_error
-                    Window_ki_error = 0.0005*shift_integral+Window_ki_error
+                    Window_ki_error = 0.0005*(shift_integral-addition_window_shift)+Window_ki_error
                     #re！！！！！Next time remenber to remove the un-corrected image from the stream
-                    #steam=np.append(steam,[Corrected_img[H_start:H_end,:] ],axis=0) # save sequence
-                    ## no longer delete the fist  one
-                    #steam= np.delete(steam , 1,axis=0)
+
+                    #save the  corrected result for group shifting  
+                    steam=np.append(steam,[Corrected_img[H_start:H_end,:] ],axis=0) # save sequence
+                    # no longer delete the fist  one
+                    steam= np.delete(steam , 1,axis=0)
 
                     #steam2=np.append(steam2,[Corrected_img ],axis=0) # save sequence
                     ## no longer delete the fist  one
@@ -308,7 +311,7 @@ class VIDEO_PEOCESS:
                                                200, cv2.WARP_INVERSE_MAP)
                     for i in range ( len(path)):
                         show1[int(path[i]),i]=254 # plot the iterative path
-                        show1[int(shift_integral[i]+int(Window_LEN/2)),i]=128 # plot the intergral
+                        #show1[int(shift_integral[i]+int(Window_LEN/2)),i]=128 # plot the intergral
 
                     cv2.imwrite(savedir_path  + str(sequence_num) +".jpg", circular)
                     cv2.imwrite(operatedir_matrix_unprocessed  + str(sequence_num) +".jpg", Costmatrix)

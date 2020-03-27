@@ -20,7 +20,7 @@ if visdom_show_flag == True:
 
 add_noise_flag  = False
 Clip_matrix_flag = True
-NURD_remove_shift_flag= True
+NURD_remove_shift_flag= False
 ########################class for signal##########################################
 class Save_Signal_matlab(object):
       def __init__(self):
@@ -323,7 +323,7 @@ class DATA_Generator(object):
             cv2.imwrite(self.data_pair1_root  + str(Image_ID) +".jpg", original_IMG)
             cv2.imwrite(self.data_pair2_root  + str(Image_ID) +".jpg", Shifted_IMG)
             ## validation 
-            self.validation(original_IMG,Shifted_IMG,path,Image_ID) 
+            #self.validation(original_IMG,Shifted_IMG,path,Image_ID) 
 
             #steam[Len_steam-1,:,:]  = original_IMG  # un-correct 
             #steam[Len_steam-2,:,:]  = Shifted_IMG  # correct 
@@ -345,4 +345,4 @@ class DATA_Generator(object):
 
 if __name__ == '__main__':
         generator   = DATA_Generator()
-        generator.generate_NURD ()
+        generator.generate_NURD_overall_shifting ()
