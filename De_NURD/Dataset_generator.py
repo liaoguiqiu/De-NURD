@@ -11,6 +11,7 @@ from median_filter_special import myfilter
 from Correct_sequence_iteration import VIDEO_PEOCESS
 from  path_finding import PATH
 from scipy.ndimage import gaussian_filter1d
+import pickle
 
 from cost_matrix import COSTMtrix ,Overall_shiftting_WinLen , Window_LEN
 visdom_show_flag = False
@@ -24,10 +25,15 @@ NURD_remove_shift_flag= False
 ########################class for signal##########################################
 class Save_Signal_matlab(object):
       def __init__(self):
+          self.save_matlab_root = "../../saved_matlab/"
+
+          self.infor_shift_nurd_dir = "../../saved_matlab/infor_shift_NURD.mat"
           self.label = []
           self.truth = []
           self.deep_result =[]
           self.tradition_result = []
+          self.overall_shift = []
+          self.NURD   = []
           pass
       def buffer_4(self,id,truth,deep,tradition):
           self.label.append(id)
@@ -35,10 +41,29 @@ class Save_Signal_matlab(object):
           self.deep_result.append(deep)
           self.tradition_result.append(tradition)
           pass
-      def save_mat(self,location):
-          scipy.io.savemat(location+'validation.mat', mdict={'arr': self})
+      def buffer_overall_shift_NURD(self,id,overall_shift, nurd):
+            self.label.append(id)
+            self.overall_shift.append(overall_shift)
+            self.NURD.append(nurd)
+            pass
+      def save_mat(self):
+          scipy.io.savemat(self.save_matlab_root+'validation_between_frame.mat', mdict={'arr': self})
           pass
 
+
+      def save_mat_infor_of_over_allshift_with_NURD(self):
+            scipy.io.savemat(self.save_matlab_root+'infor_shift_NURD.mat', mdict={'arr': self})
+            pass
+      def save_pkl_infor_of_over_allshift_with_NURD(self):
+          with open(self.save_matlab_root+'infor_shift_NURD.pkl', 'wb') as f:
+            pickle.dump(self , f, pickle.HIGHEST_PROTOCOL)
+      def read_pkl_infor_of_over_allshift_with_NURD(self):
+          result =     pickle.load(open(self.save_matlab_root+'infor_shift_NURD.pkl','rb'),encoding='iso-8859-1')
+          #decode the mat data 
+          nurd = result.NURD
+          shift = result.overall_shift
+          id = result.label
+          return id,nurd,shift
 #####################class for generat function#############################################
          
 class DATA_Generator(object):
@@ -308,6 +333,9 @@ class DATA_Generator(object):
             path =  signal.resample(path, self.W)#resample the path
             overall_shifting = Image_ID 
             overall_shifting = min(overall_shifting,self.W/2) # limit the shifting here, maybe half the lenghth is sufficient  for the combination
+
+            #Combine the overall shifting with NURD
+
             path = path  + overall_shifting
             # create the shifted image
             Shifted_IMG   = VIDEO_PEOCESS.de_distortion(original_IMG,path,Image_ID,0)
@@ -322,6 +350,13 @@ class DATA_Generator(object):
             # save all the result
             cv2.imwrite(self.data_pair1_root  + str(Image_ID) +".jpg", original_IMG)
             cv2.imwrite(self.data_pair2_root  + str(Image_ID) +".jpg", Shifted_IMG)
+
+            # save generate information: the NURD and shift used for generating img pair to matlab
+            if Save_matlab_flag == True :
+                self.matlab.buffer_overall_shift_NURD(Image_ID,overall_shifting,path)
+                self.matlab.save_mat_infor_of_over_allshift_with_NURD()
+                self.matlab.save_pkl_infor_of_over_allshift_with_NURD()
+                pass
             ## validation 
             #self.validation(original_IMG,Shifted_IMG,path,Image_ID) 
 
@@ -345,4 +380,8 @@ class DATA_Generator(object):
 
 if __name__ == '__main__':
         generator   = DATA_Generator()
+        save_test  = Save_Signal_matlab()
+        id,nurd,shift  =  save_test.read_pkl_infor_of_over_allshift_with_NURD()
+ 
+        
         generator.generate_NURD_overall_shifting ()
