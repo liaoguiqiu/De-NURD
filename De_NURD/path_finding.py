@@ -245,6 +245,74 @@ class PATH:
         path_origin = (path_add3[W_origin:2*W_origin] + path_add3_2[W_origin:2*W_origin])/2
         path_origin = np.clip(path_origin,0,70)
         return path_origin, 0
+    #fusion 2 no longger connect the start with the end 
+    def search_a_path_deep_multiscal_small_window_fusion2(img): # input should be torch tensor
+        #img2 = cv2.cvtColor(img2,cv2.COLOR_GRAY2RGB)
+        flip_img=cv2.flip(img, 1)
+        H_origin,W_origin= img.shape  #get size of image
+        add_3_img  = np.append(flip_img,img,axis=1) # cascade
+        add_3_img = np.append(add_3_img,flip_img,axis=1) # cascade
+        H,W= add_3_img.shape  #get size of image
+        piece_num = int(W/H) # the number of the squers 
+        piece_W = H
+        input_batch = np.zeros((piece_num,3,Resample_size,Resample_size)) # a batch with piece num
+        input_batch2 = np.zeros((piece_num,3,Resample_size,Resample_size)) # a batch with piece num
+
+        for  slice_point in range (piece_num):
+            img_piece = add_3_img[:,slice_point*piece_W:(slice_point+1)*piece_W]
+            img_piece = cv2.resize(img_piece, (Resample_size,Resample_size), interpolation=cv2.INTER_AREA)
+            input_batch[slice_point,0,:,:] = transform(img_piece)[0]
+            input_batch[slice_point,1,:,:] = transform(img_piece)[0]
+            input_batch[slice_point,2,:,:] = transform(img_piece)[0]
+        input = torch.from_numpy(np.float32(input_batch)) 
+        input = input.to(device) 
+
+        for  slice_point in range (piece_num-1):
+            img_piece = add_3_img[:,slice_point*piece_W +int(piece_W/3):(slice_point+1)*piece_W + int(piece_W/3)] # bias
+            img_piece = cv2.resize(img_piece, (Resample_size,Resample_size), interpolation=cv2.INTER_AREA)
+            input_batch2[slice_point,0,:,:] = transform(img_piece)[0]
+            input_batch2[slice_point,1,:,:] = transform(img_piece)[0]
+            input_batch2[slice_point,2,:,:] = transform(img_piece)[0]
+        input2 = torch.from_numpy(np.float32(input_batch2)) 
+        input2 = input2.to(device) 
+        
+        #img2 = cv2.resize(img, (Resample_size,Resample_size), interpolation=cv2.INTER_AREA)
+ 
+        #input3d =  np.zeros((3,Resample_size,Resample_size))
+        #input3d[0,:,:]= transform(img2)[0]
+        #input3d[1,:,:]= transform(img2)[0]
+        #input3d[2,:,:]= transform(img2)[0]
+        #input = torch.from_numpy(np.float32(input3d)) 
+        #input = input.to(device) 
+
+        inputv = Variable(input)
+        inputv2 = Variable(input2)
+
+
+        #inputv = Variable(input.unsqueeze(0))
+        output = netD(inputv)
+        output2 = netD(inputv2)
+
+        path_add3 = np.zeros(W)
+        output = output.cpu().detach().numpy()
+        for connect_point in range (piece_num):
+            path_add3[connect_point*piece_W:(connect_point+1)*piece_W] = signal.resample(
+                output[connect_point,:], piece_W)
+        path_add3 = path_add3 *Window_LEN
+
+        path_add3_2 = np.zeros(W)
+        output2 = output2.cpu().detach().numpy()
+        for connect_point in range (piece_num-1):
+            path_add3_2[connect_point*piece_W+int(piece_W/3):(connect_point+1)*piece_W + int(piece_W/3)] = signal.resample(
+                output2[connect_point,:], piece_W)
+        path_add3_2 = path_add3_2 *Window_LEN
+        #long_out  = np.append(np.flip(output),output)
+        #long_out  = np.append(long_out,np.flip(output))
+        #long_out = gaussian_filter1d (long_out ,1)
+        #long_path_upsam  = signal.resample(long_out, 3*W)*Window_LEN
+        path_origin = (path_add3[W_origin:2*W_origin] + path_add3_2[W_origin:2*W_origin])/2
+        path_origin = np.clip(path_origin,0,70)
+        return path_origin, 0
     #apply deep learning to find the path
     def search_a_path_Deep_Mat2longpath(img): # input should be torch tensor
         #img2 = cv2.cvtColor(img2,cv2.COLOR_GRAY2RGB)

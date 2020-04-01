@@ -95,7 +95,53 @@ class DATA_Generator(object):
             try:
                 os.stat(directory)
             except:
-                os.mkdir(directory)       
+                os.mkdir(directory)   
+  # read the original signal and then close the startign with the end
+     def close_the_origin_signal(self):
+         read_id = 0   # read pointer initialization
+         while (1):
+             
+            OriginalpathDirlist = os.listdir(self.original_root)    # 
+             # 
+ 
+
+            #read the path and Image number from the signal file
+            #get the Id of image which should be poibnt to
+ 
+            #get the path
+            path  = self.path_DS.path_saving[read_id,:]
+            path_l  = len(path)
+            long_path = np.append(path,path,axis=0)
+            long_path = np.append(long_path,path,axis=0)
+            #long_path = np.append(path[::-1],path,axis=0)
+            #long_path = np.append(long_path,path[::-1],axis=0)
+            long_path= gaussian_filter1d(long_path,5) # the fileter parameters is 5
+            path_p = long_path[path_l:2*path_l]
+
+
+            #change the signal too
+            self.path_DS.path_saving[read_id,:] = path_p
+ 
+ 
+            self.path_DS.save()
+ 
+
+            ## validation 
+            #steam[Len_steam-1,:,:]  = original_IMG  # un-correct 
+            #steam[Len_steam-2,:,:]  = Shifted_IMG  # correct 
+            #Costmatrix,shift_used = COSTMtrix.matrix_cal_corre_full_version3_2GPU(original_IMG,Shifted_IMG,0) 
+            ##Costmatrix  = myfilter.gauss_filter_s (Costmatrix) # smooth matrix
+            #show1 =  Costmatrix 
+            #for i in range ( len(path)):
+            #    show1[int(path[i]),i]=254
+            #cv2.imwrite(self.data_mat_root  + str(Image_ID) +".jpg", show1)
+
+
+
+            print ("[%s]   is processed. test point time is [%f] " % (read_id ,0.1))
+
+            read_id +=1
+         pass
      def add_lines_to_matrix(self,matrix):
         value  = 128
         H,W = matrix.shape
@@ -380,6 +426,7 @@ class DATA_Generator(object):
 
 if __name__ == '__main__':
         generator   = DATA_Generator()
+        #generator.close_the_origin_signal()
         save_test  = Save_Signal_matlab()
         id,nurd,shift  =  save_test.read_pkl_infor_of_over_allshift_with_NURD()
  

@@ -158,13 +158,13 @@ class VIDEO_PEOCESS:
         start_point= PATH.find_the_starting(mat) # starting point for path searching
         ##middle_point  =  PATH.calculate_ave_mid(mat)
         #path1,path_cost1=PATH.search_a_path(mat,start_point) # get the path and average cost of the path
-        path1,path_cost1=PATH.search_a_path_deep_multiscal_small_window_fusion(mat) # get the path and average cost of the path
+        path1,path_cost1=PATH.search_a_path_deep_multiscal_small_window_fusion2(mat) # get the path and average cost of the path
        
         #path1 = corre_shifting + path1
        
         #path1 =0.5 * path1 + 0.5 * corre_shifting 
         path_cost1  = 0
-        path1 = gaussian_filter1d(path1,10) # smooth the path 
+        path1 = gaussian_filter1d(path1,3) # smooth the path 
         #path1 = path1 -(np.mean(path1) - int(Window_LEN/2)) # remove the meaning shifting
 
         #long_out  = np.append(np.flip(path1),path1) # flip to make the the start point and end point to be perfect interpolit
@@ -280,7 +280,13 @@ class VIDEO_PEOCESS:
             
                     # remove intergral bias ( here just condsider the overal img should be in the center) 
                     # remove intergral bias ( should be combined with the overall shifting calculation) 
+
+                    #correct method 1
+                    #shift_integral = shift_integral - 1*(np.mean(shift_integral)-addition_window_shift) -  Window_ki_error
+
                     #shift_integral = shift_integral - 0.1 * np.mean(shift_integral)
+
+                    #corre method 2
                     shift_integral = shift_integral - 0.1*(shift_integral-addition_window_shift) -  Window_ki_error
                     #addition_window_shift = 0
                     #Window_kp_error =  - 0.1* path_mean_error
