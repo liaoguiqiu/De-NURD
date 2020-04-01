@@ -43,6 +43,7 @@ class Save_signal_enum(Enum):
     path_cost  = 2
     additional_kp =3
     additional_ki = 4
+     
 
 class MY_ANALYSIS(object):
 
@@ -54,6 +55,7 @@ class MY_ANALYSIS(object):
         self.all_statics_dir = os.path.join(save_dir_analys, 'signals.pkl')
         self.path_saving =[]   
         self.first_data_flag = True
+        self.path_integral =[]
    # add new step of all signals
 
     def add_new_iteration_result(self,new_step,this_path):
@@ -72,6 +74,8 @@ class MY_ANALYSIS(object):
             #self.path_saving.append(this_path)
 
             # display and save 2 :using the visdom
+    def buffer_path_integral(self, path_intr):
+        self.path_integral.append(path_intr)
     def display_and_save2(self,iteration_num,new):
         #save
         if(int(iteration_num)%2==0):

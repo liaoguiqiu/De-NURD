@@ -31,6 +31,8 @@ from cost_matrix import  COSTMtrix
 from cost_matrix import Window_LEN ,Overall_shiftting_WinLen
 from scipy.ndimage import gaussian_filter1d
 from time import time
+import scipy.io
+
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 Resample_size =Window_LEN
 Path_length = 128
@@ -303,6 +305,8 @@ class VIDEO_PEOCESS:
                         new[Save_signal_enum.path_cost.value]=  path_cost
                         new[Save_signal_enum.mean_path_error.value]=  path_mean_error
                         signal_saved.add_new_iteration_result(new,path)
+                        #
+                        signal_saved.buffer_path_integral(shift_integral)
                         signal_saved.display_and_save2(sequence_num,new)
                     test_time_point = time()
                     show1 =  Costmatrix
