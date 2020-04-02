@@ -68,6 +68,9 @@
     <Compile Include="median_filter_special.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="parrallel_thread.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="path_finding.py">
       <SubType>Code</SubType>
     </Compile>

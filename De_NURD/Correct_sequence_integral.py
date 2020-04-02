@@ -32,7 +32,7 @@ from cost_matrix import Window_LEN ,Overall_shiftting_WinLen
 from scipy.ndimage import gaussian_filter1d
 from time import time
 import scipy.io
-
+from parrallel_thread import Dual_thread_Overall_shift_NURD
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 Resample_size =Window_LEN
 Path_length = 128
@@ -222,6 +222,7 @@ class VIDEO_PEOCESS:
         Window_ki_error = 0
         Window_kp_error = 0
         Kp=0 # initial shifting paramerter
+        dual_thread  = Dual_thread_Overall_shift_NURD()
         for sequence_num in range(9,seqence_Len):
         #for i in os.listdir("E:/estimagine/vs_project/PythonApplication_data_au/pic/"):
                 start_time  = time()
@@ -244,21 +245,23 @@ class VIDEO_PEOCESS:
                     steam= np.delete(steam , 1,axis=0)
                     steam2=np.append(steam2,[gray_video],axis=0) # save sequence
                     steam2= np.delete(steam2 , 0,axis=0)
-                    # shifting used is zero in costmatrix caculation
-                    #Costmatrix,shift_used = COSTMtrix.matrix_cal_corre_full_version_2(steam,0) 
-                    # actuall overall shifting iterative way here is the shifting between frame
-                    overall_shifting,shift_used1 = COSTMtrix.Img_fully_shifting_distance (steam[Len_steam-1,:,:],
-                                                              steam[0,:,:],  addition_window_shift)
-                    #overall_shifting0,shift_used0 = COSTMtrix.Img_fully_shifting_correlation(steam[Len_steam-1,:,:],
-                    #                                          steam[Len_steam-2,:,:],  addition_window_shift) 
-                    #overall_shifting =  overall_shifting 
-                    #Corrected_img,path,path_cost=   VIDEO_PEOCESS.correct_video_with_shifting(gray_video,overall_shifting,int(sequence_num),shift_used1 )
 
-                    Costmatrix = np.zeros ((Window_LEN, W))
-                    #test_show = steam2[Len_steam-2,:,:]
-                    #cv2.imshow('correcr video',test_show.astype(np.uint8))
-                    Costmatrix,shift_used2 = COSTMtrix.matrix_cal_corre_full_version3_2GPU (steam2[Len_steam-1,:,:] ,
-                                                              steam2[Len_steam-2,:,:], 0) 
+                    dual_thread.input(steam,steam2,Len_steam,addition_window_shift)
+                    dual_thread.runInParallel()
+                    overall_shifting,shift_used1 = dual_thread.output_overall()
+                    Costmatrix,shift_used2  = dual_thread.output_NURD()
+
+                    # shifting used is zero in costmatrix caculation
+ 
+                    # actuall overall shifting iterative way here is the shifting between frame
+                    #overall_shifting,shift_used1 = COSTMtrix.Img_fully_shifting_distance (steam[Len_steam-1,:,:],
+                    #                                          steam[0,:,:],  addition_window_shift)
+                    
+                    #Costmatrix,shift_used2 = COSTMtrix.matrix_cal_corre_full_version3_2GPU (steam2[Len_steam-1,:,:] ,
+                    #                                          steam2[Len_steam-2,:,:], 0) 
+
+
+
                     ###Costmatrix = Costmatrix2
                     #Costmatrix = cv2.blur(Costmatrix,(5,5))
                     Costmatrix  = myfilter.gauss_filter_s (Costmatrix) # smooth matrix
@@ -279,7 +282,7 @@ class VIDEO_PEOCESS:
                     addition_window_shift =  shift_mean_error  +addition_window_shift
             
                     # remove intergral bias ( here just condsider the overal img should be in the center) 
-                    # remove intergral bias ( should be combined with the overall shifting calculation) 
+          
 
                     #correct method 1
                     #shift_integral = shift_integral - 1*(np.mean(shift_integral)-addition_window_shift) -  Window_ki_error
