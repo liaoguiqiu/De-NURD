@@ -290,10 +290,10 @@ class VIDEO_PEOCESS:
                     #shift_integral = shift_integral - 0.1 * np.mean(shift_integral)
 
                     #corre method 2
-                    shift_integral = shift_integral - 0.1*(shift_integral-addition_window_shift) -  Window_ki_error
+                    shift_integral = shift_integral - 0.0*(shift_integral-addition_window_shift) -  Window_ki_error
                     #addition_window_shift = 0
                     #Window_kp_error =  - 0.1* path_mean_error
-                    Window_ki_error = 0.0005*(shift_integral-addition_window_shift)+Window_ki_error
+                    Window_ki_error = 0.0000*(shift_integral-addition_window_shift)+Window_ki_error
                     #re！！！！！Next time remenber to remove the un-corrected image from the stream
 
                     #save the  corrected result for group shifting  

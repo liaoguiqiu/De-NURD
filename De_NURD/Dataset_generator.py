@@ -22,6 +22,9 @@ if visdom_show_flag == True:
 add_noise_flag  = False
 Clip_matrix_flag = True
 NURD_remove_shift_flag= False
+
+# 
+Show_circular_flag   = True
 ########################class for signal##########################################
 class Save_Signal_matlab(object):
       def __init__(self):
@@ -249,7 +252,7 @@ class DATA_Generator(object):
         # save comparison signals to matlab
         if Save_matlab_flag == True :
             self.matlab.buffer_4(Image_ID,path,path_deep,path_tradition)
-            self.matlab.save_mat(self.save_matlab_root)
+            self.matlab.save_mat()
             pass
 
          
@@ -337,7 +340,7 @@ class DATA_Generator(object):
             cv2.imwrite(self.data_pair1_root  + str(Image_ID) +".jpg", original_IMG)
             cv2.imwrite(self.data_pair2_root  + str(Image_ID) +".jpg", Shifted_IMG)
             self.path_DS.save()
-            self.validation(original_IMG,Shifted_IMG,path,Image_ID) 
+            #self.validation(original_IMG,Shifted_IMG,path,Image_ID) 
 
             ## validation 
             #steam[Len_steam-1,:,:]  = original_IMG  # un-correct 
@@ -404,7 +407,7 @@ class DATA_Generator(object):
                 self.matlab.save_pkl_infor_of_over_allshift_with_NURD()
                 pass
             ## validation 
-            #self.validation(original_IMG,Shifted_IMG,path,Image_ID) 
+            self.validation(original_IMG,Shifted_IMG,path,Image_ID) 
 
             #steam[Len_steam-1,:,:]  = original_IMG  # un-correct 
             #steam[Len_steam-2,:,:]  = Shifted_IMG  # correct 
@@ -427,8 +430,9 @@ class DATA_Generator(object):
 if __name__ == '__main__':
         generator   = DATA_Generator()
         #generator.close_the_origin_signal()
-        save_test  = Save_Signal_matlab()
-        id,nurd,shift  =  save_test.read_pkl_infor_of_over_allshift_with_NURD()
+        #save_test  = Save_Signal_matlab()
+        #id,nurd,shift  =  save_test.read_pkl_infor_of_over_allshift_with_NURD()
  
         
-        generator.generate_NURD_overall_shifting ()
+        #generator.generate_NURD ()
+        generator.generate_overall_shifting()

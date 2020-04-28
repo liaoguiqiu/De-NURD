@@ -1,11 +1,18 @@
+savedir_process = "../../saved_processed_polar/"
+operatedir_video = "../../saved_original/"
+
+savedir_process = "../../saved_pair2/"
+operatedir_video = "../../saved_pair1/"
+
 operatedir_matrix  =  "../../saved_matrix/"
  
 operatedir_one =  "../../saved_matrix/126.jpg"
-operatedir_video = "../../saved_original/"
 #operatedir_video = "E:/PhD/trying/saved_filtered_img/"
 savedir_path = "../../saved_processed/"
-savedir_process = "../../saved_processed_polar/"
+savedir_process_circle = "../../saved_processed/"
 
+#saved_original_circular
+savedir_origin_circle =  "../../saved_original_circular/"
 #saved_processed_polar
 save_display_dir = "../../saved_display_compare/"
 
@@ -27,6 +34,9 @@ from mpl_toolkits.mplot3d import Axes3D
 Display_signal_flag = False
 Display_Matrix_flag = False
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
+
+
 
 if Display_signal_flag == True:
     from analy import MY_ANALYSIS
@@ -106,6 +116,10 @@ if __name__ == '__main__':
             cv2.imshow('combin video',show_2 ) 
             cv2.imshow('show 3 imgs sequence with color',stream.astype(np.uint8) ) 
             cv2.imwrite(save_display_dir  + str(i) +".jpg",stream )
+            cv2.imwrite(savedir_origin_circle  + str(i) +".jpg",circular )
+            cv2.imwrite(savedir_process_circle  + str(i) +".jpg",gray_video1 )
+
+
 
             if cv2.waitKey(1) & 0xFF == ord('q'):
               break
