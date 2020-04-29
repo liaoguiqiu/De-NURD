@@ -58,6 +58,10 @@
     <Compile Include="DeepPathsearch\path_train.py" />
     <Compile Include="DeepPathsearch\testDataReading.py" />
     <Compile Include="DeepPathsearch\test_Deep_finding.py" />
+    <Compile Include="Deep_shift\ShiftingNetBody_V2.py" />
+    <Compile Include="shift_deploy.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="De_NURD.py" />
     <Compile Include="Correct_sequence_iteration.py">
       <SubType>Code</SubType>
@@ -83,6 +87,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="DeepPathsearch\" />
+    <Folder Include="Deep_shift\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="DeepPathsearch\README.md" />

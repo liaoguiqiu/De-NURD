@@ -12,7 +12,7 @@ from Correct_sequence_iteration import VIDEO_PEOCESS
 from  path_finding import PATH
 from scipy.ndimage import gaussian_filter1d
 import pickle
-
+from shift_deploy import Shift_Predict
 from cost_matrix import COSTMtrix ,Overall_shiftting_WinLen , Window_LEN
 visdom_show_flag = False
 Save_matlab_flag = True
@@ -82,12 +82,12 @@ class DATA_Generator(object):
         self.save_matlab_root = "../../saved_matlab/"
         self.self_check_path_create(self.save_matlab_root  )
         self.H  = 1024
-        self.W = 780
+        self.W = 832
         self.matlab = Save_Signal_matlab()
         # read the signals  just use the existing path
         self.saved_stastics = MY_ANALYSIS()
         self.saved_stastics.all_statics_dir = os.path.join(self.data_signal_root, 'signals.pkl')
-
+        self.shift_predictor  = Shift_Predict()
         self.path_DS =  self.saved_stastics.read_my_signal_results()
         self.path_DS.all_statics_dir  =  self.saved_stastics.all_statics_dir
         
@@ -205,6 +205,33 @@ class DATA_Generator(object):
               return np.clip(noisy,0,254)
 
         #the  validation functionfor check the matrix and can also be used for validate the correction result
+     def validation_shift(self,original_IMG,Shifted_IMG,path,Image_ID):
+        Costmatrix,shift_used = COSTMtrix.matrix_cal_corre_full_version3_2GPU(original_IMG,Shifted_IMG,0) 
+        if Clip_matrix_flag == True:
+            #Costmatrix = np.clip(Costmatrix, 20,254)
+            Costmatrix=self.random_min_clip_by_row(15,30,Costmatrix)
+        Shifted_IMG2 = Shifted_IMG
+        shift  = self.shift_predictor.predict(original_IMG,Shifted_IMG,Shifted_IMG2)
+        path_deep = shift + path*0
+
+        ##middle_point  =  PATH.calculate_ave_mid(mat)
+        #path1,path_cost1=PATH.search_a_path(mat,start_point) # get the path and average cost of the path
+        show1 = np.zeros((Costmatrix.shape[0] , Costmatrix.shape[1],3))   
+        cv2.imwrite(self.data_mat_root_origin  + str(Image_ID) +".jpg", show1)
+        show1[:,:,0] = Costmatrix
+        show1[:,:,1] = Costmatrix
+        show1[:,:,2] = Costmatrix
+
+        for i in range ( len(path)):
+            painter = min(path[i],Window_LEN-1)
+            #painter2= min(path_tradition[i],Window_LEN-1)
+            painter3 = min(path_deep[i],Window_LEN-1) 
+            show1[int(painter),i,:]=[255,255,255]
+            #show1[int(painter2),i,:]=[254,0,0]
+            show1[int(painter3),i,:]=[0,0,254]
+        # save the  matrix to fil dir
+        cv2.imwrite( self.data_mat_root  + str(Image_ID) +".jpg", show1)
+
      def validation(self,original_IMG,Shifted_IMG,path,Image_ID):
         #Costmatrix,shift_used = COSTMtrix.matrix_cal_corre_full_version3_2GPU(original_IMG,Shifted_IMG,0) 
         Costmatrix,shift_used = COSTMtrix.matrix_cal_corre_full_version3_2GPU(original_IMG,Shifted_IMG,0) 
@@ -256,6 +283,7 @@ class DATA_Generator(object):
             pass
 
          
+
 
      def generate_NURD(self):
          #read one from the original
@@ -314,12 +342,14 @@ class DATA_Generator(object):
         Len_steam =5
         #steam=np.zeros((Len_steam,self.H,self.W)) # create video buffer
         while (1):
-            random_shifting = random.random() * Overall_shiftting_WinLen
+            random_shifting = np.random.random_sample()*Overall_shiftting_WinLen
+            #random_shifting = random.random() * Overall_shiftting_WinLen
             OriginalpathDirlist = os.listdir(self.original_root)    # 
             sample = random.sample(OriginalpathDirlist, 1)  # 
             Sample_path = self.original_root +   sample[0]
             original_IMG = cv2.imread(Sample_path)
             original_IMG  =   cv2.cvtColor(original_IMG, cv2.COLOR_BGR2GRAY)
+            original_IMG = cv2.resize(original_IMG, (self.W,self.H), interpolation=cv2.INTER_AREA)
             #original_IMG = cv2.resize(original_IMG, (self.W,self.H), interpolation=cv2.INTER_AREA)
             H,W = original_IMG.shape
 
@@ -340,7 +370,7 @@ class DATA_Generator(object):
             cv2.imwrite(self.data_pair1_root  + str(Image_ID) +".jpg", original_IMG)
             cv2.imwrite(self.data_pair2_root  + str(Image_ID) +".jpg", Shifted_IMG)
             self.path_DS.save()
-            #self.validation(original_IMG,Shifted_IMG,path,Image_ID) 
+            #self.validation_shift(original_IMG,Shifted_IMG,path,Image_ID) 
 
             ## validation 
             #steam[Len_steam-1,:,:]  = original_IMG  # un-correct 
@@ -407,7 +437,9 @@ class DATA_Generator(object):
                 self.matlab.save_pkl_infor_of_over_allshift_with_NURD()
                 pass
             ## validation 
-            self.validation(original_IMG,Shifted_IMG,path,Image_ID) 
+            self.validation_shift(original_IMG,Shifted_IMG,path,Image_ID) 
+
+            #self.validation(original_IMG,Shifted_IMG,path,Image_ID) 
 
             #steam[Len_steam-1,:,:]  = original_IMG  # un-correct 
             #steam[Len_steam-2,:,:]  = Shifted_IMG  # correct 
@@ -436,3 +468,4 @@ if __name__ == '__main__':
         
         #generator.generate_NURD ()
         generator.generate_overall_shifting()
+        #generator.generate_NURD_overall_shifting()
