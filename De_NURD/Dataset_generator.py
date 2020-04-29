@@ -307,6 +307,9 @@ class DATA_Generator(object):
             path =  signal.resample(path, self.W)#resample the path
             if NURD_remove_shift_flag ==True:
                 path= path- (np.mean(path) - Window_LEN/2 )
+
+        #   exragene for diaplay
+            path = (path -np.mean(path))*2+np.mean(path)
             # create the shifted image
             Shifted_IMG   = VIDEO_PEOCESS.de_distortion(original_IMG,path,Image_ID,0)
             if add_noise_flag == True:
@@ -319,7 +322,7 @@ class DATA_Generator(object):
             cv2.imwrite(self.data_pair1_root  + str(Image_ID) +".jpg", original_IMG)
             cv2.imwrite(self.data_pair2_root  + str(Image_ID) +".jpg", Shifted_IMG)
             ## validation 
-            self.validation(original_IMG,Shifted_IMG,path,Image_ID) 
+            #self.validation(original_IMG,Shifted_IMG,path,Image_ID) 
 
             #steam[Len_steam-1,:,:]  = original_IMG  # un-correct 
             #steam[Len_steam-2,:,:]  = Shifted_IMG  # correct 
@@ -466,6 +469,6 @@ if __name__ == '__main__':
         #id,nurd,shift  =  save_test.read_pkl_infor_of_over_allshift_with_NURD()
  
         
-        #generator.generate_NURD ()
-        generator.generate_overall_shifting()
+        generator.generate_NURD ()
+        #generator.generate_overall_shifting()
         #generator.generate_NURD_overall_shifting()
