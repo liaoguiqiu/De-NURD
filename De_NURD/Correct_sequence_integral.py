@@ -96,14 +96,12 @@ class VIDEO_PEOCESS:
 
 #----------------------#
 # apply the path (shift) and shift compensation to correct
-    def de_distortion_integral(image,path,shift_integral,sequence_num,addition_window_shift):
+    def de_distortion_integral(image,shift_integral,sequence_num):
         new= image
         h, w= image.shape
         new=new*0  # Nan pixel will be filled by intepolation processing
         mask =  new  + 255
-        shift_diff= path + addition_window_shift - int(Window_LEN/2)  # additional compensation 
-        shift_integral = shift_integral + shift_diff  # not += : this is iteration way
-        shift_integral = gaussian_filter1d(shift_integral,10) # smooth the path 
+       
 
         #shift_integral = shift_integral + shift_diff.astype(int) # not += : this is iteration way
         #shift_integral = np.clip(shift_integral, - 35,35)
@@ -130,7 +128,7 @@ class VIDEO_PEOCESS:
         interp_img=cv2.inpaint(long_3_img, longmask, 2, cv2.INPAINT_TELEA)
         #interp_img = VIDEO_PEOCESS.img_interpilate(long_3_img) # interpolate by row
         new= interp_img[:,w:2*w] # take the middle one 
-        return new,shift_integral
+        return new
 #----------------------#
 
 #----------------------#
@@ -146,6 +144,36 @@ class VIDEO_PEOCESS:
         return img_corrected,path1,path_cost1
 
 #----------------------#
+    def get_warping_vextor(mat):
+        H,W= mat.shape  #get size of image
+        show1 =  mat.astype(float)
+        path1  = np.zeros(W)
+        #small the initial to speed path finding 
+        #mat = cv2.resize(mat, (Resample_size,H), interpolation=cv2.INTER_AREA)
+        #mat = cv2.resize(mat, (Resample_size,Resample_size), interpolation=cv2.INTER_AREA)
+
+
+        #start_point= PATH.find_the_starting(mat) # starting point for path searching
+        ##middle_point  =  PATH.calculate_ave_mid(mat)
+        #path1,path_cost1=PATH.search_a_path(mat,start_point) # get the path and average cost of the path
+        path1,path_cost1=PATH.search_a_path_deep_multiscal_small_window_fusion2(mat) # get the path and average cost of the path
+       
+        #path1 = corre_shifting + path1
+       
+        #path1 =0.5 * path1 + 0.5 * corre_shifting 
+        path_cost1  = 0
+        path1 = gaussian_filter1d(path1,3) # smooth the path 
+        return path1
+#----------------------#
+#----------------------#
+    def fusion_estimation( shift_integral,path,overall_shift,I):
+
+        shift_diff= path - int(Window_LEN/2)  # additional compensation 
+        shift_integral = shift_integral + shift_diff  # not += : this is iteration way
+        shift_integral = shift_integral - 0.15*(shift_integral-overall_shift) -  I
+        shift_integral = gaussian_filter1d(shift_integral,10) # smooth the path 
+       
+        return shift_integral
 #----------------------#
 #correct and save /display results
     def correct_video( image,corre_shifting,mat,shift_integral,sequence_num,addition_window_shift):
@@ -184,6 +212,7 @@ class VIDEO_PEOCESS:
         # applying the correct
         img_corrected,shift_integral = VIDEO_PEOCESS.de_distortion_integral (image,path1,shift_integral,sequence_num,addition_window_shift)
 
+
         
         
 
@@ -213,6 +242,8 @@ class VIDEO_PEOCESS:
         img_path = operatedir_video +   "20.jpg"
         video = cv2.imread(img_path)  #read the first one to get the image size
         gray_video  =   cv2.cvtColor(video, cv2.COLOR_BGR2GRAY)
+        gray_video = cv2.resize(gray_video, (832,1024), interpolation=cv2.INTER_AREA)
+
         Len_steam =5
         H,W= gray_video.shape  #get size of image
         H_start = 80
@@ -232,6 +263,8 @@ class VIDEO_PEOCESS:
                 img_path = operatedir_video + str(sequence_num+0)+ ".jpg" # starting from 10
                 video = cv2.imread(img_path)
                 gray_video  =   cv2.cvtColor(video, cv2.COLOR_BGR2GRAY)
+                gray_video = cv2.resize(gray_video, (832,1024), interpolation=cv2.INTER_AREA)
+
                 if(sequence_num<20):
                     # bffer a resized one to coputer the path and cost matrix
                     steam=np.append(steam,[gray_video[H_start:H_end,:] ],axis=0) # save sequence
@@ -251,6 +284,9 @@ class VIDEO_PEOCESS:
                     dual_thread.input(steam,steam2,Len_steam,addition_window_shift)
                     dual_thread.runInParallel()
                     overall_shifting,shift_used1 = dual_thread.output_overall()
+                    shift_mean_error = int(overall_shifting- int(Overall_shiftting_WinLen/2))
+                    addition_window_shift =  shift_mean_error  +addition_window_shift
+
                     Costmatrix,shift_used2  = dual_thread.output_NURD()
 
                     # shifting used is zero in costmatrix caculation
@@ -267,13 +303,21 @@ class VIDEO_PEOCESS:
                     ###Costmatrix = Costmatrix2
                     #Costmatrix = cv2.blur(Costmatrix,(5,5))
                     Costmatrix  = myfilter.gauss_filter_s (Costmatrix) # smooth matrix
+                    path  =  VIDEO_PEOCESS.get_warping_vextor(Costmatrix)
+                    shift_integral = VIDEO_PEOCESS.fusion_estimation(shift_integral,path,addition_window_shift,Window_ki_error)
+
+                    Window_ki_error = 0.00001*(shift_integral-addition_window_shift)+Window_ki_error
+
+
                     #path = np.zeros(Costmatrix.shape[1])
                     #path = path  + shift_used1 + overall_shifting
                     ###get path and correct image
                     ###Corrected_img,path,path_cost=   VIDEO_PEOCESS.correct_video(gray_video,Costmatrix,int(i),addition_window_shift +Kp )
-                    Corrected_img,path,shift_integral,path_cost=   VIDEO_PEOCESS.correct_video(gray_video,overall_shifting,Costmatrix,
-                                                                                               shift_integral,int(sequence_num),
-                                                                                      shift_used2  )
+                    #Corrected_img,path,shift_integral,path_cost=   VIDEO_PEOCESS.correct_video(gray_video,overall_shifting,Costmatrix,
+                    #                                                                           shift_integral,int(sequence_num),
+                    #                                                                  shift_used2  )
+                    Corrected_img = VIDEO_PEOCESS.de_distortion_integral (gray_video,shift_integral,sequence_num)
+                    path_cost =0
                     #overall_shifting3,shift_used3 = COSTMtrix.Img_fully_shifting_correlation(Corrected_img[H_start:H_end,:],
                     #                                          steam[0,:,:],  0) 
                     #Corrected_img,path,path_cost=   VIDEO_PEOCESS.correct_video_with_shifting(gray_video,overall_shifting,int(sequence_num),shift_used1 )
@@ -281,8 +325,7 @@ class VIDEO_PEOCESS:
                     # remove the central shifting 
                     #addition_window_shift = -0.00055*(np.mean(path)- int(Window_LEN/2))+addition_window_shift
                     path_mean_error = (np.mean(path)- int(Window_LEN/2))
-                    shift_mean_error = int(overall_shifting- int(Overall_shiftting_WinLen/2))
-                    addition_window_shift =  shift_mean_error  +addition_window_shift
+                
             
                     # remove intergral bias ( here just condsider the overal img should be in the center) 
           
@@ -293,10 +336,7 @@ class VIDEO_PEOCESS:
                     #shift_integral = shift_integral - 0.1 * np.mean(shift_integral)
 
                     #corre method 2
-                    shift_integral = shift_integral - 0.05*(shift_integral-addition_window_shift) -  Window_ki_error
-                    #addition_window_shift = 0
-                    #Window_kp_error =  - 0.1* path_mean_error
-                    Window_ki_error = 0.000001*(shift_integral-addition_window_shift)+Window_ki_error
+
                     #re！！！！！Next time remenber to remove the un-corrected image from the stream
 
                     #save the  corrected result for group shifting  

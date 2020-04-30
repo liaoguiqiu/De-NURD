@@ -308,8 +308,7 @@ class DATA_Generator(object):
             if NURD_remove_shift_flag ==True:
                 path= path- (np.mean(path) - Window_LEN/2 )
 
-        #   exragene for diaplay
-            path = (path -np.mean(path))*2+np.mean(path)
+        
             # create the shifted image
             Shifted_IMG   = VIDEO_PEOCESS.de_distortion(original_IMG,path,Image_ID,0)
             if add_noise_flag == True:
@@ -414,6 +413,8 @@ class DATA_Generator(object):
             path  = self.path_DS.path_saving[read_id,:]
             if NURD_remove_shift_flag ==True:
                 path= path- (np.mean(path) - Window_LEN/2 )
+            #   exragene for diaplay
+            path = (path -np.mean(path))*0.6+np.mean(path)
             path =  signal.resample(path, self.W)#resample the path
             overall_shifting = Image_ID 
             overall_shifting = min(overall_shifting,self.W/2) # limit the shifting here, maybe half the lenghth is sufficient  for the combination

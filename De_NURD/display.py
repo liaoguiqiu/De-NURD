@@ -80,7 +80,7 @@ if __name__ == '__main__':
             img_path2 = operatedir_video + str(i+20)+ ".jpg"
             video2 = cv2.imread(img_path2)
             gray_video2  =   cv2.cvtColor(video2, cv2.COLOR_BGR2GRAY)
-         
+            gray_video2 = cv2.resize(gray_video2, (832,1024), interpolation=cv2.INTER_AREA)
             new_frame2=cv2.rotate(gray_video2,rotateCode = 2) 
             new_frame3= new_frame2.astype(float)
             H,W= new_frame2.shape
