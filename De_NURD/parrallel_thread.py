@@ -2,6 +2,7 @@ from multiprocessing import Process
 import numpy as np
 from threading import Thread
 from cost_matrix import COSTMtrix
+from shift_deploy import Shift_Predict
 class Dual_thread_Overall_shift_NURD(object):
     def __init__(self):
         #give all parmeter initial(given the Memory for thread)
@@ -13,6 +14,7 @@ class Dual_thread_Overall_shift_NURD(object):
         self.costmatrix =[]
         self.strmlen = []
         self.add_shift  = []
+        self.shift_predictor = Shift_Predict()
         pass
     def input(self,strm1,strm2,strmlen,addshift):
         self.stream1 =strm1
@@ -30,9 +32,14 @@ class Dual_thread_Overall_shift_NURD(object):
     # function 1 calculate tthe shift
     def func1(self):
        print('shift star')
-       self.overall_shifting,self.shift_used1 = COSTMtrix.Img_fully_shifting_distance (
-                                                   self.stream1[self.strmlen-1,:,:],
-                                                   self.stream1[0,:,:],  self.add_shift)
+       img1 = self.stream1[self.strmlen-1,:,:]
+       self.shift_used1   = self.add_shift
+
+       img1 = np.roll(img1, self.shift_used1, axis = 1)     # Positive x rolls right
+       img2 = self.stream1[self.strmlen-2,:,:]
+       img3 = self.stream1[0,:,:]
+       self.overall_shifting = self.shift_predictor.predict(img1,img2,img3)
+                                                  
        print('shift end')
  
     #calculate the NURD

@@ -21,7 +21,7 @@ from scipy.ndimage import gaussian_filter1d
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 from cost_matrix import Window_LEN 
 #dir_netD  = "../../DeepPathFinding/out/netD_epoch_49.pth"
-dir_netD  = "../../DeepLearningModel/deep_path_small_window/netD_epoch_1.pth"
+dir_netD  = '../../DeepLearningModel/deep_path_small_window/netD_epoch_1.pth'
 
 transform = BaseTransform(  Resample_size,[104])
 netD = gan_body._netD_8_multiscal_fusion()

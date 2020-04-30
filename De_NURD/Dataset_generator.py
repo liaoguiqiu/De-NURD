@@ -21,7 +21,7 @@ if visdom_show_flag == True:
 
 add_noise_flag  = False
 Clip_matrix_flag = True
-NURD_remove_shift_flag= False
+NURD_remove_shift_flag= True 
 
 # 
 Show_circular_flag   = True
@@ -373,7 +373,7 @@ class DATA_Generator(object):
             cv2.imwrite(self.data_pair1_root  + str(Image_ID) +".jpg", original_IMG)
             cv2.imwrite(self.data_pair2_root  + str(Image_ID) +".jpg", Shifted_IMG)
             self.path_DS.save()
-            #self.validation_shift(original_IMG,Shifted_IMG,path,Image_ID) 
+            self.validation_shift(original_IMG,Shifted_IMG,path,Image_ID) 
 
             ## validation 
             #steam[Len_steam-1,:,:]  = original_IMG  # un-correct 
@@ -412,6 +412,8 @@ class DATA_Generator(object):
             Image_ID = int( self.path_DS.signals[Save_signal_enum.image_iD.value, read_id])
             #get the path
             path  = self.path_DS.path_saving[read_id,:]
+            if NURD_remove_shift_flag ==True:
+                path= path- (np.mean(path) - Window_LEN/2 )
             path =  signal.resample(path, self.W)#resample the path
             overall_shifting = Image_ID 
             overall_shifting = min(overall_shifting,self.W/2) # limit the shifting here, maybe half the lenghth is sufficient  for the combination
@@ -440,7 +442,7 @@ class DATA_Generator(object):
                 self.matlab.save_pkl_infor_of_over_allshift_with_NURD()
                 pass
             ## validation 
-            self.validation_shift(original_IMG,Shifted_IMG,path,Image_ID) 
+            #self.validation_shift(original_IMG,Shifted_IMG,path,Image_ID) 
 
             #self.validation(original_IMG,Shifted_IMG,path,Image_ID) 
 
@@ -469,6 +471,6 @@ if __name__ == '__main__':
         #id,nurd,shift  =  save_test.read_pkl_infor_of_over_allshift_with_NURD()
  
         
-        generator.generate_NURD ()
+        # generator.generate_NURD ()
         #generator.generate_overall_shifting()
-        #generator.generate_NURD_overall_shifting()
+        generator.generate_NURD_overall_shifting()

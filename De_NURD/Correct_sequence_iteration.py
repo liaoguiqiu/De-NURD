@@ -219,7 +219,7 @@ class VIDEO_PEOCESS:
         #for i in os.listdir("E:/estimagine/vs_project/PythonApplication_data_au/pic/"):
                 start_time  = time()
                 # read imag for process 
-                img_path = operatedir_video + str(sequence_num+0)+ ".jpg" # starting from 10
+                img_path = operatedir_video + str(sequence_num+5)+ ".jpg" # starting from 10
                 video = cv2.imread(img_path)
                 gray_video  =   cv2.cvtColor(video, cv2.COLOR_BGR2GRAY)
                 if(sequence_num<10):

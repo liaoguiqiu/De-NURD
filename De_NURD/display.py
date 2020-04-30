@@ -1,8 +1,8 @@
 savedir_process = "../../saved_processed_polar/"
 operatedir_video = "../../saved_original/"
 
-savedir_process = "../../saved_pair2/"
-operatedir_video = "../../saved_pair1/"
+#savedir_process = "../../saved_pair2/"
+#operatedir_video = "../../saved_pair1/"
 
 operatedir_matrix  =  "../../saved_matrix/"
  

@@ -33,6 +33,8 @@ from scipy.ndimage import gaussian_filter1d
 from time import time
 import scipy.io
 from parrallel_thread import Dual_thread_Overall_shift_NURD
+from shift_deploy import Shift_Predict
+from  basic_trans import Basic_oper
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 Resample_size =Window_LEN
 Path_length = 128
@@ -265,7 +267,8 @@ class VIDEO_PEOCESS:
                     ###Costmatrix = Costmatrix2
                     #Costmatrix = cv2.blur(Costmatrix,(5,5))
                     Costmatrix  = myfilter.gauss_filter_s (Costmatrix) # smooth matrix
-
+                    #path = np.zeros(Costmatrix.shape[1])
+                    #path = path  + shift_used1 + overall_shifting
                     ###get path and correct image
                     ###Corrected_img,path,path_cost=   VIDEO_PEOCESS.correct_video(gray_video,Costmatrix,int(i),addition_window_shift +Kp )
                     Corrected_img,path,shift_integral,path_cost=   VIDEO_PEOCESS.correct_video(gray_video,overall_shifting,Costmatrix,
@@ -273,7 +276,7 @@ class VIDEO_PEOCESS:
                                                                                       shift_used2  )
                     #overall_shifting3,shift_used3 = COSTMtrix.Img_fully_shifting_correlation(Corrected_img[H_start:H_end,:],
                     #                                          steam[0,:,:],  0) 
-                    #Corrected_img,path,path_cost=   VIDEO_PEOCESS.correct_video_with_shifting(Corrected_img,overall_shifting3,int(sequence_num),shift_used3 )
+                    #Corrected_img,path,path_cost=   VIDEO_PEOCESS.correct_video_with_shifting(gray_video,overall_shifting,int(sequence_num),shift_used1 )
 
                     # remove the central shifting 
                     #addition_window_shift = -0.00055*(np.mean(path)- int(Window_LEN/2))+addition_window_shift
@@ -290,10 +293,10 @@ class VIDEO_PEOCESS:
                     #shift_integral = shift_integral - 0.1 * np.mean(shift_integral)
 
                     #corre method 2
-                    shift_integral = shift_integral - 0.0*(shift_integral-addition_window_shift) -  Window_ki_error
+                    shift_integral = shift_integral - 0.05*(shift_integral-addition_window_shift) -  Window_ki_error
                     #addition_window_shift = 0
                     #Window_kp_error =  - 0.1* path_mean_error
-                    Window_ki_error = 0.0000*(shift_integral-addition_window_shift)+Window_ki_error
+                    Window_ki_error = 0.000001*(shift_integral-addition_window_shift)+Window_ki_error
                     #re！！！！！Next time remenber to remove the un-corrected image from the stream
 
                     #save the  corrected result for group shifting  
@@ -319,9 +322,8 @@ class VIDEO_PEOCESS:
                         signal_saved.display_and_save2(sequence_num,new)
                     test_time_point = time()
                     show1 =  Costmatrix
-                    new_frame=cv2.rotate(Corrected_img,rotateCode = 2) 
-                    circular = cv2.linearPolar(new_frame, (new_frame.shape[1]/2 , new_frame.shape[0]/2), 
-                                               200, cv2.WARP_INVERSE_MAP)
+                     
+                    circular = Basic_oper.tranfer_frome_rec2cir(Corrected_img)
                     for i in range ( len(path)):
                         show1[int(path[i]),i]=254 # plot the iterative path
                         #show1[int(shift_integral[i]+int(Window_LEN/2)),i]=128 # plot the intergral

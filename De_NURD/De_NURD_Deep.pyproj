@@ -5,7 +5,7 @@
     <ProjectGuid>07b9d663-4bc8-4016-8977-35b22d05cc4c</ProjectGuid>
     <ProjectHome>
     </ProjectHome>
-    <StartupFile>Dataset_generator.py</StartupFile>
+    <StartupFile>Correct_sequence_integral.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -27,6 +27,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="analy_visdom.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="basic_trans.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="correct_sequence.py">

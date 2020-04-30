@@ -15,7 +15,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
  
 class Shift_Predict(object):
     def __init__(self ):
-        dir_netD  = "../../DeepLearningModel/shift/netD_epoch_20.pth"
+        dir_netD  = "../../DeepLearningModel/shift/netD_epoch_44.pth"
 
         self.Crop_start = 0
         self.Crop_end  = 200
