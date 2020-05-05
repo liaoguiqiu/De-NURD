@@ -30,12 +30,37 @@ import random
 from matplotlib.pyplot import *
 from mpl_toolkits.mplot3d import Axes3D
 #from  path_finding import PATH
+Display_STD_flag = True
 
 Display_signal_flag = False
 Display_Matrix_flag = False
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
+class Derivation_validate(object):
+    def  __init__(self, H,W):
+        Len_steam = 8
+        self.cropH = H
+        self.steam1=np.zeros((Len_steam,self.cropH,W))
+        self.steam2=np.zeros((Len_steam,self.cropH,W))
+    def  buffer(self,img1,img2):
+        self.steam1=np.append(self.steam1, [img1] ,axis=0) # save sequence
+        # no longer delete the fist  one
+        self.steam1= np.delete(self.steam1 , 0,axis=0)
+        self.steam2=np.append(self. steam2, [img2] ,axis=0) # save sequence
+        # no longer delete the fist  one
+        self.steam2= np.delete(self.steam2 , 0,axis=0)
+        pass
+    def calculate(self):
+        a_stack  =  torch.from_numpy(self.steam1)
+        b_stack  =  torch.from_numpy(self.steam2)
+        stda =  a_stack.std( dim = 0)
+        stda = float(stda.data.mean())
+        stdb=  b_stack.std( dim = 0)
+        stdb = float( stdb.data.mean())
 
+        return stda, stdb
+
+    pass
 
 
 if Display_signal_flag == True:
@@ -50,17 +75,21 @@ if __name__ == '__main__':
     #show the image results
     read_sequence = os.listdir(savedir_process)
     seqence_Len = len(read_sequence)
-
+    img_path1 = savedir_process + str(20)+ ".jpg"
+    video2 = cv2.imread(img_path1)
+    gray_video2  =   cv2.cvtColor(video2, cv2.COLOR_BGR2GRAY)
+    H_ini,W_ini= gray_video2.shape
+    STD_call  = Derivation_validate(H_ini,W_ini)
 
 
     for i in range(seqence_Len):
     #for i in os.listdir("E:/estimagine/vs_project/PythonApplication_data_au/pic/"):
     ##      process
             img_path1 = savedir_process + str(i+20)+ ".jpg"
-            video2 = cv2.imread(img_path1)
-            gray_video2  =   cv2.cvtColor(video2, cv2.COLOR_BGR2GRAY)
-         
-            new_frame2=cv2.rotate(gray_video2,rotateCode = 2) 
+            video1 = cv2.imread(img_path1)
+            gray_video1  =   cv2.cvtColor(video1, cv2.COLOR_BGR2GRAY)
+            rectan1 = gray_video1
+            new_frame2=cv2.rotate(gray_video1,rotateCode = 2) 
             new_frame3= new_frame2.astype(float)
             H,W= new_frame2.shape
             circular3=np.ones((H,W))
@@ -80,7 +109,9 @@ if __name__ == '__main__':
             img_path2 = operatedir_video + str(i+20)+ ".jpg"
             video2 = cv2.imread(img_path2)
             gray_video2  =   cv2.cvtColor(video2, cv2.COLOR_BGR2GRAY)
-            gray_video2 = cv2.resize(gray_video2, (832,1024), interpolation=cv2.INTER_AREA)
+            gray_video2 = cv2.resize(gray_video2, (W_ini,H_ini), interpolation=cv2.INTER_AREA)
+            rectan2 = gray_video2
+
             new_frame2=cv2.rotate(gray_video2,rotateCode = 2) 
             new_frame3= new_frame2.astype(float)
             H,W= new_frame2.shape
@@ -118,7 +149,16 @@ if __name__ == '__main__':
             cv2.imwrite(save_display_dir  + str(i) +".jpg",stream )
             cv2.imwrite(savedir_origin_circle  + str(i) +".jpg",circular )
             cv2.imwrite(savedir_process_circle  + str(i) +".jpg",gray_video1 )
+            if Display_STD_flag  ==True :
+                STD_call.buffer(rectan1[0:STD_call.cropH,:],rectan2[0:STD_call.cropH,:])
+                std1,std2=STD_call.calculate()
+                print("update"+str(i)+":")
+                print("correct:"+str(std1))
+                print("origin:"+str(std2))
 
+
+                
+                pass
 
 
             if cv2.waitKey(1) & 0xFF == ord('q'):

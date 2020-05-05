@@ -170,7 +170,12 @@ class VIDEO_PEOCESS:
 
         shift_diff= path - int(Window_LEN/2)  # additional compensation 
         shift_integral = shift_integral + shift_diff  # not += : this is iteration way
-        shift_integral = shift_integral - 0.15*(shift_integral-overall_shift) -  I
+        #shift_integral = shift_integral - 0.15*(shift_integral-overall_shift) - 0.0001* I
+        #shift_integral = shift_integral - 0*(shift_integral-overall_shift) - 0* I
+        #shift_integral = shift_integral - 0.1*(shift_integral-overall_shift) - 0.001* I
+        shift_integral = shift_integral - 0.2*(shift_integral-overall_shift) - 0.00001* I
+
+
         shift_integral = gaussian_filter1d(shift_integral,10) # smooth the path 
        
         return shift_integral
@@ -187,8 +192,8 @@ class VIDEO_PEOCESS:
 
         start_point= PATH.find_the_starting(mat) # starting point for path searching
         ##middle_point  =  PATH.calculate_ave_mid(mat)
-        #path1,path_cost1=PATH.search_a_path(mat,start_point) # get the path and average cost of the path
-        path1,path_cost1=PATH.search_a_path_deep_multiscal_small_window_fusion2(mat) # get the path and average cost of the path
+        path1,path_cost1=PATH.search_a_path(mat,start_point) # get the path and average cost of the path
+        #path1,path_cost1=PATH.search_a_path_deep_multiscal_small_window_fusion2(mat) # get the path and average cost of the path
        
         #path1 = corre_shifting + path1
        
@@ -306,7 +311,7 @@ class VIDEO_PEOCESS:
                     path  =  VIDEO_PEOCESS.get_warping_vextor(Costmatrix)
                     shift_integral = VIDEO_PEOCESS.fusion_estimation(shift_integral,path,addition_window_shift,Window_ki_error)
 
-                    Window_ki_error = 0.00001*(shift_integral-addition_window_shift)+Window_ki_error
+                    Window_ki_error = (shift_integral-addition_window_shift)+Window_ki_error
 
 
                     #path = np.zeros(Costmatrix.shape[1])

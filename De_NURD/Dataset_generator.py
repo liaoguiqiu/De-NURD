@@ -372,7 +372,7 @@ class DATA_Generator(object):
             cv2.imwrite(self.data_pair1_root  + str(Image_ID) +".jpg", original_IMG)
             cv2.imwrite(self.data_pair2_root  + str(Image_ID) +".jpg", Shifted_IMG)
             self.path_DS.save()
-            self.validation_shift(original_IMG,Shifted_IMG,path,Image_ID) 
+            #self.validation_shift(original_IMG,Shifted_IMG,path,Image_ID) 
 
             ## validation 
             #steam[Len_steam-1,:,:]  = original_IMG  # un-correct 
@@ -443,7 +443,7 @@ class DATA_Generator(object):
                 self.matlab.save_pkl_infor_of_over_allshift_with_NURD()
                 pass
             ## validation 
-            #self.validation_shift(original_IMG,Shifted_IMG,path,Image_ID) 
+            self.validation_shift(original_IMG,Shifted_IMG,path,Image_ID) 
 
             #self.validation(original_IMG,Shifted_IMG,path,Image_ID) 
 
@@ -473,5 +473,5 @@ if __name__ == '__main__':
  
         
         # generator.generate_NURD ()
-        #generator.generate_overall_shifting()
-        generator.generate_NURD_overall_shifting()
+        generator.generate_overall_shifting()
+        #generator.generate_NURD_overall_shifting()
