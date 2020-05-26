@@ -38,7 +38,8 @@ from  basic_trans import Basic_oper
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 Resample_size =Window_LEN
 Path_length = 128
- 
+read_start = 290
+
 global intergral_flag
 intergral_flag =0
  
@@ -173,7 +174,7 @@ class VIDEO_PEOCESS:
         #shift_integral = shift_integral - 0.15*(shift_integral-overall_shift) - 0.0001* I
         #shift_integral = shift_integral - 0*(shift_integral-overall_shift) - 0* I
         #shift_integral = shift_integral - 0.1*(shift_integral-overall_shift) - 0.001* I
-        shift_integral = shift_integral - 0.2*(shift_integral-overall_shift) - 0.00001* I
+        shift_integral = shift_integral - 0.15*(shift_integral-overall_shift) - 0.0001*I
 
 
         shift_integral = gaussian_filter1d(shift_integral,10) # smooth the path 
@@ -241,10 +242,11 @@ class VIDEO_PEOCESS:
 
 #---------main schedule-------------#
     def main():
+
         shift_integral = 0
         read_sequence = os.listdir(operatedir_video) # read all file name
         seqence_Len = len(read_sequence)    # get all file number 
-        img_path = operatedir_video +   "20.jpg"
+        img_path = operatedir_video +  str(read_start) +".jpg"
         video = cv2.imread(img_path)  #read the first one to get the image size
         gray_video  =   cv2.cvtColor(video, cv2.COLOR_BGR2GRAY)
         gray_video = cv2.resize(gray_video, (832,1024), interpolation=cv2.INTER_AREA)
@@ -261,7 +263,7 @@ class VIDEO_PEOCESS:
         Window_kp_error = 0
         Kp=0 # initial shifting paramerter
         dual_thread  = Dual_thread_Overall_shift_NURD()
-        for sequence_num in range(9,seqence_Len):
+        for sequence_num in range(read_start,seqence_Len):
         #for i in os.listdir("E:/estimagine/vs_project/PythonApplication_data_au/pic/"):
                 start_time  = time()
                 # read imag for process 
@@ -270,7 +272,7 @@ class VIDEO_PEOCESS:
                 gray_video  =   cv2.cvtColor(video, cv2.COLOR_BGR2GRAY)
                 gray_video = cv2.resize(gray_video, (832,1024), interpolation=cv2.INTER_AREA)
 
-                if(sequence_num<20):
+                if(sequence_num<read_start+ 20):
                     # bffer a resized one to coputer the path and cost matrix
                     steam=np.append(steam,[gray_video[H_start:H_end,:] ],axis=0) # save sequence
                     # normal beffer process
@@ -321,7 +323,7 @@ class VIDEO_PEOCESS:
                     #Corrected_img,path,shift_integral,path_cost=   VIDEO_PEOCESS.correct_video(gray_video,overall_shifting,Costmatrix,
                     #                                                                           shift_integral,int(sequence_num),
                     #                                                                  shift_used2  )
-                    Corrected_img = VIDEO_PEOCESS.de_distortion_integral (gray_video,shift_integral,sequence_num)
+                    Corrected_img = VIDEO_PEOCESS.de_distortion_integral(gray_video,shift_integral,sequence_num)
                     path_cost =0
                     #overall_shifting3,shift_used3 = COSTMtrix.Img_fully_shifting_correlation(Corrected_img[H_start:H_end,:],
                     #                                          steam[0,:,:],  0) 

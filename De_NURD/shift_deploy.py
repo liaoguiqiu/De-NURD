@@ -17,8 +17,8 @@ class Shift_Predict(object):
     def __init__(self ):
         dir_netD  = "../../DeepLearningModel/shift/netD_epoch_35.pth"
 
-        self.Crop_start = 0
-        self.Crop_end  = 200
+        self.Crop_start = 100
+        self.Crop_end  = 300
         self.Resample_size =128
         self.Resample_size2 =128
         self. Original_window_Len  = 71

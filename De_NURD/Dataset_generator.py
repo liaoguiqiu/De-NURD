@@ -22,7 +22,6 @@ if visdom_show_flag == True:
 add_noise_flag  = False
 Clip_matrix_flag = True
 NURD_remove_shift_flag= True 
-
 # 
 Show_circular_flag   = True
 ########################class for signal##########################################

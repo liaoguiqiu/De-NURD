@@ -28,8 +28,6 @@ from enum import Enum
 Save_signal_flag = True
 Visidom_flag = False
 display_flag  = False
-
-
 all_statics_dir = os.path.join(save_dir_analys, 'signals.pkl')
 labels = ('mean path error','path cost','additional kp','additional ki')
 
