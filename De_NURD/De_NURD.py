@@ -5,7 +5,7 @@
 #E:\PhD\trying\OCT\OCT aligment
 #operatedir_video =  "../../OCT/OCT aligment/22JAN2020AUTO_01.avi"
 operatedir_video =  "../../OCT/OCT aligment/phantom-01_2412020121234.avi"
-operatedir_video =  "../../OCT/animal/video.avi"
+#operatedir_video =  "../../OCT/animal/video.avi"
 
 #operatedir_video =  "../../OCT/new video/P-ID_Name_25092019164030.avi"
 #P-ID_Name_25092019164030
@@ -59,7 +59,7 @@ Len_steam =5
 ret, frame = cap.read()
 if ret == True:
     H,W,_ = frame.shape
-H_start = 200
+H_start = 1
 H_end = H
  
 steam=np.zeros((Len_steam,H_end-H_start,W))

@@ -6,7 +6,7 @@ import torch
 import scipy.signal as signal
 from scipy.stats.stats import pearsonr   
 from scipy.ndimage import gaussian_filter1d
-
+from time import time
 #from numba import vectorize,float32
 #from numba import cuda
 
@@ -24,6 +24,10 @@ from scipy.ndimage import gaussian_filter1d
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 Window_LEN = 71
 Overall_shiftting_WinLen = 71
+Cost_M_sample_flag =True
+Down_sample_F = 4
+Down_sample_F2 = 4
+
 class COSTMtrix:
 
     def matrix_cal_corre(sequence):
@@ -158,10 +162,14 @@ class COSTMtrix:
 ###################
 # use the delayed one to realize full image correction line correlation 
     def matrix_cal_corre_full_version3_2GPU(present_img,previous_img,window_shift):
-
+       
        window_wid= Window_LEN
        window_cntr= int(Window_LEN/2)  # check
-       h,w = present_img.shape
+       h1,w1 = present_img.shape
+       if Cost_M_sample_flag ==True:
+           present_img = cv2.resize(present_img, (int(w1/Down_sample_F2),int(h1/Down_sample_F)), interpolation=cv2.INTER_AREA)
+           previous_img = cv2.resize(previous_img, (int(w1/Down_sample_F2),int(h1/Down_sample_F)), interpolation=cv2.INTER_AREA)
+           h,w = present_img.shape
 
        #present_img = sequence[len-1,:,:]
        ##previous_img = sequence[len-2,:,:] #  use the corrected  near img
@@ -172,8 +180,10 @@ class COSTMtrix:
        matrix = np.zeros ((window_wid, w))
        a_stack= np.zeros((window_wid,w,h))
        b_stack= np.zeros((window_wid,w,h))
-
+       start_time  = time()
+       
        #main loop (for every scanning line)
+    #    After  optimazation this cost 0.03s
        for i in range(w): # check the ending for index
            for j in range(window_wid): #sub_loop for shift distance
                a_stack[j,i,:] =present_img[:,i]
@@ -202,8 +212,12 @@ class COSTMtrix:
                #a = correlation_GPU(present_img[:,i],add_3_img[:,i-window_cntr+j+w + int(window_shift)])
                #matrix[j,i] = 251-a[0]*250  
        #matrix  = correlation_GPU (a_stack  , b_stack)
+       test_time_point = time()
+       print ("  test point time is [%f] " % ( test_time_point - start_time))
+
        a_stack  =  torch.from_numpy(a_stack)
        b_stack  =  torch.from_numpy(b_stack)
+
        #mulab = torch.mul(a_stack,b_stack)
        #mula2 = torch.mul(a_stack , a_stack)
        #mulb2 = torch.mul(b_stack , b_stack)
@@ -217,6 +231,7 @@ class COSTMtrix:
        #mulab = torch.mul(a_stack,b_stack)
        #mula2 = torch.mul(a_stack , a_stack)
        #mulb2 = torch.mul(b_stack , b_stack)
+
        suma = torch.sum(a_stack,dim=2)
        sumb = torch.sum(b_stack,dim=2)
        sumab = torch.sum(a_stack*b_stack,dim=2)
@@ -224,10 +239,11 @@ class COSTMtrix:
        sumb2 = torch.sum(b_stack*b_stack,dim=2)
        correlation_Mat= (h*sumab - suma*sumb)/ torch.sqrt((h*suma2-suma*suma)*(h*sumb2-sumb*sumb))
        correlation_Mat =  251 - correlation_Mat*250
-
+       
 
        # copy frome the GPU
        matrix=torch.Tensor.cpu(correlation_Mat).detach().numpy()
+       matrix = cv2.resize(matrix, (w1,window_wid), interpolation=cv2.INTER_AREA)
        return matrix,int(window_shift)
 #########################
 ###################

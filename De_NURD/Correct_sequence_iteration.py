@@ -280,7 +280,7 @@ class VIDEO_PEOCESS:
                     steam2=np.append(steam2,[Corrected_img ],axis=0) # save sequence
                     # no longer delete the fist  one
                     steam2= np.delete(steam2 , 0,axis=0)
-
+z
                     if(Save_signal_flag==True):
       
                         new = np.zeros((signal_saved.DIM,1))

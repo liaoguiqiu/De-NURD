@@ -32,7 +32,26 @@ netD.load_state_dict(torch.load(dir_netD))
 netD.cuda()
 netD.eval()
 class PATH:
+    def get_warping_vextor(mat):
+        H,W= mat.shape  #get size of image
+        show1 =  mat.astype(float)
+        path1  = np.zeros(W)
+        #small the initial to speed path finding 
+        #mat = cv2.resize(mat, (Resample_size,H), interpolation=cv2.INTER_AREA)
+        #mat = cv2.resize(mat, (Resample_size,Resample_size), interpolation=cv2.INTER_AREA)
 
+
+        #start_point= PATH.find_the_starting(mat) # starting point for path searching
+        ##middle_point  =  PATH.calculate_ave_mid(mat)
+        #path1,path_cost1=PATH.search_a_path(mat,start_point) # get the path and average cost of the path
+        path1,path_cost1=PATH.search_a_path_deep_multiscal_small_window_fusion2(mat) # get the path and average cost of the path
+       
+        #path1 = corre_shifting + path1
+       
+        #path1 =0.5 * path1 + 0.5 * corre_shifting 
+        path_cost1  = 0
+        path1 = gaussian_filter1d(path1,3) # smooth the path 
+        return path1
     def search_a_path(img,start_p):
 
        

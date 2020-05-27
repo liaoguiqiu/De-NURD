@@ -17,8 +17,8 @@ class Shift_Predict(object):
     def __init__(self ):
         dir_netD  = "../../DeepLearningModel/shift/netD_epoch_35.pth"
 
-        self.Crop_start = 100
-        self.Crop_end  = 300
+        self.Crop_start = 0
+        self.Crop_end  = 200
         self.Resample_size =128
         self.Resample_size2 =128
         self. Original_window_Len  = 71
@@ -42,6 +42,8 @@ class Shift_Predict(object):
         pair2  =   img3[self.Crop_start:self.Crop_end,:] 
         pair3  =   img1
         pair4  =   img2
+        # pair4  =   pair2
+
         pair1  =  cv2.resize(pair1, (self.Resample_size,self.Resample_size2), interpolation=cv2.INTER_AREA)   -104.0
         pair2  =  cv2.resize(pair2, (self.Resample_size,self.Resample_size2), interpolation=cv2.INTER_AREA)   -104.0
         pair3  =  cv2.resize(pair3, (self.Resample_size,self.Resample_size2), interpolation=cv2.INTER_AREA)   -104.0

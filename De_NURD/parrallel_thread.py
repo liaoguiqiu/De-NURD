@@ -3,6 +3,9 @@ import numpy as np
 from threading import Thread
 from cost_matrix import COSTMtrix
 from shift_deploy import Shift_Predict
+from median_filter_special import  myfilter
+from path_finding import PATH
+from time import time
 class Dual_thread_Overall_shift_NURD(object):
     def __init__(self):
         #give all parmeter initial(given the Memory for thread)
@@ -26,7 +29,7 @@ class Dual_thread_Overall_shift_NURD(object):
     def output_overall(self):
         return self.overall_shifting,self.shift_used1
     def output_NURD(self):
-        return self.costmatrix ,self.shift_used2
+        return self.path,self.costmatrix ,self.shift_used2
  
 
     # function 1 calculate tthe shift
@@ -38,17 +41,26 @@ class Dual_thread_Overall_shift_NURD(object):
        img1 = np.roll(img1, self.shift_used1, axis = 1)     # Positive x rolls right
        img2 = self.stream1[self.strmlen-2,:,:]
        img3 = self.stream1[0,:,:]
-       self.overall_shifting = self.shift_predictor.predict(img1,img2,img3)
+       self.overall_shifting = self.shift_predictor.predict(img1,img2,img3) # THIS COST 0.01 s
+       
                                                   
        print('shift end')
  
     #calculate the NURD
     def func2(self):
       print('NURD start  ')
+
       
       self.costmatrix,self.shift_used2= COSTMtrix.matrix_cal_corre_full_version3_2GPU (
                                                               self.stream2[self.strmlen-1,:,:] ,
                                                               self.stream2[self.strmlen-2,:,:], 0) 
+                                                           
+      self.costmatrix  = myfilter.gauss_filter_s (self.costmatrix) # smooth matrix
+      
+      # THE COST MATRIX COST 0.24 S
+
+      self.path  =  PATH.get_warping_vextor(self.costmatrix)  # THIS COST 0.03S
+
       print('NURD end  ')
      
      #return x
