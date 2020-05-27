@@ -15,11 +15,13 @@ import pickle
 from shift_deploy import Shift_Predict
 from cost_matrix import COSTMtrix ,Overall_shiftting_WinLen , Window_LEN
 visdom_show_flag = False
-Save_matlab_flag = True
+Save_matlab_flag = False
+validation_flag = False
+
 if visdom_show_flag == True:
     from analy_visdom import VisdomLinePlotter
 
-add_noise_flag  = False
+add_noise_flag  = True
 Clip_matrix_flag = True
 NURD_remove_shift_flag= True 
 # 
@@ -77,7 +79,7 @@ class DATA_Generator(object):
         self.data_mat_root = "../../saved_matrix/"
         self.data_mat_root_origin = "../../saved_matrix_unprocessed/"
         self.data_signal_root  = "../../saved_stastics_for_generator/"
-        self.noise_selector=['gauss_noise','gauss_noise','gauss_noise','gauss_noise']
+        self.noise_selector=['gauss_noise','speckle','gauss_noise','speckle']
         self.save_matlab_root = "../../saved_matlab/"
         self.self_check_path_create(self.save_matlab_root  )
         self.H  = 1024
@@ -410,19 +412,28 @@ class DATA_Generator(object):
             Image_ID = int( self.path_DS.signals[Save_signal_enum.image_iD.value, read_id])
             #get the path
             path  = self.path_DS.path_saving[read_id,:]
-            if NURD_remove_shift_flag ==True:
-                path= path- (np.mean(path) - Window_LEN/2 )
-            #   exragene for diaplay
-            path = (path -np.mean(path))*0.6+np.mean(path)
             path =  signal.resample(path, self.W)#resample the path
-            overall_shifting = Image_ID 
-            overall_shifting = min(overall_shifting,self.W/2) # limit the shifting here, maybe half the lenghth is sufficient  for the combination
 
+            random_NURD   = np.random.random_sample(self.W)*5
+            path = path+ random_NURD
+            if NURD_remove_shift_flag ==True:
+                path= path- np.mean(path)
+            #   exragene for diaplay
+            #path = (path -np.mean(path))*0.6+np.mean(path)
+            #overall_shifting = Image_ID 
+            #overall_shifting = min(overall_shifting,self.W/2) # limit the shifting here, maybe half the lenghth is sufficient  for the combination
+            #overall_shifting = min(overall_shifting,self.W/2) # limit the shifting here, maybe half the lenghth is sufficient  for the combination
+            random_shifting = np.random.random_sample()*Overall_shiftting_WinLen
             #Combine the overall shifting with NURD
 
-            path = path  + overall_shifting
+            #path = path  + overall_shifting
+            path = path  + random_shifting
+
             # create the shifted image
             Shifted_IMG   = VIDEO_PEOCESS.de_distortion(original_IMG,path,Image_ID,0)
+            #modify for training ground trueth
+            self.path_DS.path_saving[read_id,:] = self.path_DS.path_saving[read_id,:]* 0 + random_shifting
+            self.path_DS.save()
 
             # add noise to image pair for validation
             if add_noise_flag == True:
@@ -442,7 +453,8 @@ class DATA_Generator(object):
                 self.matlab.save_pkl_infor_of_over_allshift_with_NURD()
                 pass
             ## validation 
-            self.validation_shift(original_IMG,Shifted_IMG,path,Image_ID) 
+            if validation_flag == True:
+                self.validation_shift(original_IMG,Shifted_IMG,path,Image_ID) 
 
             #self.validation(original_IMG,Shifted_IMG,path,Image_ID) 
 
@@ -472,5 +484,5 @@ if __name__ == '__main__':
  
         
         # generator.generate_NURD ()
-        generator.generate_overall_shifting()
-        #generator.generate_NURD_overall_shifting()
+        #generator.generate_overall_shifting()
+        generator.generate_NURD_overall_shifting()
