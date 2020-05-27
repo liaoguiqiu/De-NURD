@@ -15,12 +15,12 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
  
 class Shift_Predict(object):
     def __init__(self ):
-        dir_netD  = "../../DeepLearningModel/shift/netD_epoch_35.pth"
+        dir_netD  = "../../DeepLearningModel/shift/netD_epoch_1.pth"
 
         self.Crop_start = 0
         self.Crop_end  = 200
-        self.Resample_size =128
-        self.Resample_size2 =128
+        self.Resample_size =512
+        self.Resample_size2 =200
         self. Original_window_Len  = 71
         self.netD = ShiftingNetBody_V2.ShiftingNet_init( None)
         self.netD.cuda()
@@ -33,8 +33,14 @@ class Shift_Predict(object):
         print(self. netD)
 
         pass
-
-
+    def image3_append(self,img):
+        long = numpy.append(img,img,axis=1)
+        long = numpy.append(long,img,axis=1)
+        return long
+    def image2_append(self,img):
+        long = numpy.append(img,img,axis=1)
+        #long = np.append(long,img,axis=1)
+        return long
     # the image sequence 1: new  2the stablized history 3: the reference
     def predict(self,img1,img2,img3):
         H,W = img1.shape
@@ -44,11 +50,11 @@ class Shift_Predict(object):
         pair4  =   img2
         # pair4  =   pair2
 
-        pair1  =  cv2.resize(pair1, (self.Resample_size,self.Resample_size2), interpolation=cv2.INTER_AREA)   -104.0
-        pair2  =  cv2.resize(pair2, (self.Resample_size,self.Resample_size2), interpolation=cv2.INTER_AREA)   -104.0
-        pair3  =  cv2.resize(pair3, (self.Resample_size,self.Resample_size2), interpolation=cv2.INTER_AREA)   -104.0
-        pair4  =  cv2.resize(pair4, (self.Resample_size,self.Resample_size2), interpolation=cv2.INTER_AREA)   -104.0
-        np_input = numpy.zeros((1,4,self.Resample_size,self.Resample_size2)) # a batch with piece num
+        pair1  =  cv2.resize(self.image2_append(pair1), (self.Resample_size,self.Resample_size2), interpolation=cv2.INTER_AREA)   -104.0
+        pair2  =  cv2.resize(self.image2_append(pair2), (self.Resample_size,self.Resample_size2), interpolation=cv2.INTER_AREA)   -104.0
+        pair3  =  cv2.resize(self.image2_append(pair3), (self.Resample_size,self.Resample_size2), interpolation=cv2.INTER_AREA)   -104.0
+        pair4  =  cv2.resize(self.image2_append(pair4), (self.Resample_size,self.Resample_size2), interpolation=cv2.INTER_AREA)   -104.0
+        np_input = numpy.zeros((1,4,self.Resample_size2,self.Resample_size)) # a batch with piece num
         np_input[0,0,:,:] = pair1
         np_input[0,1,:,:] = pair2
         np_input[0,2,:,:] = pair3
