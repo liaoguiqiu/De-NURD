@@ -31,10 +31,11 @@ from matplotlib.pyplot import *
 from mpl_toolkits.mplot3d import Axes3D
 from Correct_sequence_integral import read_start 
 from read_circu import tranfer_frome_rec2cir
+read_start = 1500
 Padding_H  = 200
 #from  path_finding import PATH
-Display_STD_flag = True
-Padd_zero_top = True
+Display_STD_flag = False
+Padd_zero_top = False
 Display_signal_flag = False
 Display_Matrix_flag = False
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -94,8 +95,8 @@ def tranfer2circ_padding(img):
     H,W_ini = img.shape
     padding = np.zeros((Padding_H,W_ini))
     if Padd_zero_top ==True:
-            img_pad  = np.append(padding,img,axis=0)
-    circular = tranfer_frome_rec2cir(img_pad)
+            img  = np.append(padding,img,axis=0)
+    circular = tranfer_frome_rec2cir(img)
     return circular
 
 def diplay_sequence():
@@ -103,14 +104,14 @@ def diplay_sequence():
     #show the image results
     read_sequence = os.listdir(savedir_process)
     seqence_Len = len(read_sequence)
-    img_path1 = savedir_process + str(read_start)+ ".jpg"
+    img_path1 = savedir_process + str(read_start+20)+ ".jpg"
     video2 = cv2.imread(img_path1)
     gray_video2  =   cv2.cvtColor(video2, cv2.COLOR_BGR2GRAY)
     H_ini,W_ini= gray_video2.shape
     STD_call  = Derivation_validate(H_ini,W_ini)
 
 
-    for i in range(read_start,seqence_Len-read_start):
+    for i in range(read_start,seqence_Len+read_start):
     #for i in os.listdir("E:/estimagine/vs_project/PythonApplication_data_au/pic/"):
     ##      process
             img_path1 = savedir_process + str(i+20)+ ".jpg"
@@ -148,9 +149,11 @@ def diplay_sequence():
             else: 
                 #show_2  = np.append(circular[:,300:W_ini-300],gray_video1[:,300:W_ini-300],axis=1) # cascade
                 #show_2  = np.append(circular[:,:],gray_video1[:,:],axis=1) # cascade
-                zero = np.zeros ((H_ini,50))
-                show_2  = np.append(rectan2[:,:],zero,axis=1) # cascade
-                show_2  = np.append(show_2,rectan1[:,:],axis=1) # cascade
+                zero = np.zeros ((gray_video1.shape[0],50))
+                show_2  = np.append(gray_video1,zero,axis=1) # cascade
+                show_2  = np.append(show_2,circular,axis=1) # cascade
+                #show_2  = np.append(rectan2[:,:],zero,axis=1) # cascade
+                #show_2  = np.append(show_2,rectan1[:,:],axis=1) # cascade
 
 
 
@@ -158,7 +161,7 @@ def diplay_sequence():
                 stream=np.zeros((show_2.shape[0],show_2.shape[1],3))
             else:
 
-                if i%2==0:
+                if i%1==0:
                     new_frame   = np.zeros((show_2.shape[0],show_2.shape[1],1))
                     new_frame[:,:,0]  = show_2
                     stream=np.append(stream,new_frame,axis=2) # save sequence

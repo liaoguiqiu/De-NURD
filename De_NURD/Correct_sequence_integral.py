@@ -180,10 +180,10 @@ class VIDEO_PEOCESS:
         #shift_integral = shift_integral - 0.15*(shift_integral-overall_shift) - 0.0001* I
         #shift_integral = shift_integral - 0*(shift_integral-overall_shift) - 0* I
         #shift_integral = shift_integral - 0.1*(shift_integral-overall_shift) - 0.001* I
-        shift_integral = np.clip(shift_integral,overall_shift- Window_LEN,overall_shift+ Window_LEN)
+        #shift_integral = np.clip(shift_integral,overall_shift- Window_LEN/2,overall_shift+ Window_LEN/2)
         shift_integral = gaussian_filter1d(shift_integral,5) # smooth the path 
 
-        shift_integral = shift_integral - 0.15*(shift_integral-overall_shift) - 0.0001*I
+        shift_integral = shift_integral - 1*(shift_integral-overall_shift) #- 0.000000001*I
         # shift_integral = shift_integral*0 + overall_shift  
 
 
@@ -304,7 +304,9 @@ class VIDEO_PEOCESS:
                     
                     overall_shifting,shift_used1 = dual_thread.output_overall()
                     shift_mean_error = int(overall_shifting- int(Overall_shiftting_WinLen/2))
-                    addition_window_shift =  shift_mean_error  +addition_window_shift
+                    shift_mean_error = overall_shifting- Overall_shiftting_WinLen/2
+
+                    addition_window_shift =  int(shift_mean_error  +shift_used1)
 
                     path,Costmatrix,shift_used2  = dual_thread.output_NURD()
 

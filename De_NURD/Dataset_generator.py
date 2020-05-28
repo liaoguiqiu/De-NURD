@@ -427,7 +427,7 @@ class DATA_Generator(object):
             #Combine the overall shifting with NURD
 
             #path = path  + overall_shifting
-            path = path  + random_shifting
+            path = path  + random_shifting  
 
             # create the shifted image
             Shifted_IMG   = VIDEO_PEOCESS.de_distortion(original_IMG,path,Image_ID,0)

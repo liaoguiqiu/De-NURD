@@ -38,11 +38,14 @@ class Dual_thread_Overall_shift_NURD(object):
        img1 = self.stream1[self.strmlen-1,:,:]
        self.shift_used1   = self.add_shift
 
-       img1 = np.roll(img1, self.shift_used1, axis = 1)     # Positive x rolls right
        img2 = self.stream1[self.strmlen-2,:,:]
        img3 = self.stream1[0,:,:]
+
+       img1 = np.roll(img1, self.shift_used1, axis = 1)     # Positive x rolls right
        self.overall_shifting = self.shift_predictor.predict(img1,img2,img3) # THIS COST 0.01 s
-       
+
+       #self.overall_shifting,shift_used1 = COSTMtrix.Img_fully_shifting_distance (img1[0:200,:],
+       #                                                       img3[0:200,:],  self.shift_used1 )
                                                   
        print('shift end')
  
