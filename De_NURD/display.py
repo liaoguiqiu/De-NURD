@@ -31,7 +31,7 @@ from matplotlib.pyplot import *
 from mpl_toolkits.mplot3d import Axes3D
 from Correct_sequence_integral import read_start 
 from read_circu import tranfer_frome_rec2cir
-read_start = 1500
+#read_start = 1500
 Padding_H  = 200
 #from  path_finding import PATH
 Display_STD_flag = False
@@ -149,11 +149,11 @@ def diplay_sequence():
             else: 
                 #show_2  = np.append(circular[:,300:W_ini-300],gray_video1[:,300:W_ini-300],axis=1) # cascade
                 #show_2  = np.append(circular[:,:],gray_video1[:,:],axis=1) # cascade
-                zero = np.zeros ((gray_video1.shape[0],50))
-                show_2  = np.append(gray_video1,zero,axis=1) # cascade
-                show_2  = np.append(show_2,circular,axis=1) # cascade
-                #show_2  = np.append(rectan2[:,:],zero,axis=1) # cascade
-                #show_2  = np.append(show_2,rectan1[:,:],axis=1) # cascade
+                zero = np.zeros ((rectan2.shape[0],50))
+                #show_2  = np.append(circular,zero,axis=1) # cascade
+                #show_2  = np.append(show_2,gray_video1,axis=1) # cascade
+                show_2  = np.append(rectan2[:,:],zero,axis=1) # cascade
+                show_2  = np.append(show_2,rectan1[:,:],axis=1) # cascade
 
 
 

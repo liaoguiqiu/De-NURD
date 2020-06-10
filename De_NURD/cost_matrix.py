@@ -163,14 +163,21 @@ class COSTMtrix:
 # use the delayed one to realize full image correction line correlation 
     def matrix_cal_corre_full_version3_2GPU(present_img,previous_img,window_shift):
        
-       window_wid= Window_LEN
-       window_cntr= int(Window_LEN/2)  # check
+       
        h1,w1 = present_img.shape
        if Cost_M_sample_flag ==True:
            present_img = cv2.resize(present_img, (int(w1/Down_sample_F2),int(h1/Down_sample_F)), interpolation=cv2.INTER_AREA)
            previous_img = cv2.resize(previous_img, (int(w1/Down_sample_F2),int(h1/Down_sample_F)), interpolation=cv2.INTER_AREA)
-           h,w = present_img.shape
 
+           h,w = present_img.shape
+           window_wid= int(Window_LEN/Down_sample_F)
+           window_cntr= int(window_wid/2)  # check
+       else:
+           h,w = present_img.shape
+           window_wid= Window_LEN 
+           window_cntr= int(window_wid/2)  # check
+       #window_wid= Window_LEN 
+       #window_cntr= int(window_wid/2)  # check
        #present_img = sequence[len-1,:,:]
        ##previous_img = sequence[len-2,:,:] #  use the corrected  near img
        #previous_img = sequence[0,:,:] #  use the first Img
@@ -237,13 +244,15 @@ class COSTMtrix:
        sumab = torch.sum(a_stack*b_stack,dim=2)
        suma2 = torch.sum(a_stack*a_stack,dim=2)
        sumb2 = torch.sum(b_stack*b_stack,dim=2)
-       correlation_Mat= (h*sumab - suma*sumb)/ torch.sqrt((h*suma2-suma*suma)*(h*sumb2-sumb*sumb))
+       #correlation_Mat= (h*sumab - suma*sumb)/ torch.sqrt((h*suma2-suma*suma)*(h*sumb2-sumb*sumb))
+       correlation_Mat= (h*sumab - suma*sumb)/ torch.sqrt((h*suma2+1-suma*suma)*(h*sumb2+1-sumb*sumb))
+
        correlation_Mat =  251 - correlation_Mat*250
        
 
        # copy frome the GPU
        matrix=torch.Tensor.cpu(correlation_Mat).detach().numpy()
-       matrix = cv2.resize(matrix, (w1,window_wid), interpolation=cv2.INTER_AREA)
+       matrix = cv2.resize(matrix, (w1,Window_LEN), interpolation=cv2.INTER_AREA)
        return matrix,int(window_shift)
 #########################
 ###################

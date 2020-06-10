@@ -79,7 +79,8 @@ class DATA_Generator(object):
         self.data_mat_root = "../../saved_matrix/"
         self.data_mat_root_origin = "../../saved_matrix_unprocessed/"
         self.data_signal_root  = "../../saved_stastics_for_generator/"
-        self.noise_selector=['gauss_noise','speckle','gauss_noise','speckle']
+        # noise type
+        self.noise_selector=['none','s&p','gauss_noise','gauss_noise']
         self.save_matlab_root = "../../saved_matlab/"
         self.self_check_path_create(self.save_matlab_root  )
         self.H  = 1024
@@ -167,6 +168,8 @@ class DATA_Generator(object):
              mat[:,i] = np.clip(mat[:,i],rand,254)
          return mat
      def noisy(self,noise_typ,image):
+           if(noise_typ =="none"):
+              return image
            if noise_typ == "gauss_noise":
               row,col = image.shape
               mean = 0
@@ -240,7 +243,7 @@ class DATA_Generator(object):
         Costmatrix  = myfilter.gauss_filter_s (Costmatrix) # smooth matrix
         if Clip_matrix_flag == True:
             #Costmatrix = np.clip(Costmatrix, 20,254)
-            Costmatrix=self.random_min_clip_by_row(15,30,Costmatrix)
+            Costmatrix=self.random_min_clip_by_row(5,30,Costmatrix)
         #Costmatrix = self.add_lines_to_matrix(Costmatrix)
         #Costmatrix=np.clip(Costmatrix, 20, 255)
         # Costmatrix  = myfilter.gauss_filter_s(Costmatrix) # smooth matrix
@@ -257,7 +260,7 @@ class DATA_Generator(object):
         ##middle_point  =  PATH.calculate_ave_mid(mat)
         #path1,path_cost1=PATH.search_a_path(mat,start_point) # get the path and average cost of the path
         show1 = np.zeros((Costmatrix.shape[0] , Costmatrix.shape[1],3))   
-        cv2.imwrite(self.data_mat_root_origin  + str(Image_ID) +".jpg", show1)
+        cv2.imwrite(self.data_mat_root_origin  + str(Image_ID) +".jpg", Costmatrix)
         show1[:,:,0] = Costmatrix
         show1[:,:,1] = Costmatrix
         show1[:,:,2] = Costmatrix
@@ -297,6 +300,9 @@ class DATA_Generator(object):
             sample = random.sample(OriginalpathDirlist, 1)  # 
             Sample_path = self.original_root +   sample[0]
             original_IMG = cv2.imread(Sample_path)
+            path  = self.path_DS.path_saving[read_id,:]
+            self.W = len(path)
+
             original_IMG  =   cv2.cvtColor(original_IMG, cv2.COLOR_BGR2GRAY)
             original_IMG = cv2.resize(original_IMG, (self.W,self.H), interpolation=cv2.INTER_AREA)
 
@@ -304,25 +310,31 @@ class DATA_Generator(object):
             #get the Id of image which should be poibnt to
             Image_ID = int( self.path_DS.signals[Save_signal_enum.image_iD.value, read_id])
             #get the path
-            path  = self.path_DS.path_saving[read_id,:]
-            path =  signal.resample(path, self.W)#resample the path
+            #path =  signal.resample(path, self.W)#resample the path
             if NURD_remove_shift_flag ==True:
                 path= path- (np.mean(path) - Window_LEN/2 )
+            random_NURD   = np.random.random_sample(self.W)*10
+            random_NURD = gaussian_filter1d(random_NURD,5) # smooth the path 
+            path =path +random_NURD
+            self.path_DS.path_saving[read_id,:] = path
+            self.path_DS.save()
 
-        
             # create the shifted image
             Shifted_IMG   = VIDEO_PEOCESS.de_distortion(original_IMG,path,Image_ID,0)
             if add_noise_flag == True:
-                noise_type  =  str(self.noise_selector[int(Image_ID)%4])
+                noise_it = np.random.random_sample()*100
+                noise_type  =  str(self.noise_selector[int(noise_it)%4])
                 #noise_type = "gauss_noise"
                 original_IMG  =  self.noisy(noise_type,original_IMG)
+                noise_it = np.random.random_sample()*100
+                noise_type  =  str(self.noise_selector[int(noise_it)%4])
                 Shifted_IMG  =  self.noisy(noise_type,Shifted_IMG)
             # save all the result
 
             cv2.imwrite(self.data_pair1_root  + str(Image_ID) +".jpg", original_IMG)
             cv2.imwrite(self.data_pair2_root  + str(Image_ID) +".jpg", Shifted_IMG)
             ## validation 
-            #self.validation(original_IMG,Shifted_IMG,path,Image_ID) 
+            self.validation(original_IMG,Shifted_IMG,path,Image_ID) 
 
             #steam[Len_steam-1,:,:]  = original_IMG  # un-correct 
             #steam[Len_steam-2,:,:]  = Shifted_IMG  # correct 
@@ -414,7 +426,9 @@ class DATA_Generator(object):
             path  = self.path_DS.path_saving[read_id,:]
             path =  signal.resample(path, self.W)#resample the path
 
-            random_NURD   = np.random.random_sample(self.W)*5
+            random_NURD   = np.random.random_sample(self.W)*20
+            random_NURD = gaussian_filter1d(random_NURD,5) # smooth the path 
+
             path = path+ random_NURD
             if NURD_remove_shift_flag ==True:
                 path= path- np.mean(path)
@@ -483,6 +497,6 @@ if __name__ == '__main__':
         #id,nurd,shift  =  save_test.read_pkl_infor_of_over_allshift_with_NURD()
  
         
-        # generator.generate_NURD ()
+        generator.generate_NURD ()
         #generator.generate_overall_shifting()
-        generator.generate_NURD_overall_shifting()
+        #generator.generate_NURD_overall_shifting()
