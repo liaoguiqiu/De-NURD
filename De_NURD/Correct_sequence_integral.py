@@ -38,7 +38,7 @@ from  basic_trans import Basic_oper
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 Resample_size =Window_LEN
 Path_length = 128
-read_start = 300
+read_start = 10
 Debug_flag  = True
 global intergral_flag
 intergral_flag =0
@@ -180,11 +180,11 @@ class VIDEO_PEOCESS:
         #shift_integral = shift_integral - 0.15*(shift_integral-overall_shift) - 0.0001* I
         #shift_integral = shift_integral - 0*(shift_integral-overall_shift) - 0* I
         #shift_integral = shift_integral - 0.1*(shift_integral-overall_shift) - 0.001* I
-        #shift_integral = np.clip(shift_integral,overall_shift- Window_LEN/2,overall_shift+ Window_LEN/2)
-        shift_integral = gaussian_filter1d(shift_integral,5) # smooth the path 
+        shift_integral = np.clip(shift_integral,overall_shift- Window_LEN/2,overall_shift+ Window_LEN/2)
+        #shift_integral = gaussian_filter1d(shift_integral,5) # smooth the path 
 
         shift_integral = shift_integral - 0.06*(shift_integral-overall_shift) - 0.00001*I
-        # shift_integral = shift_integral*0 + overall_shift  
+        #shift_integral = shift_integral*0 + overall_shift  
 
 
         shift_integral = gaussian_filter1d(shift_integral,10) # smooth the path 

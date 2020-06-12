@@ -58,12 +58,14 @@ class Dual_thread_Overall_shift_NURD(object):
                                                               self.stream2[self.strmlen-1,:,:] ,
                                                               self.stream2[self.strmlen-2,:,:], 0) 
                                                            
-      self.costmatrix  = myfilter.gauss_filter_s (self.costmatrix) # smooth matrix
+      #self.costmatrix  = myfilter.gauss_filter_s (self.costmatrix) # smooth matrix
       
       # THE COST MATRIX COST 0.24 S
 
-      self.path  =  PATH.get_warping_vextor(self.costmatrix)  # THIS COST 0.03S
+      #self.path  =  PATH.get_warping_vextor(self.costmatrix)  # THIS COST 0.03S
+      start_point= PATH.find_the_starting(self.costmatrix) # starting point for path searching
 
+      self.path,pathcost1  = PATH.search_a_path(self.costmatrix,start_point)
       print('NURD end  ')
      
      #return x

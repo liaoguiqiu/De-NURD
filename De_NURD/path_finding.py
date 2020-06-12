@@ -21,10 +21,10 @@ from scipy.ndimage import gaussian_filter1d
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 from cost_matrix import Window_LEN 
 #dir_netD  = "../../DeepPathFinding/out/netD_epoch_49.pth"
-dir_netD  = '../../DeepLearningModel/deep_path_small_window/netD_epoch_1.pth'
+dir_netD  = '../../DeepLearningModel/deep_path_small_window/netD_epoch_5.pth'
 
 transform = BaseTransform(  Resample_size,[104])
-netD = gan_body._netD_8_multiscal_fusion()
+netD = gan_body._netD_8_multiscal_fusion_2()
 print(netD)
 
 print('load weights for Path_ find ing')
@@ -212,18 +212,18 @@ class PATH:
         for  slice_point in range (piece_num):
             img_piece = add_3_img[:,slice_point*piece_W:(slice_point+1)*piece_W]
             img_piece = cv2.resize(img_piece, (Resample_size,Resample_size), interpolation=cv2.INTER_AREA)
-            input_batch[slice_point,0,:,:] = transform(img_piece)[0]
-            input_batch[slice_point,1,:,:] = transform(img_piece)[0]
-            input_batch[slice_point,2,:,:] = transform(img_piece)[0]
+            input_batch[slice_point,0,:,:] = transform(img_piece)[0]/104.0
+            input_batch[slice_point,1,:,:] = transform(img_piece)[0]/104.0
+            input_batch[slice_point,2,:,:] = transform(img_piece)[0]/104.0
         input = torch.from_numpy(np.float32(input_batch)) 
         input = input.to(device) 
 
         for  slice_point in range (piece_num-1):
             img_piece = add_3_img[:,slice_point*piece_W +int(piece_W/3):(slice_point+1)*piece_W + int(piece_W/3)] # bias
             img_piece = cv2.resize(img_piece, (Resample_size,Resample_size), interpolation=cv2.INTER_AREA)
-            input_batch2[slice_point,0,:,:] = transform(img_piece)[0]
-            input_batch2[slice_point,1,:,:] = transform(img_piece)[0]
-            input_batch2[slice_point,2,:,:] = transform(img_piece)[0]
+            input_batch2[slice_point,0,:,:] = transform(img_piece)[0]/104.0
+            input_batch2[slice_point,1,:,:] = transform(img_piece)[0]/104.0
+            input_batch2[slice_point,2,:,:] = transform(img_piece)[0]/104.0
         input2 = torch.from_numpy(np.float32(input_batch2)) 
         input2 = input2.to(device) 
         
@@ -267,6 +267,8 @@ class PATH:
     #fusion 2 no longger connect the start with the end 
     def search_a_path_deep_multiscal_small_window_fusion2(img): # input should be torch tensor
         #img2 = cv2.cvtColor(img2,cv2.COLOR_GRAY2RGB)
+        # img = img*255.0/np.mean(img)
+        img = np.clip(img,0,254)
         flip_img=cv2.flip(img, 1)
         H_origin,W_origin= img.shape  #get size of image
         add_3_img  = np.append(flip_img,img,axis=1) # cascade
@@ -278,20 +280,23 @@ class PATH:
         input_batch2 = np.zeros((piece_num,3,Resample_size,Resample_size)) # a batch with piece num
 
         for  slice_point in range (piece_num):
+            # rescale
+
             img_piece = add_3_img[:,slice_point*piece_W:(slice_point+1)*piece_W]
+
             img_piece = cv2.resize(img_piece, (Resample_size,Resample_size), interpolation=cv2.INTER_AREA)
-            input_batch[slice_point,0,:,:] = transform(img_piece)[0]
-            input_batch[slice_point,1,:,:] = transform(img_piece)[0]
-            input_batch[slice_point,2,:,:] = transform(img_piece)[0]
+            input_batch[slice_point,0,:,:] = transform(img_piece)[0]/104.0
+            input_batch[slice_point,1,:,:] = transform(img_piece)[0]/104.0
+            input_batch[slice_point,2,:,:] = transform(img_piece)[0]/104.0
         input = torch.from_numpy(np.float32(input_batch)) 
         input = input.to(device) 
 
         for  slice_point in range (piece_num-1):
             img_piece = add_3_img[:,slice_point*piece_W +int(piece_W/3):(slice_point+1)*piece_W + int(piece_W/3)] # bias
             img_piece = cv2.resize(img_piece, (Resample_size,Resample_size), interpolation=cv2.INTER_AREA)
-            input_batch2[slice_point,0,:,:] = transform(img_piece)[0]
-            input_batch2[slice_point,1,:,:] = transform(img_piece)[0]
-            input_batch2[slice_point,2,:,:] = transform(img_piece)[0]
+            input_batch2[slice_point,0,:,:] = transform(img_piece)[0]/104.0
+            input_batch2[slice_point,1,:,:] = transform(img_piece)[0]/104.0
+            input_batch2[slice_point,2,:,:] = transform(img_piece)[0]/104.0
         input2 = torch.from_numpy(np.float32(input_batch2)) 
         input2 = input2.to(device) 
         

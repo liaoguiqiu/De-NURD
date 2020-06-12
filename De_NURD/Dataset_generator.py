@@ -22,7 +22,7 @@ if visdom_show_flag == True:
     from analy_visdom import VisdomLinePlotter
 
 add_noise_flag  = True
-Clip_matrix_flag = True
+Clip_matrix_flag = False
 NURD_remove_shift_flag= True 
 # 
 Show_circular_flag   = True
@@ -239,6 +239,8 @@ class DATA_Generator(object):
      def validation(self,original_IMG,Shifted_IMG,path,Image_ID):
         #Costmatrix,shift_used = COSTMtrix.matrix_cal_corre_full_version3_2GPU(original_IMG,Shifted_IMG,0) 
         Costmatrix,shift_used = COSTMtrix.matrix_cal_corre_full_version3_2GPU(original_IMG,Shifted_IMG,0) 
+        #Costmatrix,shift_used = COSTMtrix.matrix_cal_corre_block_version3_3GPU(original_IMG,Shifted_IMG,0) 
+
         #Costmatrix=cv2.blur(Costmatrix,(2,2))
         Costmatrix  = myfilter.gauss_filter_s (Costmatrix) # smooth matrix
         if Clip_matrix_flag == True:
@@ -253,7 +255,7 @@ class DATA_Generator(object):
 
         path_tradition,pathcost1  = PATH.search_a_path(Costmatrix,start_point) # get the path and average cost of the path
         #path_deep,path_cost2=PATH.search_a_path_Deep_Mat2longpath(Costmatrix) # get the path and average cost of the path
-        path_deep,path_cost2=PATH.search_a_path_deep_multiscal_small_window_fusion(Costmatrix) # get the path and average cost of the path
+        path_deep,path_cost2=PATH.search_a_path_deep_multiscal_small_window_fusion2(Costmatrix) # get the path and average cost of the path
         
         path_deep = gaussian_filter1d(path_deep,2) # smooth the path 
 
@@ -312,9 +314,11 @@ class DATA_Generator(object):
             #get the path
             #path =  signal.resample(path, self.W)#resample the path
             if NURD_remove_shift_flag ==True:
-                path= path- (np.mean(path) - Window_LEN/2 )
-            random_NURD   = np.random.random_sample(self.W)*10
-            random_NURD = gaussian_filter1d(random_NURD,5) # smooth the path 
+                #path= path- (np.mean(path) - Window_LEN/2 )
+                path= path*0+ Window_LEN/2 
+
+            random_NURD   = np.random.random_sample(self.W)*30-10 + np.random.random_sample()*40-20
+            random_NURD = gaussian_filter1d(random_NURD,3) # smooth the path 
             path =path +random_NURD
             self.path_DS.path_saving[read_id,:] = path
             self.path_DS.save()

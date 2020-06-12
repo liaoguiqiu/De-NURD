@@ -32,7 +32,7 @@ from mpl_toolkits.mplot3d import Axes3D
 from Correct_sequence_integral import read_start 
 from read_circu import tranfer_frome_rec2cir
 #read_start = 1500
-Padding_H  = 200
+Padding_H  = 1
 #from  path_finding import PATH
 Display_STD_flag = False
 Padd_zero_top = False

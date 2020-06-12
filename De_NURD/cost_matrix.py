@@ -264,7 +264,18 @@ class COSTMtrix:
        window_wid= Window_LEN
        window_cntr= int(Window_LEN/2)  # check
        h,w = present_img.shape
+       h1,w1 = present_img.shape
+       if Cost_M_sample_flag ==True:
+           present_img = cv2.resize(present_img, (int(w1/Down_sample_F2),int(h1/Down_sample_F)), interpolation=cv2.INTER_AREA)
+           previous_img = cv2.resize(previous_img, (int(w1/Down_sample_F2),int(h1/Down_sample_F)), interpolation=cv2.INTER_AREA)
 
+           h,w = present_img.shape
+           window_wid= int(Window_LEN/Down_sample_F)
+           window_cntr= int(window_wid/2)  # check
+       else:
+           h,w = present_img.shape
+           window_wid= Window_LEN 
+           window_cntr= int(window_wid/2)  # check
        #present_img = sequence[len-1,:,:]
        ##previous_img = sequence[len-2,:,:] #  use the corrected  near img
        #previous_img = sequence[0,:,:] #  use the first Img
@@ -341,6 +352,8 @@ class COSTMtrix:
 
        # copy frome the GPU
        matrix=torch.Tensor.cpu(correlation_Mat).detach().numpy()
+       matrix = cv2.resize(matrix, (w1,Window_LEN), interpolation=cv2.INTER_AREA)
+
        return matrix,int(window_shift)
 #########################
 ###################
