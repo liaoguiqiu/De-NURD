@@ -26,6 +26,7 @@ Clip_matrix_flag = False
 NURD_remove_shift_flag= True 
 # 
 Show_circular_flag   = True
+Show_nurd_compare = False
 ########################class for signal##########################################
 class Save_Signal_matlab(object):
       def __init__(self):
@@ -251,29 +252,37 @@ class DATA_Generator(object):
         # Costmatrix  = myfilter.gauss_filter_s(Costmatrix) # smooth matrix
         #tradition way to find path
  
-        start_point= PATH.find_the_starting(Costmatrix) # starting point for path searching
 
-        path_tradition,pathcost1  = PATH.search_a_path(Costmatrix,start_point) # get the path and average cost of the path
-        #path_deep,path_cost2=PATH.search_a_path_Deep_Mat2longpath(Costmatrix) # get the path and average cost of the path
-        path_deep,path_cost2=PATH.search_a_path_deep_multiscal_small_window_fusion2(Costmatrix) # get the path and average cost of the path
-        
-        path_deep = gaussian_filter1d(path_deep,2) # smooth the path 
 
         ##middle_point  =  PATH.calculate_ave_mid(mat)
         #path1,path_cost1=PATH.search_a_path(mat,start_point) # get the path and average cost of the path
         show1 = np.zeros((Costmatrix.shape[0] , Costmatrix.shape[1],3))   
-        cv2.imwrite(self.data_mat_root_origin  + str(Image_ID) +".jpg", Costmatrix)
         show1[:,:,0] = Costmatrix
         show1[:,:,1] = Costmatrix
         show1[:,:,2] = Costmatrix
+        cv2.imwrite(self.data_mat_root_origin  + str(Image_ID) +".jpg", Costmatrix)
+        
 
         for i in range ( len(path)):
             painter = min(path[i],Window_LEN-1)
-            painter2= min(path_tradition[i],Window_LEN-1)
-            painter3 = min(path_deep[i],Window_LEN-1) 
+      
             show1[int(painter),i,:]=[255,255,255]
-            show1[int(painter2),i,:]=[254,0,0]
-            show1[int(painter3),i,:]=[0,0,254]
+            
+        if Show_nurd_compare==True:
+            start_point= PATH.find_the_starting(Costmatrix) # starting point for path searching
+
+            path_tradition,pathcost1  = PATH.search_a_path(Costmatrix,start_point) # get the path and average cost of the path
+            #path_deep,path_cost2=PATH.search_a_path_Deep_Mat2longpath(Costmatrix) # get the path and average cost of the path
+            path_deep,path_cost2=PATH.search_a_path_deep_multiscal_small_window_fusion2(Costmatrix) # get the path and average cost of the path
+        
+            path_deep = gaussian_filter1d(path_deep,2) # smooth the path 
+            
+            for i in range ( len(path)):
+                painter2= min(path_tradition[i],Window_LEN-1)
+                painter3 = min(path_deep[i],Window_LEN-1) 
+                show1[int(painter2),i,:]=[254,0,0]
+                show1[int(painter3),i,:]=[0,0,254]
+
         # save the  matrix to fil dir
         cv2.imwrite( self.data_mat_root  + str(Image_ID) +".jpg", show1)
         # show the signal comparison in visdom
@@ -297,7 +306,8 @@ class DATA_Generator(object):
         read_id = 0
         Len_steam =5
         steam=np.zeros((Len_steam,self.H,self.W)) # create video buffer
-        while (1):
+        num_path, path_len = self.path_DS.path_saving.shape
+        for read_id in range(num_path):
             OriginalpathDirlist = os.listdir(self.original_root)    # 
             sample = random.sample(OriginalpathDirlist, 1)  # 
             Sample_path = self.original_root +   sample[0]
@@ -315,10 +325,12 @@ class DATA_Generator(object):
             #path =  signal.resample(path, self.W)#resample the path
             if NURD_remove_shift_flag ==True:
                 #path= path- (np.mean(path) - Window_LEN/2 )
-                path= path*0+ Window_LEN/2 
-
-            random_NURD   = np.random.random_sample(self.W)*30-10 + np.random.random_sample()*40-20
-            random_NURD = gaussian_filter1d(random_NURD,3) # smooth the path 
+                path= path*0+ int(Window_LEN/2 )
+            random_NURD   = np.random.random_sample(int(self.W/5))*30-10 + np.random.random_sample()*40-20
+            
+            random_NURD =  signal.resample(random_NURD, self.W)#resample the path
+            #random_NURD   = np.random.random_sample(self.W)*30-10 + np.random.random_sample()*40-20
+            random_NURD = gaussian_filter1d(random_NURD,5) # smooth the path 
             path =path +random_NURD
             self.path_DS.path_saving[read_id,:] = path
             self.path_DS.save()
@@ -353,7 +365,7 @@ class DATA_Generator(object):
 
             print ("[%s]   is processed. test point time is [%f] " % (read_id ,0.1))
 
-            read_id +=1
+            #read_id +=1
      def generate_overall_shifting(self):
          #read one from the original
             #random select one IMG frome the oringinal 
@@ -503,4 +515,4 @@ if __name__ == '__main__':
         
         generator.generate_NURD ()
         #generator.generate_overall_shifting()
-        #generator.generate_NURD_overall_shifting()
+        generator.generate_NURD_overall_shifting()

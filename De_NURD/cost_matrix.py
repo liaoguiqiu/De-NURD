@@ -25,8 +25,8 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 Window_LEN = 71
 Overall_shiftting_WinLen = 71
 Cost_M_sample_flag =True
-Down_sample_F = 2
-Down_sample_F2 = 2
+Down_sample_F = 4
+Down_sample_F2 = 1
 
 class COSTMtrix:
 
@@ -170,8 +170,8 @@ class COSTMtrix:
            previous_img = cv2.resize(previous_img, (int(w1/Down_sample_F2),int(h1/Down_sample_F)), interpolation=cv2.INTER_AREA)
 
            h,w = present_img.shape
-           window_wid= int(Window_LEN/Down_sample_F)
-           window_cntr= int(window_wid/2)  # check
+           window_wid= int(Window_LEN/Down_sample_F2)
+           window_cntr= int(Window_LEN/Down_sample_F2/2.0)  # check
        else:
            h,w = present_img.shape
            window_wid= Window_LEN 
@@ -270,7 +270,7 @@ class COSTMtrix:
            previous_img = cv2.resize(previous_img, (int(w1/Down_sample_F2),int(h1/Down_sample_F)), interpolation=cv2.INTER_AREA)
 
            h,w = present_img.shape
-           window_wid= int(Window_LEN/Down_sample_F)
+           window_wid= int(Window_LEN/Down_sample_F2)
            window_cntr= int(window_wid/2)  # check
        else:
            h,w = present_img.shape
