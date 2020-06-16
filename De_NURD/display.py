@@ -42,13 +42,13 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 class Derivation_validate(object):
     def  __init__(self, H,W):
-        Len_steam = 10
-        self.crop_start = 100
-        self.cropH = int(H/2)
+        Len_steam = 8
+        self.crop_start = 20
+        self.cropH = int(H/1)
         self.steam1=np.zeros((Len_steam,self.cropH-self.crop_start,W))
         self.steam2=np.zeros((Len_steam, self.cropH-self.crop_start,W))
         self.cnt=0
-        self.sample_rate=5
+        self.sample_rate=1
         self.std_suma =0
         self.std_sumb =0
         self.avga =0
@@ -143,18 +143,22 @@ def diplay_sequence():
                 MATRIX_RESULT = cv2.imread(img_path3)
                 MATRIX_RESULT  =   cv2.cvtColor(MATRIX_RESULT, cv2.COLOR_BGR2GRAY)
                 Rotate_matr = cv2.rotate(MATRIX_RESULT,rotateCode = 2) 
-                show_2  = np.append(circular[:,300:W-300],Rotate_matr,axis=1) # cascade
-                show_2 = np.append(show_2,gray_video1[:,300:W-300],axis=1) # cascade
+                #show_2  = np.append(circular[:,300:W-300],Rotate_matr,axis=1) # cascade
+                #show_2 = np.append(show_2,gray_video1[:,300:W-300],axis=1) # cascade
+                
             #cv2.imshow('matrix',MATRIX_RESULT)
             else: 
                 #show_2  = np.append(circular[:,300:W_ini-300],gray_video1[:,300:W_ini-300],axis=1) # cascade
                 #show_2  = np.append(circular[:,:],gray_video1[:,:],axis=1) # cascade
-                zero = np.zeros ((rectan2.shape[0],50))
                 #show_2  = np.append(circular,zero,axis=1) # cascade
                 #show_2  = np.append(show_2,gray_video1,axis=1) # cascade
-                show_2  = np.append(rectan2[:,:],zero,axis=1) # cascade
-                show_2  = np.append(show_2,rectan1[:,:],axis=1) # cascade
+                #show_2  = np.append(rectan2[:,:],zero,axis=1) # cascade
+                #show_2  = np.append(show_2,rectan1[:,:],axis=1) # cascade
+                zero = np.zeros ((circular1.shape[0],50))
 
+                show_2  = np.append(circular[:,:],zero,axis=1) # cascade
+                show_2  = np.append(show_2,circular1[:,:],axis=1) # cascade
+                #show_2 = cv2.resize(show_2, (int(show_2.shape[1]/1.5),int(show_2.shape[0]/1.5)), interpolation=cv2.INTER_AREA)
 
 
             if(i == read_start): # initialize the color sequence 

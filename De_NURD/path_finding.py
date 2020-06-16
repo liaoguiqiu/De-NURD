@@ -21,7 +21,7 @@ from scipy.ndimage import gaussian_filter1d
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 from cost_matrix import Window_LEN 
 #dir_netD  = "../../DeepPathFinding/out/netD_epoch_49.pth"
-dir_netD  = '../../DeepLearningModel/deep_path_small_window/netD_epoch_5.pth'
+dir_netD  = '../../DeepLearningModel/deep_path_small_window/netD_epoch_4.pth'
 
 transform = BaseTransform(  Resample_size,[104])
 netD = gan_body._netD_8_multiscal_fusion_2()
@@ -269,7 +269,8 @@ class PATH:
         #img2 = cv2.cvtColor(img2,cv2.COLOR_GRAY2RGB)
         # img = img*255.0/np.mean(img)
         img = np.clip(img,0,254)
-        flip_img=cv2.flip(img, 1)
+        #flip_img=cv2.flip(img, 1) # connect  the start with the end 
+        flip_img=img
         H_origin,W_origin= img.shape  #get size of image
         add_3_img  = np.append(flip_img,img,axis=1) # cascade
         add_3_img = np.append(add_3_img,flip_img,axis=1) # cascade

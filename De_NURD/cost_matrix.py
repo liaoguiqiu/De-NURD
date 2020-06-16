@@ -25,8 +25,8 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 Window_LEN = 71
 Overall_shiftting_WinLen = 71
 Cost_M_sample_flag =True
-Down_sample_F = 4
-Down_sample_F2 = 1
+Down_sample_F = 5
+Down_sample_F2 = 4
 
 class COSTMtrix:
 
@@ -172,6 +172,8 @@ class COSTMtrix:
            h,w = present_img.shape
            window_wid= int(Window_LEN/Down_sample_F2)
            window_cntr= int(Window_LEN/Down_sample_F2/2.0)  # check
+           #window_wid= int(Window_LEN )
+           #window_cntr= int(Window_LEN/2)  # check
        else:
            h,w = present_img.shape
            window_wid= Window_LEN 

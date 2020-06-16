@@ -7,8 +7,8 @@
 #operatedir_video =  "../../OCT/OCT aligment/phantom-01_2412020121234.avi"
 #operatedir_video =  "../../OCT/new video/P-ID_Name_25092019164030.avi"
 #D:\PhD\trying\tradition_method\OCT\database_download\cardiovascular
-operatedir_video =  "../../OCT/database_download/cardiovascular/2.mp4"
-operatedir_video =  "../../OCT/database_download/Lungs/1.mov"
+operatedir_video =  "../../OCT/database_download/cardiovascular/1.mp4"
+#operatedir_video =  "../../OCT/database_download/Lungs/1.mov"
 
  
 
@@ -18,7 +18,7 @@ savedir_matrix  = "../../saved_matrix/"
 savedir_original  = "../../saved_original/"
 savedir_filtered_OCT  = "../../saved_filtered_img/"
 savedir_original_circular = "../../saved_original_circular/"
-crop_flag  =False
+crop_flag  =True
 reverse_flag =False
 #used python packages
 import cv2
@@ -91,7 +91,7 @@ if __name__ == '__main__':
     ret, frame = cap.read()
     if ret == True:
         H,W,_ = frame.shape
-    H_start = 200
+    H_start = 50
     H_end = H
     W_start = 0
     #W_end = int(W/2)
@@ -112,15 +112,14 @@ if __name__ == '__main__':
         if reverse_flag == True:
             gray = 255  - gray
    
-        crop_H_test = gray[H_start:H_end,:] 
-        if crop_flag == True :
-            gray = gray[H_start:H_end, W_start: W_end] 
-        filter_img = crop_H_test
+        #crop_H_test = gray[H_start:H_end,:] 
         
-        filter_img= myfilter.gauss_filter_s(crop_H_test)
+        #filter_img = crop_H_test
+        
+        #filter_img= myfilter.gauss_filter_s(crop_H_test)
     
-        steam=np.append(steam,[filter_img],axis=0) # save sequence
-        steam= np.delete(steam , 0,axis=0) 
+        #steam=np.append(steam,[filter_img],axis=0) # save sequence
+        #steam= np.delete(steam , 0,axis=0) 
     
         #Costmatrix = COSTMtrix.matrix_cal_corre_full_version(steam)
     
@@ -135,8 +134,18 @@ if __name__ == '__main__':
         value = np.sqrt(((H/2.0)**2.0)+((W/2.0)**2.0))
 
         polar_image = tranfer_frome_cir2rec(gray)
+
+        H,W= polar_image.shape
+        H_start = 85
+        H_end = 500
+        W_start = 0
+        #W_end = int(W/2)
+        W_end = W
+        if crop_flag == True :
+            polar_image = polar_image[H_start:H_end, W_start: W_end] 
+
         circular  = tranfer_frome_rec2cir(polar_image)
- 
+        
         #H,W= new_frame2.shape
         #circular3=np.ones((H,W))
         #circular2=circular3.astype(float)
@@ -146,7 +155,7 @@ if __name__ == '__main__':
 
         #cv2.imwrite(savedir_matrix  + str(save_sequence_num) +".jpg", Costmatrix)
         cv2.imwrite(savedir_original  + str(save_sequence_num) +".jpg", polar_image)
-        cv2.imwrite(savedir_filtered_OCT  + str(save_sequence_num) +".jpg", filter_img)
+        #cv2.imwrite(savedir_filtered_OCT  + str(save_sequence_num) +".jpg", filter_img)
         cv2.imwrite(savedir_original_circular  + str(save_sequence_num) +".jpg", circular)
 
         save_sequence_num+=1

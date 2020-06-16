@@ -470,22 +470,21 @@ class _netD_8_multiscal_fusion(nn.Module):
         return out
 
 
-    
 class _netD_8_multiscal_fusion_2(nn.Module):
     def __init__(self):
         super(_netD_8_multiscal_fusion_2, self).__init__()
-        kernels = [6, 4, 4, 4, 2,2]
+        kernels = [8, 6, 4, 4, 2,2]
         strides = [2, 2, 2, 2, 2,1]
-        pads =    [2, 1, 1, 1, 0,0]
+        pads =    [3, 2, 1, 1, 0,0]
         self.fully_connect_len  =1000
         layer_len = len(kernels)
 
         #a side branch predict with original iamge with rectangular kernel
         # 71*71 - 35*71
-        feature = 8
+        feature = 16
         self.side_branch1  =  nn.ModuleList()
         self.side_branch1.append( nn.Sequential(
-             nn.Conv2d(3, feature,(4,3), (2,1), (1,1), bias=False),          
+             nn.Conv2d(3, feature,(8,7), (2,1), (3,3), bias=False),          
             #  nn.BatchNorm2d(feature),
              nn.LeakyReLU(0.1,inplace=True)
             
@@ -494,7 +493,7 @@ class _netD_8_multiscal_fusion_2(nn.Module):
         # 35*71 - 17*71
 
         self.side_branch1.append( nn.Sequential(
-             nn.Conv2d(feature, feature*2,(4,3), (2,1), (1,1), bias=False),          
+             nn.Conv2d(feature, feature*2,(6,5), (2,1), (2,2), bias=False),          
             #  nn.BatchNorm2d(feature*2),
              nn.LeakyReLU(0.1,inplace=True)
             
@@ -504,7 +503,7 @@ class _netD_8_multiscal_fusion_2(nn.Module):
         # 17*64  - 8*64
 
         self.side_branch1.append( nn.Sequential(
-             nn.Conv2d(feature, feature*2,(4,3), (2,1), (1,1), bias=False),          
+             nn.Conv2d(feature, feature*2,(6,5), (2,1), (2,2), bias=False),          
             #  nn.BatchNorm2d(feature*2),
              nn.LeakyReLU(0.1,inplace=True)
             
@@ -543,6 +542,7 @@ class _netD_8_multiscal_fusion_2(nn.Module):
              #nn.LeakyReLU(0.1,inplace=True)
                                                     )
                                  )
+        self.fusion_layer = nn.Conv2d(feature +1,1,(1,4), (1,1), (0,0), bias=False) 
 
         #create the layer list
         self.layers = nn.ModuleList()
@@ -551,7 +551,7 @@ class _netD_8_multiscal_fusion_2(nn.Module):
              # input is (nc) x 128 x 128
             if  layer_pointer ==0:
                 this_input_depth = 3
-                this_output_depth = 8
+                this_output_depth = 32
             else:
                 this_input_depth = this_output_depth
                 this_output_depth = this_output_depth*3
@@ -599,9 +599,8 @@ class _netD_8_multiscal_fusion_2(nn.Module):
                 nn.LeakyReLU(0.2, inplace=False)
                 )
             #self.layers.append(this_layer)
-        self.branch1LU = nn.LeakyReLU(0.1,inplace=True)
-        self.branch2LU = nn.LeakyReLU(0.1,inplace=True)
-        self.fusion_layer = nn.Conv2d(2,1,(1,4), (1,1), (0,0), bias=False) 
+        self.branch1LU = nn.LeakyReLU(0.1,inplace=False)
+        self.branch2LU = nn.LeakyReLU(0.1,inplace=False)
     def forward(self, x):
         #output = self.main(input)
         #layer_len = len(kernels)
@@ -613,10 +612,13 @@ class _netD_8_multiscal_fusion_2(nn.Module):
         #for i, name in enumerate(self.layers):
         #    x = self.layers[i](x)
         side_out =x
+        length  = len(self.side_branch1)
         for j, name in enumerate(self.side_branch1):
             # if(isinstance(self.side_branch1[j],nn.BatchNorm2d)):
             #    pass
             # else:
+            if j==(length -1):
+                side_feature  = side_out
             side_out = self.side_branch1[j](side_out)
              
         for i, key in enumerate(self.layers):
@@ -627,13 +629,13 @@ class _netD_8_multiscal_fusion_2(nn.Module):
            if i == (len(self.layers)-2)  :
                x = x.view(-1,self.fully_connect_len).squeeze(1)# squess before fully connected 
         #fusion
-        # fuse1=self.branch1LU(side_out)
-        fuse1=side_out
+        fuse1=self.branch1LU(side_feature)
+        #fuse1=side_feature
 
         x = x.view(-1,1,Path_length).unsqueeze(1)
 
-        # fuse2=self.branch2LU(x)
-        fuse2=x
+        fuse2=self.branch2LU(x)
+        #fuse2=x
 
         fuse=torch.cat((fuse1,fuse2),1)
         fuse=self.fusion_layer(fuse)
@@ -643,7 +645,7 @@ class _netD_8_multiscal_fusion_2(nn.Module):
         local_bz,_,_,local_l = fuse.size() 
         out = nn.functional.interpolate(fuse, size=(1, Path_length), mode='bilinear') 
         out  = out.view(-1,Path_length).squeeze(1)# squess before fully connected
-
+        #out  = 0.5*out + 0.3 * side_out + 0.2 * side_out2
         # return x
         # return side_out
         return out#,side_out,side_out2

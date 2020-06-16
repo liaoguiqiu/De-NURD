@@ -38,7 +38,7 @@ from  basic_trans import Basic_oper
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 Resample_size =Window_LEN
 Path_length = 128
-read_start = 10
+read_start = 30
 Debug_flag  = True
 global intergral_flag
 intergral_flag =0
@@ -174,16 +174,16 @@ class VIDEO_PEOCESS:
 #----------------------#
 #----------------------#
     def fusion_estimation( shift_integral,path,overall_shift,I):
-
+        #overall_shift =0
         shift_diff= path - int(Window_LEN/2)  # additional compensation 
         shift_integral = shift_integral + shift_diff  # not += : this is iteration way
         #shift_integral = shift_integral - 0.15*(shift_integral-overall_shift) - 0.0001* I
         #shift_integral = shift_integral - 0*(shift_integral-overall_shift) - 0* I
         #shift_integral = shift_integral - 0.1*(shift_integral-overall_shift) - 0.001* I
-        shift_integral = np.clip(shift_integral,overall_shift- Window_LEN/2,overall_shift+ Window_LEN/2)
-        #shift_integral = gaussian_filter1d(shift_integral,5) # smooth the path 
+        #shift_integral = np.clip(shift_integral,overall_shift- Window_LEN/2,overall_shift+ Window_LEN/2)
+        shift_integral = gaussian_filter1d(shift_integral,3) # smooth the path 
 
-        shift_integral = shift_integral - 0.06*(shift_integral-overall_shift) - 0.00001*I
+        shift_integral = shift_integral - 0.15*(shift_integral-overall_shift) - 0.00001*I
         #shift_integral = shift_integral*0 + overall_shift  
 
 
@@ -259,11 +259,13 @@ class VIDEO_PEOCESS:
         img_path = operatedir_video +  str(read_start) +".jpg"
         video = cv2.imread(img_path)  #read the first one to get the image size
         gray_video  =   cv2.cvtColor(video, cv2.COLOR_BGR2GRAY)
-        gray_video = cv2.resize(gray_video, (832,1024), interpolation=cv2.INTER_AREA)
+        H_ori , W_ori  = gray_video.shape
+        gray_video = cv2.resize(gray_video, (832,H_ori), interpolation=cv2.INTER_AREA)
+        
 
         Len_steam =5
         H,W= gray_video.shape  #get size of image
-        H_start = 80
+        H_start = 0
         H_end = H
         steam=np.zeros((Len_steam,H_end-H_start,W))
         steam2=np.zeros((Len_steam,H ,W))
@@ -279,7 +281,8 @@ class VIDEO_PEOCESS:
                 img_path = operatedir_video + str(sequence_num+0)+ ".jpg" # starting from 10
                 video = cv2.imread(img_path)
                 gray_video  =   cv2.cvtColor(video, cv2.COLOR_BGR2GRAY)
-                gray_video = cv2.resize(gray_video, (832,1024), interpolation=cv2.INTER_AREA)
+                H_ori , W_ori  = gray_video.shape
+                gray_video = cv2.resize(gray_video, (832,H_ori), interpolation=cv2.INTER_AREA)
                 start_time  = time()
 
                 if(sequence_num<read_start+ 20):
@@ -309,7 +312,7 @@ class VIDEO_PEOCESS:
                     addition_window_shift =  int(shift_mean_error  +shift_used1)
 
                     path,Costmatrix,shift_used2  = dual_thread.output_NURD()
-
+                    #path =path+1
                     # shifting used is zero in costmatrix caculation
  
                     # actuall overall shifting iterative way here is the shifting between frame
@@ -328,7 +331,7 @@ class VIDEO_PEOCESS:
 
                     shift_integral = VIDEO_PEOCESS.fusion_estimation(shift_integral,path,addition_window_shift,Window_ki_error)
 
-                    Window_ki_error = (shift_integral-addition_window_shift)+Window_ki_error
+                    Window_ki_error =np.sum(shift_integral-addition_window_shift)+Window_ki_error
 
 
                     #path = np.zeros(Costmatrix.shape[1])
