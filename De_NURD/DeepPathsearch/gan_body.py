@@ -468,57 +468,63 @@ class _netD_8_multiscal_fusion(nn.Module):
         # return x
         # return side_out
         return out
-
-
+ 
+def conv_keep_W(indepth,outdepth,k=(4,3),s=(2,1),p=(1,1)):
+#output width=((W-F+2*P )/S)+1
+# Conv2d(in_channels, out_channels, kernel_size, stride=1, padding=0, dilation=1, groups=1, bias=True)
+    module = nn.Sequential(
+             nn.Conv2d(indepth, outdepth,k, s, p, bias=False),          
+             nn.BatchNorm2d(outdepth),
+             nn.LeakyReLU(0.1,inplace=True)
+             )
+    return module
+def conv_dv_2(indepth,outdepth,k=(4,4),s=(2,2),p=(1,1)):
+#output width=((W-F+2*P )/S)+1
+# Conv2d(in_channels, out_channels, kernel_size, stride=1, padding=0, dilation=1, groups=1, bias=True)
+    module = nn.Sequential(
+             nn.Conv2d(indepth, outdepth,k, s, p, bias=False),          
+             #nn.BatchNorm2d(outdepth),
+             nn.LeakyReLU(0.1,inplace=True)
+             )
+    return module
+def conv_keep(indepth,outdepth,k=(3,3),s=(1,1),p=(1,1)):
+#output width=((W-F+2*P )/S)+1
+# Conv2d(in_channels, out_channels, kernel_size, stride=1, padding=0, dilation=1, groups=1, bias=True)
+    module = nn.Sequential(
+             nn.Conv2d(indepth, outdepth,k, s, p, bias=False),          
+             #nn.BatchNorm2d(outdepth),
+             nn.LeakyReLU(0.1,inplace=True)
+             )
+    return module
+    
 class _netD_8_multiscal_fusion_2(nn.Module):
     def __init__(self):
         super(_netD_8_multiscal_fusion_2, self).__init__()
-        kernels = [8, 6, 4, 4, 2,2]
+        kernels = [6, 6, 4, 4, 2,2]
         strides = [2, 2, 2, 2, 2,1]
-        pads =    [3, 2, 1, 1, 0,0]
-        self.fully_connect_len  =1000
+        pads =    [2, 2, 1, 1, 0,0]
+        self.fully_connect_len = 1000
         layer_len = len(kernels)
 
         #a side branch predict with original iamge with rectangular kernel
         # 71*71 - 35*71
-        feature = 16
+        feature = 8
         self.side_branch1  =  nn.ModuleList()
-        self.side_branch1.append( nn.Sequential(
-             nn.Conv2d(3, feature,(8,7), (2,1), (3,3), bias=False),          
-            #  nn.BatchNorm2d(feature),
-             nn.LeakyReLU(0.1,inplace=True)
-            
-                                                    )
-                                 )
-        # 35*71 - 17*71
+        #self.side_branch1.append( conv_keep(3,feature))
+        self.side_branch1.append( conv_keep_W(3,2*feature))
+        feature = feature *2
 
-        self.side_branch1.append( nn.Sequential(
-             nn.Conv2d(feature, feature*2,(6,5), (2,1), (2,2), bias=False),          
-            #  nn.BatchNorm2d(feature*2),
-             nn.LeakyReLU(0.1,inplace=True)
-            
-                                                    )
-                                 )
+        # 35*71 - 17*71
+        #self.side_branch1.append( conv_keep(feature,feature))
+        self.side_branch1.append( conv_keep_W(feature,2*feature))
         feature = feature *2
         # 17*64  - 8*64
-
-        self.side_branch1.append( nn.Sequential(
-             nn.Conv2d(feature, feature*2,(6,5), (2,1), (2,2), bias=False),          
-            #  nn.BatchNorm2d(feature*2),
-             nn.LeakyReLU(0.1,inplace=True)
-            
-                                                    )
-                                 )
+        #self.side_branch1.append( conv_keep(feature,feature))
+        self.side_branch1.append( conv_keep_W(feature,2*feature))
         feature = feature *2
         # 8*64  - 4*64
-
-        self.side_branch1.append( nn.Sequential(
-             nn.Conv2d(feature, feature*2,(4,3), (2,1), (1,1), bias=False),          
-            #  nn.BatchNorm2d(feature*2),
-             nn.LeakyReLU(0.1,inplace=True)
-            
-                                                    )
-                                 )
+        #self.side_branch1.append( conv_keep(feature,feature))
+        self.side_branch1.append( conv_keep_W(feature,2*feature))
         feature = feature *2
         #self.side_branch1.append( nn.Sequential(
         #     nn.Conv2d(256, 512,(64,3), (1,1), (0,1), bias=False),          
@@ -529,7 +535,7 @@ class _netD_8_multiscal_fusion_2(nn.Module):
         #                         )
         self.side_branch1.append( nn.Sequential(
              nn.Conv2d(feature, feature*2,(4,1), (1,1), (0,0), bias=False),          
-            #  nn.BatchNorm2d(feature*2),
+             nn.BatchNorm2d(feature*2),
              nn.LeakyReLU(0.1,inplace=True)
             
                                                     )
@@ -542,7 +548,8 @@ class _netD_8_multiscal_fusion_2(nn.Module):
              #nn.LeakyReLU(0.1,inplace=True)
                                                     )
                                  )
-        self.fusion_layer = nn.Conv2d(feature +1,1,(1,4), (1,1), (0,0), bias=False) 
+
+        # fully connect fuion
 
         #create the layer list
         self.layers = nn.ModuleList()
@@ -564,7 +571,7 @@ class _netD_8_multiscal_fusion_2(nn.Module):
                 #nn.Sigmoid()
                 # )
                 self.layers.append(
-                nn.Conv2d(this_input_depth, self.fully_connect_len, kernels[layer_pointer], strides[layer_pointer], pads[layer_pointer], bias=False),          
+                nn.Conv2d(this_input_depth, Path_length, kernels[layer_pointer], strides[layer_pointer], pads[layer_pointer], bias=False),          
                  )
                 #self.layers.append (
                 #nn.BatchNorm2d(1000),
@@ -572,12 +579,12 @@ class _netD_8_multiscal_fusion_2(nn.Module):
                 #self.layers.append(
                 #nn. AdaptiveAvgPool2d(output_size=(1, 1)),    
                 # )
-                self.layers.append (
-                nn.LeakyReLU(0.2, inplace=False) #1
-                )
-                self.layers.append(
-                nn.Linear(self.fully_connect_len, Path_length, bias=False),   #2       
-                 )
+                #self.layers.append (
+                #nn.LeakyReLU(0.2, inplace=False) #1
+                #)
+                #self.layers.append(
+                #nn.Linear(self.fully_connect_len, Path_length, bias=False),   #2       
+                # )
                 #self.layers.append (
                 #nn.BatchNorm2d(Path_length),
                 #   )
@@ -592,15 +599,17 @@ class _netD_8_multiscal_fusion_2(nn.Module):
                 self.layers.append (
                 nn.Conv2d(this_input_depth, this_output_depth, kernels[layer_pointer], strides[layer_pointer], pads[layer_pointer], bias=False),
                 )
-                # self.layers.append (
-                # nn.BatchNorm2d(this_output_depth),
-                #    )
+                self.layers.append (
+                 nn.BatchNorm2d(this_output_depth),
+                    )
                 self.layers.append (
                 nn.LeakyReLU(0.2, inplace=False)
                 )
             #self.layers.append(this_layer)
         self.branch1LU = nn.LeakyReLU(0.1,inplace=False)
         self.branch2LU = nn.LeakyReLU(0.1,inplace=False)
+        self.fusion_layer = nn.Conv2d(2,1,(1,3), (1,1), (0,0), bias=False)       
+
     def forward(self, x):
         #output = self.main(input)
         #layer_len = len(kernels)
@@ -626,10 +635,10 @@ class _netD_8_multiscal_fusion_2(nn.Module):
         #        pass
         #    else:
            x = self.layers[i](x)
-           if i == (len(self.layers)-2)  :
-               x = x.view(-1,self.fully_connect_len).squeeze(1)# squess before fully connected 
+           if i == (len(self.layers)-1)  :
+               x = x.view(-1,Path_length).squeeze(1)# squess before fully connected 
         #fusion
-        fuse1=self.branch1LU(side_feature)
+        fuse1=self.branch1LU(side_out)
         #fuse1=side_feature
 
         x = x.view(-1,1,Path_length).unsqueeze(1)
@@ -645,7 +654,7 @@ class _netD_8_multiscal_fusion_2(nn.Module):
         local_bz,_,_,local_l = fuse.size() 
         out = nn.functional.interpolate(fuse, size=(1, Path_length), mode='bilinear') 
         out  = out.view(-1,Path_length).squeeze(1)# squess before fully connected
-        #out  = 0.5*out + 0.3 * side_out + 0.2 * side_out2
+        out  = 0.3*out + 0.3 * side_out + 0.3 * side_out2
         # return x
         # return side_out
         return out#,side_out,side_out2

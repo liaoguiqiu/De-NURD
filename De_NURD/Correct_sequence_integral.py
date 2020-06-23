@@ -8,7 +8,6 @@ operatedir_video = "../../saved_original/"
 savedir_path = "../../saved_processed/"
 savedir_rectan_ = "../../saved_processed_polar/"
 
-
 from analy import Save_signal_flag
 # notificatiton for the naming of stream： all “steam” in this project means 
 #"stream"
@@ -38,7 +37,7 @@ from  basic_trans import Basic_oper
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 Resample_size =Window_LEN
 Path_length = 128
-read_start = 30
+read_start = 20
 Debug_flag  = True
 global intergral_flag
 intergral_flag =0
@@ -183,7 +182,7 @@ class VIDEO_PEOCESS:
         #shift_integral = np.clip(shift_integral,overall_shift- Window_LEN/2,overall_shift+ Window_LEN/2)
         shift_integral = gaussian_filter1d(shift_integral,3) # smooth the path 
 
-        shift_integral = shift_integral - 0.15*(shift_integral-overall_shift) - 0.00001*I
+        shift_integral = shift_integral - 0.2*(shift_integral-overall_shift) - 0.0000001*I
         #shift_integral = shift_integral*0 + overall_shift  
 
 
@@ -260,7 +259,7 @@ class VIDEO_PEOCESS:
         video = cv2.imread(img_path)  #read the first one to get the image size
         gray_video  =   cv2.cvtColor(video, cv2.COLOR_BGR2GRAY)
         H_ori , W_ori  = gray_video.shape
-        gray_video = cv2.resize(gray_video, (832,H_ori), interpolation=cv2.INTER_AREA)
+        gray_video = cv2.resize(gray_video, (832,H_ori), interpolation=cv2.INTER_LINEAR)
         
 
         Len_steam =5
@@ -282,7 +281,7 @@ class VIDEO_PEOCESS:
                 video = cv2.imread(img_path)
                 gray_video  =   cv2.cvtColor(video, cv2.COLOR_BGR2GRAY)
                 H_ori , W_ori  = gray_video.shape
-                gray_video = cv2.resize(gray_video, (832,H_ori), interpolation=cv2.INTER_AREA)
+                gray_video = cv2.resize(gray_video, (832,H_ori), interpolation=cv2.INTER_LINEAR)
                 start_time  = time()
 
                 if(sequence_num<read_start+ 20):
@@ -306,10 +305,13 @@ class VIDEO_PEOCESS:
                     dual_thread.runInParallel()
                     
                     overall_shifting,shift_used1 = dual_thread.output_overall()
-                    shift_mean_error = int(overall_shifting- int(Overall_shiftting_WinLen/2))
-                    shift_mean_error = overall_shifting- Overall_shiftting_WinLen/2
+                    shift_mean_error = int(overall_shifting)- int(Overall_shiftting_WinLen/2)
+                    #shift_mean_error = overall_shifting- Overall_shiftting_WinLen/2
 
+                    #filter
                     addition_window_shift =  int(shift_mean_error  +shift_used1)
+                    #addition_window_shift = 0.3*addition_window_shift+0.7* int(shift_mean_error  +shift_used1)
+
 
                     path,Costmatrix,shift_used2  = dual_thread.output_NURD()
                     #path =path+1
@@ -331,8 +333,8 @@ class VIDEO_PEOCESS:
 
                     shift_integral = VIDEO_PEOCESS.fusion_estimation(shift_integral,path,addition_window_shift,Window_ki_error)
 
-                    Window_ki_error =np.sum(shift_integral-addition_window_shift)+Window_ki_error
-
+                    Window_ki_error = (shift_integral-addition_window_shift)+Window_ki_error
+                    #addition_window_shift = np.mean(shift_integral)
 
                     #path = np.zeros(Costmatrix.shape[1])
                     #path = path  + shift_used1 + overall_shifting

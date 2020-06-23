@@ -5,7 +5,7 @@
     <ProjectGuid>07b9d663-4bc8-4016-8977-35b22d05cc4c</ProjectGuid>
     <ProjectHome>
     </ProjectHome>
-    <StartupFile>Correct_sequence_integral.py</StartupFile>
+    <StartupFile>Dataset_generator_OLG.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -51,6 +51,9 @@
     <Compile Include="DeepPathsearch\arithmetic.py" />
     <Compile Include="DeepPathsearch\classifier_svm.py" />
     <Compile Include="DeepPathsearch\dataset.py" />
+    <Compile Include="DeepPathsearch\deeppathlong.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="DeepPathsearch\extract_imagenet.py" />
     <Compile Include="DeepPathsearch\gan_body.py" />
     <Compile Include="DeepPathsearch\get_samples.py" />
@@ -63,6 +66,9 @@
     <Compile Include="DeepPathsearch\test_Deep_finding.py" />
     <Compile Include="Deep_shift\ShiftingNetBody_V2.py" />
     <Compile Include="Dataset_generator_OLG.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="displayBline.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="shift_deploy.py">

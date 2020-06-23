@@ -158,7 +158,7 @@ def diplay_sequence():
 
                 show_2  = np.append(circular[:,:],zero,axis=1) # cascade
                 show_2  = np.append(show_2,circular1[:,:],axis=1) # cascade
-                #show_2 = cv2.resize(show_2, (int(show_2.shape[1]/1.5),int(show_2.shape[0]/1.5)), interpolation=cv2.INTER_AREA)
+                show_2 = cv2.resize(show_2, (int(show_2.shape[1]/1.5),int(show_2.shape[0]/1.5)), interpolation=cv2.INTER_AREA)
 
 
             if(i == read_start): # initialize the color sequence 

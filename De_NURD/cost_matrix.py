@@ -25,8 +25,8 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 Window_LEN = 71
 Overall_shiftting_WinLen = 71
 Cost_M_sample_flag =True
-Down_sample_F = 5
-Down_sample_F2 = 4
+Down_sample_F = 3
+Down_sample_F2 = 1
 
 class COSTMtrix:
 
@@ -166,8 +166,8 @@ class COSTMtrix:
        
        h1,w1 = present_img.shape
        if Cost_M_sample_flag ==True:
-           present_img = cv2.resize(present_img, (int(w1/Down_sample_F2),int(h1/Down_sample_F)), interpolation=cv2.INTER_AREA)
-           previous_img = cv2.resize(previous_img, (int(w1/Down_sample_F2),int(h1/Down_sample_F)), interpolation=cv2.INTER_AREA)
+           present_img = cv2.resize(present_img, (int(w1/Down_sample_F2),int(h1/Down_sample_F)), interpolation=cv2.INTER_LINEAR)
+           previous_img = cv2.resize(previous_img, (int(w1/Down_sample_F2),int(h1/Down_sample_F)), interpolation=cv2.INTER_LINEAR)
 
            h,w = present_img.shape
            window_wid= int(Window_LEN/Down_sample_F2)
@@ -247,14 +247,14 @@ class COSTMtrix:
        suma2 = torch.sum(a_stack*a_stack,dim=2)
        sumb2 = torch.sum(b_stack*b_stack,dim=2)
        #correlation_Mat= (h*sumab - suma*sumb)/ torch.sqrt((h*suma2-suma*suma)*(h*sumb2-sumb*sumb))
-       correlation_Mat= (h*sumab - suma*sumb)/ torch.sqrt((h*suma2+1-suma*suma)*(h*sumb2+1-sumb*sumb))
+       correlation_Mat= (h*sumab - suma*sumb)/ torch.sqrt((h*suma2-suma*suma)*(h*sumb2-sumb*sumb))
 
        correlation_Mat =  251 - correlation_Mat*250
        
 
        # copy frome the GPU
        matrix=torch.Tensor.cpu(correlation_Mat).detach().numpy()
-       matrix = cv2.resize(matrix, (w1,Window_LEN), interpolation=cv2.INTER_AREA)
+       matrix = cv2.resize(matrix, (w1,Window_LEN), interpolation=cv2.INTER_LINEAR )
        return matrix,int(window_shift)
 #########################
 ###################
@@ -268,8 +268,8 @@ class COSTMtrix:
        h,w = present_img.shape
        h1,w1 = present_img.shape
        if Cost_M_sample_flag ==True:
-           present_img = cv2.resize(present_img, (int(w1/Down_sample_F2),int(h1/Down_sample_F)), interpolation=cv2.INTER_AREA)
-           previous_img = cv2.resize(previous_img, (int(w1/Down_sample_F2),int(h1/Down_sample_F)), interpolation=cv2.INTER_AREA)
+           present_img = cv2.resize(present_img, (int(w1/Down_sample_F2),int(h1/Down_sample_F)), interpolation=cv2.INTER_LINEAR)
+           previous_img = cv2.resize(previous_img, (int(w1/Down_sample_F2),int(h1/Down_sample_F)), interpolation=cv2.INTER_LINEAR)
 
            h,w = present_img.shape
            window_wid= int(Window_LEN/Down_sample_F2)
@@ -348,13 +348,13 @@ class COSTMtrix:
        sumab = torch.sum(sumab,dim=2)
        suma2 = torch.sum(suma2,dim=2)
        sumb2 = torch.sum(sumb2,dim=2)
-       correlation_Mat= (h*block_wid *  sumab - suma*sumb)/ torch.sqrt((h*block_wid*suma2-suma*suma)*(h*block_wid*sumb2-sumb*sumb))
+       correlation_Mat= (h*block_wid *  sumab - suma*sumb)/ torch.sqrt((h*block_wid*suma2-suma*suma+1)*(h*block_wid*sumb2-sumb*sumb+1))
        correlation_Mat =  251 - correlation_Mat*250
 
 
        # copy frome the GPU
        matrix=torch.Tensor.cpu(correlation_Mat).detach().numpy()
-       matrix = cv2.resize(matrix, (w1,Window_LEN), interpolation=cv2.INTER_AREA)
+       matrix = cv2.resize(matrix, (w1,Window_LEN), interpolation=cv2.INTER_LINEAR)
 
        return matrix,int(window_shift)
 #########################
