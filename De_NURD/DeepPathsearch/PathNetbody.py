@@ -1,5 +1,7 @@
 import torch
 import torch.nn as nn
+import torchvision.models
+import math
 Path_length =832
  
 
@@ -146,6 +148,11 @@ class _netD_8_multiscal_fusion_long(nn.Module):
         side_out =x
         for j, name in enumerate(self.side_branch1):
             side_out = self.side_branch1[j](side_out)
+            test=side_out[0,0,0,0].cpu().detach().numpy()
+            if math.isnan(test):
+                path = 0
+
+                pass
              
         
 

@@ -59,7 +59,7 @@ class Dual_thread_Overall_shift_NURD(object):
                                                               self.stream2[self.strmlen-1,:,:] ,
                                                               self.stream2[self.strmlen-2,:,:], 0) 
                                                            
-      #self.costmatrix  = myfilter.gauss_filter_s (self.costmatrix) # smooth matrix
+      self.costmatrix  = myfilter.gauss_filter_s (self.costmatrix) # smooth matrix
       self.costmatrix  = cv2.GaussianBlur(self.costmatrix,(5,5),0)
         # down sample the materix and up sample 
       #Hm,Wm= self.costmatrix.shape

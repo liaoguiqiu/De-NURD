@@ -5,7 +5,7 @@
     <ProjectGuid>07b9d663-4bc8-4016-8977-35b22d05cc4c</ProjectGuid>
     <ProjectHome>
     </ProjectHome>
-    <StartupFile>Dataset_generator_OLG.py</StartupFile>
+    <StartupFile>display.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -69,6 +69,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="displayBline.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="matlab.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="shift_deploy.py">

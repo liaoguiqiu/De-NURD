@@ -31,22 +31,26 @@ from matplotlib.pyplot import *
 from mpl_toolkits.mplot3d import Axes3D
 from Correct_sequence_integral import read_start 
 from read_circu import tranfer_frome_rec2cir
+from  matlab import Save_Signal_matlab
+matlab_saver  = Save_Signal_matlab()
+
 #read_start = 1500
 Padding_H  = 1
 #from  path_finding import PATH
-Display_STD_flag = False
+Display_STD_flag = True
 Padd_zero_top = False
 Display_signal_flag = False
 Display_Matrix_flag = False
+save_matlab_flag = True
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 class Derivation_validate(object):
     def  __init__(self, H,W):
-        Len_steam = 8
-        self.crop_start = 20
-        self.cropH = int(H/1)
-        self.steam1=np.zeros((Len_steam,self.cropH-self.crop_start,W))
-        self.steam2=np.zeros((Len_steam, self.cropH-self.crop_start,W))
+        self.Len_steam = 10
+        self.crop_start = 80
+        self.cropH = int(2*H/3)
+        self.steam1=np.zeros((self.Len_steam,self.cropH-self.crop_start,W))
+        self.steam2=np.zeros((self.Len_steam, self.cropH-self.crop_start,W))
         self.cnt=0
         self.sample_rate=1
         self.std_suma =0
@@ -57,9 +61,14 @@ class Derivation_validate(object):
     def  buffer(self,img1,img2):
         self.cnt +=1
         if self.cnt%self.sample_rate==0:
-            self.steam1=np.append(self.steam1, [img1[self.crop_start:self.cropH,:]] ,axis=0) # save sequence
+            source1  =  cv2.GaussianBlur(img1,(5,5),0)
+            source2  =  cv2.GaussianBlur(img2,(5,5),0)
+
+
+
+            self.steam1=np.append(self.steam1, [source1[self.crop_start:self.cropH,:]] ,axis=0) # save sequence
             # no longer delete the fist  one
-            self.steam2=np.append(self. steam2, [img2[self.crop_start:self.cropH,:]] ,axis=0) # save sequence
+            self.steam2=np.append(self. steam2, [source2[self.crop_start:self.cropH,:]] ,axis=0) # save sequence
             # no longer delete the fist  one
         
             self.steam2= np.delete(self.steam2 , 0,axis=0)
@@ -72,10 +81,11 @@ class Derivation_validate(object):
         stda = float(stda.data.mean())
         stdb=  b_stack.std( dim = 0)
         stdb = float( stdb.data.mean())
-        self.std_suma += stda
-        self.std_sumb += stdb
-        self.avga=self.std_suma /self.cnt
-        self.avgb=self.std_sumb /self.cnt
+        if self.cnt>self.Len_steam:
+            self.std_suma += stda
+            self.std_sumb += stdb
+            self.avga=self.std_suma /(self.cnt-self.Len_steam)
+            self.avgb=self.std_sumb /(self.cnt-self.Len_steam)
 
 
 
@@ -180,12 +190,13 @@ def diplay_sequence():
             if Display_STD_flag  ==True :
                 STD_call.buffer(rectan1 ,rectan2 )
                 std1,std2=STD_call.calculate()
-                print("correct:"+str(std1))
+                print("correct:"+str(std1)) # 1 is the process
                 print("origin:"+str(std2))
                 print("correct_ave:"+str(STD_call.avga))
                 print("origin_ave:"+str(STD_call.avgb))
 
-                
+                if save_matlab_flag == True:
+                    matlab_saver.buffer2(std1,std2)
                 pass
 
             print("update"+str(i)+":")
@@ -279,7 +290,8 @@ def displayselected():
                 print("origin:"+str(std2))
                 print("correct_ave:"+str(STD_call.avga))
                 print("origin_ave:"+str(STD_call.avgb))
-
+                if save_matlab_flag == True:
+                    matlab_saver.buffer2(std1,std2)
 
                 
                 pass

@@ -17,7 +17,7 @@ from cost_matrix import COSTMtrix ,Overall_shiftting_WinLen , Window_LEN,Down_sa
 visdom_show_flag = False
 Save_matlab_flag = False
 validation_flag = False
-Use_random_NURD = True
+Use_random_NURD = False
 if visdom_show_flag == True:
     from analy_visdom import VisdomLinePlotter
 
@@ -81,7 +81,7 @@ class DATA_Generator(object):
         self.data_mat_root_origin = "../../saved_matrix_unprocessed/"
         self.data_signal_root  = "../../saved_stastics_for_generator/"
         # noise type
-        self.noise_selector=['none','s&p','gauss_noise','gauss_noise']
+        self.noise_selector=['gauss_noise','gauss_noise','gauss_noise','gauss_noise']
         self.save_matlab_root = "../../saved_matlab/"
         self.self_check_path_create(self.save_matlab_root  )
         self.H  = 1024
@@ -174,7 +174,7 @@ class DATA_Generator(object):
            if noise_typ == "gauss_noise":
               row,col = image.shape
               mean = 0
-              var = 50
+              var = 15
               sigma = var**0.5
               gauss = np.random.normal(mean,sigma,(row,col )) 
               gauss = gauss.reshape(row,col ) 
@@ -244,6 +244,7 @@ class DATA_Generator(object):
 
         #Costmatrix=cv2.blur(Costmatrix,(5,5))
         Costmatrix  = myfilter.gauss_filter_s (Costmatrix) # smooth matrix
+        # Costmatrix =cv2.GaussianBlur(Costmatrix,(5,5),0)
         # down sample the materix and up sample 
         #Hm,Wm= Costmatrix.shape
         #Costmatrix = cv2.resize(Costmatrix, (int(Wm/2),int(Hm/2)), interpolation=cv2.INTER_LINEAR)
@@ -266,13 +267,9 @@ class DATA_Generator(object):
         show1[:,:,0] = Costmatrix
         show1[:,:,1] = Costmatrix
         show1[:,:,2] = Costmatrix
-        cv2.imwrite(self.data_mat_root_origin  + str(Image_ID) +".jpg", Costmatrix)
         
 
-        for i in range ( len(path)):
-            painter = np.clip(path[i],1,Window_LEN-2)
-      
-            show1[int(painter),i,:]=show1[int(painter)-1,i,:]=[255,255,255]
+        
             
         if Show_nurd_compare==True:
             start_point= PATH.find_the_starting(Costmatrix) # starting point for path searching
@@ -282,15 +279,20 @@ class DATA_Generator(object):
             #path_deep,path_cost2=PATH.search_a_path_Deep_Mat2longpath(Costmatrix) # get the path and average cost of the path
             path_deep,path_cost2=PATH.search_a_path_GPU (Costmatrix) # get the path and average cost of the path
             #path_deep=(path_deep -Window_LEN/2)*  Down_sample_F2 +Window_LEN/2
-            path_deep = gaussian_filter1d(path_deep,2) # smooth the path 
+            path_deep = gaussian_filter1d(path_deep,3) # smooth the path 
             
             for i in range ( len(path)):
                 painter2= np.clip(path_tradition[i],1,Window_LEN-2)
                 painter3 = np.clip(path_deep[i],1,Window_LEN-2) 
                 show1[int(painter2),i,:]=show1[int(painter2)-1,i,:]=[254,0,0]
                 show1[int(painter3),i,:]=show1[int(painter3)-1,i,:]=[0,254,254]
-
+        for i in range ( len(path)):
+            painter = np.clip(path[i],1,Window_LEN-2)
+      
+            show1[int(painter),i,:]=show1[int(painter)-1,i,:]=[254,254,254]
         # save the  matrix to fil dir
+        cv2.imwrite(self.data_mat_root_origin  + str(Image_ID) +".jpg", Costmatrix)
+
         cv2.imwrite( self.data_mat_root  + str(Image_ID) +".jpg", show1)
         # show the signal comparison in visdom
         if visdom_show_flag == True:
@@ -334,10 +336,11 @@ class DATA_Generator(object):
                 path= path- (np.mean(path) - Window_LEN/2 )
                 #path= path*0+ int(Window_LEN/2 )
             Dice=int(np.random.random_sample()*100)
-            if Dice%2 == 0 or Use_random_NURD == True:
+            if  Dice%2 == 0 or Use_random_NURD == True: 
                 path= path*0+ int(Window_LEN/2 )
                 fact1 = int(np.random.random_sample()*20)+20
-                random_NURD   = np.random.random_sample(fact1)*20-10 + np.random.random_sample()*71-35
+                fact2 = np.random.random_sample()
+                random_NURD   = np.random.random_sample(fact1)*30-15 + fact2*71-35
             
                 random_NURD =  signal.resample(random_NURD, self.W)#resample the path
                 #random_NURD   = np.random.random_sample(self.W)*30-10 + np.random.random_sample()*40-20
@@ -347,14 +350,14 @@ class DATA_Generator(object):
             #Low_path =Low_path.astype(int)
             Downsample_bias =  35 -  Low_path*Down_sample_F2 
             
-            path = np.clip(path,0,Window_LEN)
+            path = np.clip(path,0,Window_LEN-1)
             
 
             # create the shifted image
             Shifted_IMG   = VIDEO_PEOCESS.de_distortion(original_IMG,path,Image_ID,0)
-            path = path -0.5* Downsample_bias
+            #path = path -0.5* Downsample_bias
             path = gaussian_filter1d(path,3) # smooth the path 
-            path = np.clip(path,0,Window_LEN)
+            path = np.clip(path,0,Window_LEN-1)
 
             self.path_DS.path_saving[read_id,:] = path
             self.path_DS.save()
@@ -536,4 +539,4 @@ if __name__ == '__main__':
         
         generator.generate_NURD ()
         #generator.generate_overall_shifting()
-        generator.generate_NURD_overall_shifting()
+        #generator.generate_NURD_overall_shifting()

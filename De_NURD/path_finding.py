@@ -14,7 +14,7 @@ import random
 from torch.autograd import Variable
 from DeepPathsearch.dataset import myDataloader,Batch_size,Resample_size, Path_length,Resample_H,Resample_W
 from DeepPathsearch import PathNetbody
-from DeepPathsearch import gan_body
+#from DeepPathsearch import gan_body
 
 from DeepPathsearch.image_trans import BaseTransform 
 from scipy.ndimage import gaussian_filter1d
@@ -22,7 +22,9 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 from cost_matrix import Window_LEN 
 #dir_netD  = "../../DeepPathFinding/out/netD_epoch_49.pth"
 #dir_netD  = '../../DeepLearningModel/deep_path_small_window/netD_epoch_2.pth'
-dir_netD  = '../../DeepLearningModel/deep_path/netD_epoch_2.pth'
+dir_netD  = '../../DeepLearningModel/deep_path/netD_epoch_2.pth' # train1
+#dir_netD  = '../../DeepLearningModel/deep_path/netD_epoch_5.pth'# train2
+
 
 transform = BaseTransform(  Resample_size,[104])
 netD = PathNetbody._netD_8_multiscal_fusion_long()
@@ -31,7 +33,7 @@ print(netD)
 print('load weights for Path_ find ing')
 netD.load_state_dict(torch.load(dir_netD))
 netD.cuda()
-netD.eval()
+#netD.eval()
 torch.no_grad()
 class PATH:
     def get_warping_vextor(mat):
@@ -114,14 +116,16 @@ class PATH:
     def search_a_path_GPU(img): # input should be torch tensor
         #img2 = cv2.cvtColor(img2,cv2.COLOR_GRAY2RGB)
         H,W= img.shape  #get size of image
-        img = cv2.resize(img, (832,71), interpolation=cv2.INTER_AREA)
+        img =  img.astype(float)
+        img = cv2.resize(img, (832,71), interpolation=cv2.INTER_LINEAR)
+        img = np.clip(img,0,254)
          
         input_batch = np.zeros((1,3,71,832)) # a batch with piece num
 
           
-        input_batch[0,0,:,:] = img - 104.0
-        input_batch[0,1,:,:] = img - 104.0
-        input_batch[0,2,:,:] = img - 104.0
+        input_batch[0,0,:,:] = (img - 128.0)/128.0
+        input_batch[0,1,:,:] = (img - 128.0)/128.0
+        input_batch[0,2,:,:] = (img - 128.0)/128.0
         input = torch.from_numpy(np.float32(input_batch)) 
         input = input.to(device) 
 
@@ -138,16 +142,23 @@ class PATH:
 
         #inputv = Variable(input.unsqueeze(0))
         output = netD(inputv)
-        path_upsam = np.zeros(W)
+        #path_upsam = np.zeros(W)
         output = output.cpu().detach().numpy()
          
-        path_upsam = output[0] *Window_LEN
+        path_upsam = output[0]*Window_LEN
+        if math.isnan(path_upsam[0]):
+            path = np.clip(path_upsam,0,Window_LEN-1)
+
+            pass
+        path = np.clip(path_upsam,0,Window_LEN-1)
+
         #long_out  = np.append(np.flip(output),output)
         #long_out  = np.append(long_out,np.flip(output))
         #long_out = gaussian_filter1d (long_out ,1)
-        path_upsam  = signal.resample(path_upsam, W) 
+         
+        path   = signal.resample(path_upsam , W)  
         #path_upsam = long_path_upsam[W:2*W]
-        return path_upsam, 0
+        return path, 0
         #apply deep learning to find the path
     def search_a_path_GPU2(img): # input should be torch tensor
         #img2 = cv2.cvtColor(img2,cv2.COLOR_GRAY2RGB)

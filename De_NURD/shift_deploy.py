@@ -24,7 +24,7 @@ class Shift_Predict(object):
         self. Original_window_Len  = 71
         self.netD = ShiftingNetBody_V2.ShiftingNet_init( None)
         self.netD.cuda()
-        self.netD.eval()
+        #self.netD.eval()
         torch.no_grad()
 
         #my_netD  = ShiftingNetBody.ShiftingNet_init_my( None)
