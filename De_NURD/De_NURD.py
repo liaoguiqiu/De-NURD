@@ -4,7 +4,7 @@
 operatedir_video =  "../../OCT/P-ID_Name_25092019161813-7500rpm-G1_0.05_4_25_extracted.avi"
 #E:\PhD\trying\OCT\OCT aligment
 #operatedir_video =  "../../OCT/OCT aligment/22JAN2020AUTO_01.avi"
-# operatedir_video =  "../../OCT/OCT aligment/phantom-01_2412020121234.avi"
+#operatedir_video =  "../../OCT/OCT aligment/phantom-01_2412020121234.avi"
 #operatedir_video =  "../../OCT/animal/video.avi"
 
 #operatedir_video =  "../../OCT/new video/P-ID_Name_25092019164030.avi"
@@ -62,7 +62,7 @@ Len_steam =5
 ret, frame = cap.read()
 if ret == True:
     H,W,_ = frame.shape
-H_start = 1
+H_start = 0
 H_end = H
  
 steam=np.zeros((Len_steam,H_end-H_start,W))
@@ -102,9 +102,10 @@ while(cap.isOpened()):
     circular = circular2*2
     circular = cv2.linearPolar(new_frame3, (int(W/2) , int(H/2)),400, cv2.WARP_INVERSE_MAP)
     circular=circular.astype(np.uint8)
-
+    H_ori , W_ori  = crop_H_test.shape
+    gray_video = cv2.resize(crop_H_test, (832,H_ori), interpolation=cv2.INTER_LINEAR)
     #cv2.imwrite(savedir_matrix  + str(save_sequence_num) +".jpg", Costmatrix)
-    cv2.imwrite(savedir_original  + str(save_sequence_num) +".jpg", crop_H_test)
+    cv2.imwrite(savedir_original  + str(save_sequence_num) +".jpg", gray_video)
     cv2.imwrite(savedir_filtered_OCT  + str(save_sequence_num) +".jpg", filter_img)
     cv2.imwrite(savedir_original_circular  + str(save_sequence_num) +".jpg", circular)
 

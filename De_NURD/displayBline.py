@@ -140,8 +140,8 @@ def diplay_bline():
             #cv2.imshow('circular video',circular ) 
             rectan1 = cv2.medianBlur(rectan1,5)
             rectan2 = cv2.medianBlur(rectan2,5)
-            B_line1 = np.sum(rectan1[300:H_ini,:], axis=0)/(rectan1.shape[0]-300)
-            B_line2 = np.sum(rectan2[300:H_ini,:], axis=0)/(rectan2.shape[0]-300)
+            B_line1 = np.sum(rectan1[1:H_ini,:], axis=0)/(rectan1.shape[0]-1)
+            B_line2 = np.sum(rectan2[1:H_ini,:], axis=0)/(rectan2.shape[0]-1)
             B_line1 = B_line1/np.max(B_line1) *255
             B_line2 = B_line2/np.max(B_line2) *255
             #B_line1=B_line1*B_line1
@@ -162,6 +162,7 @@ def diplay_bline():
             cv2.imshow('2',enface2.astype(np.uint8))
             cv2.imwrite(save_display_dir  +  "0_0.jpg",enface1.astype(np.uint8) )
             cv2.imwrite(save_display_dir  +  "0_1.jpg",enface2.astype(np.uint8) )
+            print ("[%s]   bline" % (i ))
 
             if cv2.waitKey(1) & 0xFF == ord('q'):
               break

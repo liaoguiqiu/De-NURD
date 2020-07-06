@@ -5,7 +5,7 @@
     <ProjectGuid>07b9d663-4bc8-4016-8977-35b22d05cc4c</ProjectGuid>
     <ProjectHome>
     </ProjectHome>
-    <StartupFile>display.py</StartupFile>
+    <StartupFile>Dataset_generator.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -66,6 +66,9 @@
     <Compile Include="DeepPathsearch\test_Deep_finding.py" />
     <Compile Include="Deep_shift\ShiftingNetBody_V2.py" />
     <Compile Include="Dataset_generator_OLG.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Deep_shift\ShiftNetBodyV3.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="displayBline.py">

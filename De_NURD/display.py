@@ -31,17 +31,18 @@ from matplotlib.pyplot import *
 from mpl_toolkits.mplot3d import Axes3D
 from Correct_sequence_integral import read_start 
 from read_circu import tranfer_frome_rec2cir
+from basic_trans import Basic_oper
 from  matlab import Save_Signal_matlab
 matlab_saver  = Save_Signal_matlab()
 
 #read_start = 1500
 Padding_H  = 1
 #from  path_finding import PATH
-Display_STD_flag = True
-Padd_zero_top = False
+Display_STD_flag = False
+Padd_zero_top = True
 Display_signal_flag = False
 Display_Matrix_flag = False
-save_matlab_flag = True
+save_matlab_flag = False
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 class Derivation_validate(object):

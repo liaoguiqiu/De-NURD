@@ -52,14 +52,14 @@ def tranfer_frome_rec2cir(gray):
     H,W = gray.shape
     value = np.sqrt(((W/2.0)**2.0)+((W/2.0)**2.0))
     value/=2
-    gray=cv2.rotate(gray,rotateCode = 2) 
-    H,W = gray.shape
+    grayr=cv2.rotate(gray,rotateCode = 2) 
+    H,W = grayr.shape
 
     #value = 200
     #circular = cv2.linearPolar(new_frame, (new_frame.shape[1]/2 , new_frame.shape[0]/2), 
     #                               200, cv2.WARP_INVERSE_MAP)
     #circular = cv2.linearPolar(gray,(W/2, H/2), value, cv2.WARP_INVERSE_MAP)
-    circular = cv2.linearPolar(gray,(W/2, H/2), value, cv2.WARP_INVERSE_MAP)
+    circular = cv2.linearPolar(grayr,(W/2, H/2), value, cv2.WARP_INVERSE_MAP)
 
 
     circular = circular.astype(np.uint8)

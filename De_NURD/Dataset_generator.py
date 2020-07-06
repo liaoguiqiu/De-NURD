@@ -21,9 +21,9 @@ Use_random_NURD = False
 if visdom_show_flag == True:
     from analy_visdom import VisdomLinePlotter
 
-add_noise_flag  = True
+add_noise_flag  = False
 Clip_matrix_flag = False
-NURD_remove_shift_flag= False 
+NURD_remove_shift_flag= True 
 # 
 Show_circular_flag   = True
 Show_nurd_compare = False
@@ -450,6 +450,7 @@ class DATA_Generator(object):
         read_id = 0   # read pointer initialization
         Len_steam =5 # create the buffer for validation 
         steam=np.zeros((Len_steam,self.H,self.W)) # create video buffer
+        growing=0
         while (1):
             #list all the picture for video generating, ensure the original folder has only one image
             OriginalpathDirlist = os.listdir(self.original_root) 
@@ -466,18 +467,20 @@ class DATA_Generator(object):
             path  = self.path_DS.path_saving[read_id,:]
             path =  signal.resample(path, self.W)#resample the path
 
-            random_NURD   = np.random.random_sample(self.W)*20
+            random_NURD   = np.random.random_sample(self.W)*5
             random_NURD = gaussian_filter1d(random_NURD,5) # smooth the path 
 
-            path = path+ random_NURD
             if NURD_remove_shift_flag ==True:
-                path= path- np.mean(path)
+                 path= path- (np.mean(path) - Window_LEN/2 )
+            path = random_NURD+ Window_LEN/2
+            
             #   exragene for diaplay
             #path = (path -np.mean(path))*0.6+np.mean(path)
             #overall_shifting = Image_ID 
             #overall_shifting = min(overall_shifting,self.W/2) # limit the shifting here, maybe half the lenghth is sufficient  for the combination
             #overall_shifting = min(overall_shifting,self.W/2) # limit the shifting here, maybe half the lenghth is sufficient  for the combination
             random_shifting = np.random.random_sample()*Overall_shiftting_WinLen
+            random_shifting = (random_shifting-Overall_shiftting_WinLen/2)*0.4+Overall_shiftting_WinLen/2
             #Combine the overall shifting with NURD
 
             #path = path  + overall_shifting
@@ -495,6 +498,14 @@ class DATA_Generator(object):
                 #noise_type = "gauss_noise"
                 original_IMG  =  self.noisy(noise_type,original_IMG)
                 Shifted_IMG  =  self.noisy(noise_type,Shifted_IMG)
+            if Image_ID <100:
+                grower=+np.random.random_sample()*np.random.random_sample() *2
+            else:
+                grower=+np.random.random_sample()*np.random.random_sample() *3
+            growing+=  grower
+            # addistional shift
+            Shifted_IMG = np.roll(Shifted_IMG, int(growing), axis = 1) 
+
 
             # save all the result
             cv2.imwrite(self.data_pair1_root  + str(Image_ID) +".jpg", original_IMG)
@@ -537,6 +548,6 @@ if __name__ == '__main__':
         #id,nurd,shift  =  save_test.read_pkl_infor_of_over_allshift_with_NURD()
  
         
-        generator.generate_NURD ()
+        #generator.generate_NURD ()
         #generator.generate_overall_shifting()
-        #generator.generate_NURD_overall_shifting()
+        generator.generate_NURD_overall_shifting()
