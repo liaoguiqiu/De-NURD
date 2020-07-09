@@ -37,7 +37,7 @@ from  basic_trans import Basic_oper
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 Resample_size =Window_LEN
 Path_length = 128
-read_start = 200
+read_start = 100
 Debug_flag  = True
 global intergral_flag
 intergral_flag =0
@@ -146,7 +146,7 @@ class VIDEO_PEOCESS:
        
         add_3_img  = np.append(image,image,axis=1) # cascade
         add_3_img = np.append(add_3_img,image,axis=1) # cascade
-        new= add_3_img
+        new= add_3_img*0
 
         #shift_integral = shift_integral + shift_diff.astype(int) # not += : this is iteration way
         #shift_integral = np.clip(shift_integral, - 35,35)
@@ -157,22 +157,22 @@ class VIDEO_PEOCESS:
 
         for i in range ( len(add_3)):
             #limit the integral             
-            new_position  = int(add_3[i]+i)
+            new_position  = add_3[i]+i
             # deal with the boundary exceeding
             if(new_position<0):
                 new_position = 0
             if (new_position>=3*w):
                 new_position= 3*w-1
             #move this line to new position
-            path_inv[int(new_position)] = i
+            path_inv[int(new_position)] = float(i)
             #mask[:,int(new_position)] = 0
         #add_3   = np.append(path_inv[::-1],path_inv,axis=0) # cascade
         #add_3   = np.append(add_3,path_inv[::-1],axis=0) # cascade
-        s = pd.Series(add_3)
+        s = pd.Series(path_inv)
         path_inv = s.interpolate()
         #path_inv = path_inv[w:2*w].to_numpy() 
       
-        for i in range ( len(shift_integral)):
+        for i in range ( w,2*w):
             #limit the integral             
             new_position  = int(path_inv[i])
             # deal with the boundary exceeding
@@ -181,7 +181,7 @@ class VIDEO_PEOCESS:
             if (new_position>=3*w):
                 new_position= 3*w-1
             #move this line to new position
-            new[:,i] = image[:,new_position]
+            new[:,i] = add_3_img[:,new_position]
             #mask[:,int(new_position)] = 0
         # connect the statrt and end before the interpilate          
         #modified to  # connect the statrt and end before the interpilate
@@ -196,10 +196,10 @@ class VIDEO_PEOCESS:
         
 
         ##interp_img = VIDEO_PEOCESS.img_interpilate(long_3_img) # interpolate by row
-        new= new[:,w:2*w] # take the middle one 
+        short= new[:,w:2*w] # take the middle one 
         #new= interp_img  
 
-        return new
+        return short
 #----------------------#
 
 #----------------------#
@@ -241,7 +241,7 @@ class VIDEO_PEOCESS:
         #overall_shift =0
         shift_diff= path - int(Window_LEN/2)  # additional compensation 
         shift_integral = shift_integral + shift_diff  # not += : this is iteration way
-        shift_integral = shift_integral - 0.2*(shift_integral-overall_shift) - 0.0001* I
+        #shift_integral = shift_integral - 0.15*(shift_integral-overall_shift) - 0.0001* I
         #shift_integral = shift_integral - 0.15*(shift_integral-overall_shift) - 0.0001* I
 
         #shift_integral = shift_integral - 0*(shift_integral-overall_shift) - 0* I
@@ -292,7 +292,7 @@ class VIDEO_PEOCESS:
         
         
         # applying the correct
-        img_corrected,shift_integral = VIDEO_PEOCESS.de_distortion_integral2 (image,path1,shift_integral,sequence_num,addition_window_shift)
+        img_corrected,shift_integral = VIDEO_PEOCESS.de_distortion_integral (image,path1,shift_integral,sequence_num,addition_window_shift)
 
 
         
@@ -332,9 +332,9 @@ class VIDEO_PEOCESS:
         Len_steam =5
         H,W= gray_video.shape  #get size of image
         H_start = 0
-        H_end = H
+        H_end = int(300)
         steam=np.zeros((Len_steam,H_end-H_start,W))
-        steam2=np.zeros((Len_steam,H ,W))
+        steam2=np.zeros((Len_steam,H_end-H_start ,W))
         save_sequence_num = 0  # processing iteration initial 
         addition_window_shift=0 # innitial shifting parameter
         Window_ki_error = 0
@@ -358,13 +358,13 @@ class VIDEO_PEOCESS:
                     steam= np.delete(steam , 0,axis=0)
       
 
-                    steam2=np.append(steam2,[gray_video],axis=0) # save sequence
+                    steam2=np.append(steam2,[gray_video[H_start:H_end,:] ],axis=0) # save sequence
                     steam2= np.delete(steam2 , 0,axis=0)
                 else:
                     steam=np.append(steam,[gray_video[H_start:H_end,:] ],axis=0) # save sequence
                     # no longer delete the fist  one
                     steam= np.delete(steam , 1,axis=0)
-                    steam2=np.append(steam2,[gray_video],axis=0) # save sequence
+                    steam2=np.append(steam2,[gray_video[H_start:H_end,:] ],axis=0) # save sequence
                     steam2= np.delete(steam2 , 0,axis=0)
 
                     dual_thread.input(steam,steam2,Len_steam,addition_window_shift)

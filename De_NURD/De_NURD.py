@@ -1,11 +1,11 @@
 #operatedir_pic =  "../initialbackground/"
 #operatedir_video =  "D:/PhD/trying/OCT/P-ID_Name_25092019160318VIDEO.avi"
 #operatedir_video =  "../../OCT/P-ID_Name_25092019160318VIDEO.avi"
-operatedir_video =  "../../OCT/P-ID_Name_25092019161813-7500rpm-G1_0.05_4_25_extracted.avi"
+#operatedir_video =  "../../OCT/P-ID_Name_25092019161813-7500rpm-G1_0.05_4_25_extracted.avi"
 #E:\PhD\trying\OCT\OCT aligment
 #operatedir_video =  "../../OCT/OCT aligment/22JAN2020AUTO_01.avi"
 #operatedir_video =  "../../OCT/OCT aligment/phantom-01_2412020121234.avi"
-#operatedir_video =  "../../OCT/animal/video.avi"
+operatedir_video =  "../../OCT/animal/video.avi"
 
 #operatedir_video =  "../../OCT/new video/P-ID_Name_25092019164030.avi"
 #operatedir_video =  "../../OCT/new video/Grape-04-7000rpms-20um-20mm-100kHz.avi"
@@ -37,7 +37,7 @@ try:
 except ImportError: 
     import xml.etree.ElementTree as ET 
 import sys 
-
+Down_sample_flag =True
 #GPU acceleration
 #from numba import vectorize
 #from numba import jit
@@ -62,7 +62,7 @@ Len_steam =5
 ret, frame = cap.read()
 if ret == True:
     H,W,_ = frame.shape
-H_start = 0
+H_start = 261
 H_end = H
  
 steam=np.zeros((Len_steam,H_end-H_start,W))
@@ -105,10 +105,14 @@ while(cap.isOpened()):
     H_ori , W_ori  = crop_H_test.shape
     gray_video = cv2.resize(crop_H_test, (832,H_ori), interpolation=cv2.INTER_LINEAR)
     #cv2.imwrite(savedir_matrix  + str(save_sequence_num) +".jpg", Costmatrix)
-    cv2.imwrite(savedir_original  + str(save_sequence_num) +".jpg", gray_video)
-    cv2.imwrite(savedir_filtered_OCT  + str(save_sequence_num) +".jpg", filter_img)
-    cv2.imwrite(savedir_original_circular  + str(save_sequence_num) +".jpg", circular)
-
+    if Down_sample_flag ==True:
+        cv2.imwrite(savedir_original  + str(int(save_sequence_num/2)) +".jpg", gray_video)
+        cv2.imwrite(savedir_filtered_OCT  + str(int(save_sequence_num/2)) +".jpg", filter_img)
+        cv2.imwrite(savedir_original_circular  + str(int(save_sequence_num/2)) +".jpg", circular)
+    else:
+        cv2.imwrite(savedir_original  + str(save_sequence_num) +".jpg", gray_video)
+        cv2.imwrite(savedir_filtered_OCT  + str(save_sequence_num) +".jpg", filter_img)
+        cv2.imwrite(savedir_original_circular  + str(save_sequence_num) +".jpg", circular)
     save_sequence_num+=1
     print ("[%s]   is processed." % (save_sequence_num))
     

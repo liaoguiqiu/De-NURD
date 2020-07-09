@@ -55,12 +55,12 @@ class Dual_thread_Overall_shift_NURD(object):
       print('NURD start  ')
 
       
-      self.costmatrix,self.shift_used2= COSTMtrix.matrix_cal_corre_full_version3_2GPU (
+      self.costmatrix,self.shift_used2= COSTMtrix.matrix_cal_corre_block_version3_3GPU (
                                                               self.stream2[self.strmlen-1,:,:] ,
                                                               self.stream2[self.strmlen-2,:,:], 0) 
-                                                           
-      self.costmatrix  = myfilter.gauss_filter_s (self.costmatrix) # smooth matrix
-      self.costmatrix  = cv2.GaussianBlur(self.costmatrix,(5,5),0)
+      #self.costmatrix,self.shift_used2= COSTMtrix.     matrix_cal_corre_full_version_2  (self.stream2,0)
+      #self.costmatrix  = myfilter.gauss_filter_s (self.costmatrix) # smooth matrix
+      #self.costmatrix  = cv2.GaussianBlur(self.costmatrix,(5,5),0)
         # down sample the materix and up sample 
       #Hm,Wm= self.costmatrix.shape
       #self.costmatrix = cv2.resize(self.costmatrix, (int(Wm/2),int(Hm/2)), interpolation=cv2.INTER_AREA)
@@ -69,9 +69,9 @@ class Dual_thread_Overall_shift_NURD(object):
 
       # THE COST MATRIX COST 0.24 S
 
-      self.path  =  PATH.get_warping_vextor(self.costmatrix)  # THIS COST 0.03S
-      #start_point= PATH.find_the_starting(self.costmatrix) # starting point for path searching
-      #self.path,pathcost1  = PATH.search_a_path(self.costmatrix,start_point)
+      #self.path  =  PATH.get_warping_vextor(self.costmatrix)  # THIS COST 0.03S
+      start_point= PATH.find_the_starting(self.costmatrix) # starting point for path searching
+      self.path,pathcost1  = PATH.search_a_path(self.costmatrix,start_point)
       print('NURD end  ')
      
      #return x

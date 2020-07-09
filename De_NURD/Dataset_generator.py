@@ -21,12 +21,12 @@ Use_random_NURD = False
 if visdom_show_flag == True:
     from analy_visdom import VisdomLinePlotter
 
-add_noise_flag  = False
+add_noise_flag  = True
 Clip_matrix_flag = False
 NURD_remove_shift_flag= True 
 # 
 Show_circular_flag   = True
-Show_nurd_compare = False
+Show_nurd_compare = True
 ########################class for signal##########################################
 class Save_Signal_matlab(object):
       def __init__(self):
@@ -269,7 +269,10 @@ class DATA_Generator(object):
         show1[:,:,2] = Costmatrix
         
 
-        
+        for i in range ( len(path)):
+            painter = np.clip(path[i],1,Window_LEN-2)
+      
+            show1[int(painter),i,:]=show1[int(painter)-1,i,:]=[254,254,254]
             
         if Show_nurd_compare==True:
             start_point= PATH.find_the_starting(Costmatrix) # starting point for path searching
@@ -284,12 +287,9 @@ class DATA_Generator(object):
             for i in range ( len(path)):
                 painter2= np.clip(path_tradition[i],1,Window_LEN-2)
                 painter3 = np.clip(path_deep[i],1,Window_LEN-2) 
-                show1[int(painter2),i,:]=show1[int(painter2)-1,i,:]=[254,0,0]
-                show1[int(painter3),i,:]=show1[int(painter3)-1,i,:]=[0,254,254]
-        for i in range ( len(path)):
-            painter = np.clip(path[i],1,Window_LEN-2)
-      
-            show1[int(painter),i,:]=show1[int(painter)-1,i,:]=[254,254,254]
+                show1[int(painter2),i,:]=show1[int(painter2)-1,i,:]=[0,254,0]
+                show1[int(painter3),i,:]=show1[int(painter3)-1,i,:]=[0,0,254]
+       
         # save the  matrix to fil dir
         cv2.imwrite(self.data_mat_root_origin  + str(Image_ID) +".jpg", Costmatrix)
 
@@ -548,6 +548,6 @@ if __name__ == '__main__':
         #id,nurd,shift  =  save_test.read_pkl_infor_of_over_allshift_with_NURD()
  
         
-        #generator.generate_NURD ()
+        generator.generate_NURD ()
         #generator.generate_overall_shifting()
-        generator.generate_NURD_overall_shifting()
+        #generator.generate_NURD_overall_shifting()
