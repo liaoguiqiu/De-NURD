@@ -74,6 +74,9 @@
     <Compile Include="displayBline.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="display_pure.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="matlab.py">
       <SubType>Code</SubType>
     </Compile>

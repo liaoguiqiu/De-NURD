@@ -37,7 +37,9 @@ from  basic_trans import Basic_oper
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 Resample_size =Window_LEN
 Path_length = 128
-read_start = 100
+#read_start = 100
+read_start = 20
+
 Debug_flag  = True
 global intergral_flag
 intergral_flag =0
@@ -240,20 +242,23 @@ class VIDEO_PEOCESS:
     def fusion_estimation( shift_integral,path,overall_shift,I):
         #overall_shift =0
         shift_diff= path - int(Window_LEN/2)  # additional compensation 
+        ##shift_diff = gaussian_filter1d(shift_diff,3) # smooth the path 
+
         shift_integral = shift_integral + shift_diff  # not += : this is iteration way
-        #shift_integral = shift_integral - 0.15*(shift_integral-overall_shift) - 0.0001* I
-        #shift_integral = shift_integral - 0.15*(shift_integral-overall_shift) - 0.0001* I
+        #shift_integral = shift_integral - 0.05*(shift_integral-overall_shift) - 0.0001* I
+        #shift_integral = shift_integral - 0.45*(shift_integral-overall_shift) - 0.001* I
 
         #shift_integral = shift_integral - 0*(shift_integral-overall_shift) - 0* I
         #shift_integral = shift_integral - 0.1*(shift_integral-overall_shift) - 0.001* I
         #shift_integral = np.clip(shift_integral,overall_shift- Window_LEN/2,overall_shift+ Window_LEN/2)
-        shift_integral = gaussian_filter1d(shift_integral,5) # smooth the path 
+        #shift_integral = gaussian_filter1d(shift_integral,5) # smooth the path 
 
         #shift_integral = shift_integral - 0.2*(shift_integral-overall_shift) - 0.0000001*I
         #shift_integral = shift_integral*0 + overall_shift  
 
+        shift_integral = gaussian_filter1d(shift_integral,3) # smooth the path 
 
-        shift_integral = gaussian_filter1d(shift_integral,10) # smooth the path 
+        #shift_integral = gaussian_filter1d(shift_integral,10) # smooth the path 
        
         return shift_integral
 #----------------------#
@@ -332,7 +337,7 @@ class VIDEO_PEOCESS:
         Len_steam =5
         H,W= gray_video.shape  #get size of image
         H_start = 0
-        H_end = int(300)
+        H_end = int(H)
         steam=np.zeros((Len_steam,H_end-H_start,W))
         steam2=np.zeros((Len_steam,H_end-H_start ,W))
         save_sequence_num = 0  # processing iteration initial 

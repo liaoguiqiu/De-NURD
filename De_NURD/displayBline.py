@@ -138,6 +138,10 @@ def diplay_bline():
             rectan2 = gray_video2
             circular= tranfer2circ_padding(gray_video2)
             #cv2.imshow('circular video',circular ) 
+            rectan1= np.clip(rectan1,20,255)-20
+            rectan2= np.clip(rectan2,20,255)-20
+
+
             rectan1 = cv2.medianBlur(rectan1,5)
             rectan2 = cv2.medianBlur(rectan2,5)
             B_line1 = np.sum(rectan1[1:H_ini,:], axis=0)/(rectan1.shape[0]-1)

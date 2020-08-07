@@ -269,11 +269,11 @@ class DATA_Generator(object):
         show1[:,:,2] = Costmatrix
         
 
+        
         for i in range ( len(path)):
             painter = np.clip(path[i],1,Window_LEN-2)
       
-            show1[int(painter),i,:]=show1[int(painter)-1,i,:]=[254,254,254]
-            
+            show1[int(painter),i,:]=show1[int(painter)-1,i,:]=[254,254,254]   
         if Show_nurd_compare==True:
             start_point= PATH.find_the_starting(Costmatrix) # starting point for path searching
 
@@ -283,13 +283,18 @@ class DATA_Generator(object):
             path_deep,path_cost2=PATH.search_a_path_GPU (Costmatrix) # get the path and average cost of the path
             #path_deep=(path_deep -Window_LEN/2)*  Down_sample_F2 +Window_LEN/2
             path_deep = gaussian_filter1d(path_deep,3) # smooth the path 
-            
+            show1 = np.clip(show1,1,190)
+
             for i in range ( len(path)):
+                painter = np.clip(path[i],1,Window_LEN-2)
+      
+                show1[int(painter),i,:]=show1[int(painter)-1,i,:]=[254,254,254] 
                 painter2= np.clip(path_tradition[i],1,Window_LEN-2)
                 painter3 = np.clip(path_deep[i],1,Window_LEN-2) 
                 show1[int(painter2),i,:]=show1[int(painter2)-1,i,:]=[0,254,0]
                 show1[int(painter3),i,:]=show1[int(painter3)-1,i,:]=[0,0,254]
-       
+                
+        
         # save the  matrix to fil dir
         cv2.imwrite(self.data_mat_root_origin  + str(Image_ID) +".jpg", Costmatrix)
 
