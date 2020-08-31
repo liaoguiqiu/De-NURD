@@ -226,6 +226,8 @@ class COSTMtrix:
 
        a_stack  =  torch.from_numpy(a_stack)
        b_stack  =  torch.from_numpy(b_stack)
+       a_stack = a_stack.cuda()
+       b_stack = b_stack.cuda()
 
        #mulab = torch.mul(a_stack,b_stack)
        #mula2 = torch.mul(a_stack , a_stack)
