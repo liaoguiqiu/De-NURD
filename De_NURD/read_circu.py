@@ -8,6 +8,8 @@
 #operatedir_video =  "../../OCT/new video/P-ID_Name_25092019164030.avi"
 #D:\PhD\trying\tradition_method\OCT\database_download\cardiovascular
 operatedir_video =  "../../OCT/database_download/cardiovascular/1.mp4"
+operatedir_video =  "../../OCT/database_download/cardiovascular/2.mp4"
+
 #operatedir_video =  "../../OCT/database_download/Lungs/1.mov"
 
  
@@ -30,7 +32,7 @@ import random
 #from mpl_toolkits.mplot3d import Axes3D
 from median_filter_special import  myfilter
 from cost_matrix import  COSTMtrix
-
+Down_sample_CNT= 3
 #PythonETpackage for xml file edition
 try: 
     import xml.etree.cElementTree as ET 
@@ -81,34 +83,48 @@ if __name__ == '__main__':
     # Create a VideoCapture object and read from input file
     # If the input is the camera, pass 0 instead of the video file name
     cap = cv2.VideoCapture(operatedir_video)
- 
+    
     # Check if camera opened successfully
     if (cap.isOpened()== False): 
-      print("Error opening video stream or file")
+        print("Error opening video stream or file")
     #fig = figure() 
     # Read until video is completed
     Len_steam =5
     ret, frame = cap.read()
     if ret == True:
         H,W,_ = frame.shape
-    H_start = 50
+    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+    H_start = 0
     H_end = H
-    W_start = 0
+    W_start = int(W/2)
     #W_end = int(W/2)
     W_end = W
- 
+     
     steam=np.zeros((Len_steam,H_end-H_start,W))
     steam2=np.zeros((Len_steam,H_end-H_start,W))
     save_sequence_num = 0
 
-
+    read_start  =  0
     while(cap.isOpened()):
       # Capture frame-by-frame
       ret, frame = cap.read()
+      read_start += 1
+      if read_start % Down_sample_CNT !=0:
+          continue
       if ret == True:
- 
+        
         # Display the resulting frame
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        H,W = gray.shape
+        H_start = 0
+        H_end = H
+        W_start = int(W/2)
+        #W_end = int(W/2)
+        W_end = W
+        gray  = gray [H_start:H_end, W_start: W_end]
+        #H,W = gray.shape
+         
         if reverse_flag == True:
             gray = 255  - gray
    
@@ -136,8 +152,8 @@ if __name__ == '__main__':
         polar_image = tranfer_frome_cir2rec(gray)
 
         H,W= polar_image.shape
-        H_start = 85
-        H_end = 500
+        H_start = 0
+        H_end = H
         W_start = 0
         #W_end = int(W/2)
         W_end = W

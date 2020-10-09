@@ -40,7 +40,7 @@ Padding_H  = 0
 
 #Padding_H  = 254
 #from  path_finding import PATH
-Display_STD_flag = True
+Display_STD_flag = False
 Padd_zero_top = True
 Display_signal_flag = False
 Display_Matrix_flag = False
@@ -221,7 +221,7 @@ def diplay_sequence():
                 #show_2  = np.append(show_2,rectan1[:,:],axis=1) # cascade
 
                 #show_2 = cv2.resize(show_2, (int(show_2.shape[1]/1.5),int(show_2.shape[0]/1.5)), interpolation=cv2.INTER_AREA)
-                show_2 = cv2.resize(show_2, (int(show_2.shape[1]/1.5),int(show_2.shape[0]/1.5)), interpolation=cv2.INTER_AREA)
+                show_2 = cv2.resize(show_2, (int(show_2.shape[1]/1.1),int(show_2.shape[0]/1.1)), interpolation=cv2.INTER_AREA)
 
                 #show_2 = cv2.resize(show_2, (int(video_sizeW),int(video_sizeH)), interpolation=cv2.INTER_AREA)
 
@@ -237,7 +237,7 @@ def diplay_sequence():
                     stream= np.delete(stream , 0,axis=2) # update this every 50 frame
  
 
-            cv2.imshow('combin video',show_2.astype(np.uint8)) 
+            #cv2.imshow('combin video',show_2.astype(np.uint8)) 
             cv2.imshow('show 3 imgs sequence with color',stream.astype(np.uint8) ) 
             #videoout.write(stream)
             cv2.imwrite(save_display_dir  + str(i) +".jpg",stream )
