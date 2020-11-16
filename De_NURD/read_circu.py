@@ -7,10 +7,13 @@
 #operatedir_video =  "../../OCT/OCT aligment/phantom-01_2412020121234.avi"
 #operatedir_video =  "../../OCT/new video/P-ID_Name_25092019164030.avi"
 #D:\PhD\trying\tradition_method\OCT\database_download\cardiovascular
-operatedir_video =  "../../OCT/database_download/cardiovascular/1.mp4"
-operatedir_video =  "../../OCT/database_download/cardiovascular/2.mp4"
+#operatedir_video =  "../../OCT/database_download/cardiovascular/1.mp4"
+#operatedir_video =  "../../OCT/database_download/cardiovascular/2.mp4"
 
 #operatedir_video =  "../../OCT/database_download/Lungs/1.mov"
+#operatedir_video =  "../../OCT/colon/animal.avi"
+operatedir_video =  "../../OCT/colon/hiperPlastic_2.avi"
+operatedir_video =  "E:/database/video_dot/22JAN2020AUTO_02_2212020121028-Scale-0_5-41pix_Per_mm_CIRC-Rotated.avi"
 
  
 
@@ -32,7 +35,7 @@ import random
 #from mpl_toolkits.mplot3d import Axes3D
 from median_filter_special import  myfilter
 from cost_matrix import  COSTMtrix
-Down_sample_CNT= 3
+Down_sample_CNT= 2
 #PythonETpackage for xml file edition
 try: 
     import xml.etree.cElementTree as ET 
@@ -97,7 +100,10 @@ if __name__ == '__main__':
 
     H_start = 0
     H_end = H
-    W_start = int(W/2)
+    #W_start = int(W/2)
+    W_start = 0
+    W_start = 0
+
     #W_end = int(W/2)
     W_end = W
      
@@ -119,7 +125,12 @@ if __name__ == '__main__':
         H,W = gray.shape
         H_start = 0
         H_end = H
-        W_start = int(W/2)
+
+        #W_start = int(W/2)
+        W_start = 0
+
+        W_start = 0
+
         #W_end = int(W/2)
         W_end = W
         gray  = gray [H_start:H_end, W_start: W_end]
@@ -152,8 +163,16 @@ if __name__ == '__main__':
         polar_image = tranfer_frome_cir2rec(gray)
 
         H,W= polar_image.shape
-        H_start = 0
+        #H_start = 0
+        #H_start = 270
+        H_start = 31
+
+
         H_end = H
+        #H_end = 1400
+        H_end = 700
+
+
         W_start = 0
         #W_end = int(W/2)
         W_end = W

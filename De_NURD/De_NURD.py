@@ -4,8 +4,8 @@
 #operatedir_video =  "../../OCT/P-ID_Name_25092019161813-7500rpm-G1_0.05_4_25_extracted.avi"
 #E:\PhD\trying\OCT\OCT aligment
 #operatedir_video =  "../../OCT/OCT aligment/22JAN2020AUTO_01.avi"
-#operatedir_video =  "../../OCT/OCT aligment/phantom-01_2412020121234.avi"
-operatedir_video =  "../../OCT/animal/video.avi"
+operatedir_video =  "../../OCT/OCT aligment/phantom-01_2412020121234.avi"
+#operatedir_video =  "../../OCT/animal/video.avi"
 
 #operatedir_video =  "../../OCT/new video/P-ID_Name_25092019164030.avi"
 #operatedir_video =  "../../OCT/new video/Grape-04-7000rpms-20um-20mm-100kHz.avi"
@@ -62,8 +62,8 @@ Len_steam =5
 ret, frame = cap.read()
 if ret == True:
     H,W,_ = frame.shape
-#H_start = 150
-H_start = 254
+H_start = 20
+#H_start = 254
 
 H_end = H
  
