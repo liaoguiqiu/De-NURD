@@ -18,7 +18,7 @@ class Shift_Predict(object):
         dir_netD  = "../../DeepLearningModel/shift/netD_epoch_2.pth"
 
         self.Crop_start = 0
-        self.Crop_end  = 160
+        self.Crop_end  = 200
         self.Resample_size =512
         self.Resample_size2 =200
         self. Original_window_Len  = 71
@@ -46,12 +46,18 @@ class Shift_Predict(object):
     # the image sequence 1: new  2the stablized history 3: the reference
     def predict(self,img1,img2,img3):
         multi_scale_weight = [0.005, 0.01, 0.02, 0.16, 0.32]
+        multi_scale_weight = [0.2, 0.2, 0.2, 0.2, 0.2]
+
 
         H,W = img1.shape
         pair1  =   img1[self.Crop_start:self.Crop_end,:] 
         pair2  =   img3[self.Crop_start:self.Crop_end,:] 
         pair3  =   img1
         pair4  =   img2
+        #pair3  =   img2
+        #pair4  =   img1
+        #pair3  =   pair1
+        #pair4  =   pair2
         #pair4  =   pair2
         pair1  =  cv2.resize(pair1, (self.Resample_size,self.Resample_size2), interpolation=cv2.INTER_AREA)   -104.0
         pair2  =  cv2.resize(pair2, (self.Resample_size,self.Resample_size2), interpolation=cv2.INTER_AREA)   -104.0
@@ -75,7 +81,7 @@ class Shift_Predict(object):
         output = self.netD(inputv)
         save_out  = output
         save_out = save_out[4] 
-        save_out = save_out[0] 
+        #save_out = save_out[0] 
         ave_out =0
         for k in range(len(multi_scale_weight)):
             this_out =      output[k] 
@@ -86,7 +92,7 @@ class Shift_Predict(object):
         ave_out /= numpy.sum(multi_scale_weight)
 
         save_out  = (save_out.data.mean()) *(self.Original_window_Len   ) 
-        #save_out = ave_out
+        save_out = ave_out
         save_out  = numpy.clip(int(save_out),0, self.Original_window_Len   -1)
         return  save_out
 

@@ -12,8 +12,9 @@
 
 #operatedir_video =  "../../OCT/database_download/Lungs/1.mov"
 #operatedir_video =  "../../OCT/colon/animal.avi"
-operatedir_video =  "../../OCT/colon/hiperPlastic_2.avi"
+#operatedir_video =  "../../OCT/colon/hiperPlastic_2.avi"
 operatedir_video =  "E:/database/video_dot/22JAN2020AUTO_02_2212020121028-Scale-0_5-41pix_Per_mm_CIRC-Rotated.avi"
+#operatedir_video =  "E:/database/video_dot/tele_221202012329_CIRC.avi"
 
  
 
@@ -165,12 +166,16 @@ if __name__ == '__main__':
         H,W= polar_image.shape
         #H_start = 0
         #H_start = 270
-        H_start = 31
+        #H_start = 117
+        H_start = 81
 
 
-        H_end = H
+
+        #H_end = 1560
+        H_end = 750
+
         #H_end = 1400
-        H_end = 700
+        #H_end = 700
 
 
         W_start = 0
@@ -189,7 +194,9 @@ if __name__ == '__main__':
         #circular=circular.astype(np.uint8)
 
         #cv2.imwrite(savedir_matrix  + str(save_sequence_num) +".jpg", Costmatrix)
-        cv2.imwrite(savedir_original  + str(save_sequence_num) +".jpg", polar_image)
+        resized = cv2.resize(polar_image, (832,832), interpolation=cv2.INTER_AREA)
+
+        cv2.imwrite(savedir_original  + str(save_sequence_num) +".jpg", resized)
         #cv2.imwrite(savedir_filtered_OCT  + str(save_sequence_num) +".jpg", filter_img)
         cv2.imwrite(savedir_original_circular  + str(save_sequence_num) +".jpg", circular)
 

@@ -485,7 +485,7 @@ class DATA_Generator(object):
             #overall_shifting = min(overall_shifting,self.W/2) # limit the shifting here, maybe half the lenghth is sufficient  for the combination
             #overall_shifting = min(overall_shifting,self.W/2) # limit the shifting here, maybe half the lenghth is sufficient  for the combination
             random_shifting = np.random.random_sample()*Overall_shiftting_WinLen
-            random_shifting = (random_shifting-Overall_shiftting_WinLen/2)*0.4+Overall_shiftting_WinLen/2
+            random_shifting = (random_shifting-Overall_shiftting_WinLen/2)*4+Overall_shiftting_WinLen/2
             #Combine the overall shifting with NURD
 
             #path = path  + overall_shifting
@@ -553,6 +553,6 @@ if __name__ == '__main__':
         #id,nurd,shift  =  save_test.read_pkl_infor_of_over_allshift_with_NURD()
  
         
-        generator.generate_NURD ()
+        #generator.generate_NURD ()
         #generator.generate_overall_shifting()
-        #generator.generate_NURD_overall_shifting()
+        generator.generate_NURD_overall_shifting()
