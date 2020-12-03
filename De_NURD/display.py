@@ -35,7 +35,7 @@ from basic_trans import Basic_oper
 from  matlab import Save_Signal_matlab
 matlab_saver  = Save_Signal_matlab()
 
-#read_start = 1500
+read_start = 15
 Padding_H  = 0
 
 #Padding_H  = 254

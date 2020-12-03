@@ -34,6 +34,9 @@ import scipy.io
 from parrallel_thread import Dual_thread_Overall_shift_NURD
 from shift_deploy import Shift_Predict
 from  basic_trans import Basic_oper
+from ekf import EKF
+myekf = EKF()
+
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 Resample_size =Window_LEN
 Path_length = 128
@@ -244,19 +247,20 @@ class VIDEO_PEOCESS:
         shift_diff= path - int(Window_LEN/2)  # additional compensation 
         ##shift_diff = gaussian_filter1d(shift_diff,3) # smooth the path 
 
+        # PI fusion
         shift_integral = shift_integral + shift_diff  # not += : this is iteration way
-        #shift_integral = shift_integral - 0.05*(shift_integral-overall_shift) - 0.0001* I
-        #shift_integral = shift_integral - 0.45*(shift_integral-overall_shift) - 0.001* I
-
-        #shift_integral = shift_integral - 0*(shift_integral-overall_shift) - 0* I
         shift_integral = shift_integral - 0.2*(shift_integral-overall_shift) - 0.000001* I
+        # EKF fusion
+        #shift_integral = myekf.update(shift_diff,overall_shift)
+
+
         #shift_integral = np.clip(shift_integral,overall_shift- Window_LEN/2,overall_shift+ Window_LEN/2)
         #shift_integral = gaussian_filter1d(shift_integral,5) # smooth the path 
 
         #shift_integral = shift_integral - 0.2*(shift_integral-overall_shift) - 0.0000001*I
         #shift_integral = shift_integral*0 + overall_shift  
 
-        shift_integral = gaussian_filter1d(shift_integral,3) # smooth the path 
+        #shift_integral = gaussian_filter1d(shift_integral,3) # smooth the path 
 
         shift_integral = gaussian_filter1d(shift_integral,10) # smooth the path 
        
