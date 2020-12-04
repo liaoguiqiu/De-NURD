@@ -3,6 +3,8 @@ operatedir_video = "D:/PhD/trying/tradition_method/OCT/sheath registration/pairB
 
 #operatedir_video2 = "D:/PhD/trying/tradition_method/OCT/sheath registration/pair A/without rectan/"
 operatedir_video2 = "D:/PhD/trying/tradition_method/OCT/sheath registration/pairB/with ractangular/2/"
+#operatedir_video2 = "D:/PhD/trying/tradition_method/OCT/sheath registration/pairB/with ruler/1/"
+
 
 #savedir_process = "../../saved_pair2/"
 #operatedir_video = "../../saved_pair1/"

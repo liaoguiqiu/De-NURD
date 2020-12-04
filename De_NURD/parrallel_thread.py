@@ -41,6 +41,10 @@ class Dual_thread_Overall_shift_NURD(object):
 
        img2 = self.stream1[self.strmlen-2,:,:]
        img3 = self.stream1[0,:,:]
+       H,W = img1.shape 
+       #self.overall_shifting,shift_used1 = COSTMtrix.Img_fully_shifting_correlation (img1[200:H,:],
+       #                                                       img3[200:H,:],  self.shift_used1 )
+       #self.shift_used1 += self.overall_shifting
        #self.overall_shifting,shift_used1 = COSTMtrix.Img_fully_shifting_correlation (img1[0:200,:],
        #                                                       img3[0:200,:],  self.shift_used1 )
        #self.shift_used1 += self.overall_shifting

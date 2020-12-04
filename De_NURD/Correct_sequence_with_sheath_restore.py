@@ -2,8 +2,10 @@ operatedir_matrix  =  "../../saved_matrix/"
 operatedir_matrix_unprocessed  =  "../../saved_matrix_unprocessed/"
 
 # reference folder
-reference_dir  =  "D:/PhD/trying/tradition_method/OCT/sheath registration/pairB/with ruler/1/"
-reference_start = 89
+#reference_dir  =  "D:/PhD/trying/tradition_method/OCT/sheath registration/pairB/with ruler/1/"
+reference_dir  =  "D:/PhD/trying/tradition_method/OCT/sheath registration/pairB/with ruler/correct/"
+
+reference_start = 5  
 
  #saved_matrix_unprocessed
 operatedir_one =  "../../saved_matrix/126.jpg"
@@ -46,7 +48,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 Resample_size =Window_LEN
 Path_length = 128
 #read_start = 100
-read_start = 0
+read_start = 0  
 
 Debug_flag  = True
 global intergral_flag
@@ -366,7 +368,9 @@ class VIDEO_PEOCESS:
                 H_ori , W_ori  = gray_video.shape
                 gray_video = cv2.resize(gray_video, (832,H_ori), interpolation=cv2.INTER_LINEAR)
                 start_time  = time()
-                referen_img_dir =  reference_dir + "image" + str(sequence_num+ reference_start - read_start)+ ".jpg" # starting from 10
+                referen_img_dir =  reference_dir + str(sequence_num+ reference_start - read_start)+ ".jpg" # starting from 10
+                #referen_img_dir =  reference_dir + "image" + str(sequence_num+ reference_start - read_start)+ ".jpg" # starting from 10
+                
                 referen_img = cv2.imread(referen_img_dir)
                 referen_img  =   cv2.cvtColor(referen_img, cv2.COLOR_BGR2GRAY)
 
