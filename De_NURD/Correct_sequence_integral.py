@@ -34,6 +34,7 @@ import scipy.io
 from parrallel_thread import Dual_thread_Overall_shift_NURD
 from shift_deploy import Shift_Predict
 from  basic_trans import Basic_oper
+from Path_post_pcs import PATH_POST
 from ekf import EKF
 myekf = EKF()
 
@@ -41,7 +42,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 Resample_size =Window_LEN
 Path_length = 128
 #read_start = 100
-read_start = 300
+read_start = 15
 
 Debug_flag  = True
 global intergral_flag
@@ -249,7 +250,9 @@ class VIDEO_PEOCESS:
 
         # PI fusion
         shift_integral = shift_integral + shift_diff  # not += : this is iteration way
-        shift_integral = shift_integral - 0.2*(shift_integral-overall_shift) - 0.000001* I
+        #shift_integral = PATH_POST.path_integral(shift_integral,shift_diff)
+
+        shift_integral = shift_integral - 0.15*(shift_integral-overall_shift) - 0.000001* I
         # EKF fusion
         #shift_integral = myekf.update(shift_diff,overall_shift)
 
@@ -328,7 +331,6 @@ class VIDEO_PEOCESS:
 #---------main schedule-------------#
     def main():
 
-        shift_integral = 0
         read_sequence = os.listdir(operatedir_video) # read all file name
         seqence_Len = len(read_sequence)    # get all file number 
         img_path = operatedir_video +  str(read_start) +".jpg"
@@ -336,6 +338,7 @@ class VIDEO_PEOCESS:
         gray_video  =   cv2.cvtColor(video, cv2.COLOR_BGR2GRAY)
         H_ori , W_ori  = gray_video.shape
         gray_video = cv2.resize(gray_video, (832,H_ori), interpolation=cv2.INTER_LINEAR)
+        shift_integral = np.zeros(832)
         
 
         Len_steam =5

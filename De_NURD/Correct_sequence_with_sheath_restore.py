@@ -15,6 +15,7 @@ savedir_rectan_ = "../../saved_processed_polar/"
 from analy import Save_signal_flag
 # notificatiton for the naming of stream： all “steam” in this project means 
 #"stream"
+from Path_post_pcs import PATH_POST
 
 import cv2
 import math
@@ -252,7 +253,8 @@ class VIDEO_PEOCESS:
         ##shift_diff = gaussian_filter1d(shift_diff,3) # smooth the path 
 
         # PI fusion
-        shift_integral = shift_integral + shift_diff  # not += : this is iteration way
+        #shift_integral = shift_integral + shift_diff  # not += : this is iteration way
+        shift_integral = PATH_POST.path_integral(shift_integral,shift_diff)
         shift_integral = shift_integral - 0.2*(shift_integral-overall_shift) - 0.000001* I
         # EKF fusion
         #shift_integral = myekf.update(shift_diff,overall_shift)
@@ -332,7 +334,8 @@ class VIDEO_PEOCESS:
 #---------main schedule-------------#
     def main():
 
-        shift_integral = 0
+        shift_integral = np.zeros(832)
+
         read_sequence = os.listdir(operatedir_video) # read all file name
         seqence_Len = len(read_sequence)    # get all file number 
         img_path = operatedir_video +  str(read_start) +".jpg"
