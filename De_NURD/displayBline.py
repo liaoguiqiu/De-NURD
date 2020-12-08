@@ -1,5 +1,8 @@
 savedir_process = "../../saved_processed_polar/"
+savedir_process  = "D:/PhD/trying/tradition_method/OCT/sheath registration/pairB/with ruler/correct2/"
+
 operatedir_video = "../../saved_original/"
+operatedir_video  = "D:/PhD/trying/tradition_method/OCT/sheath registration/pairB/with ruler/correct/"
 
 #savedir_process = "../../saved_pair2/"
 #operatedir_video = "../../saved_pair1/"
@@ -32,7 +35,7 @@ from mpl_toolkits.mplot3d import Axes3D
 from Correct_sequence_integral import read_start 
 from read_circu import tranfer_frome_rec2cir
 from PIL import Image, ImageEnhance
-#read_start = 1500
+read_start = 5
 Padding_H  = 1
 #from  path_finding import PATH
 Display_STD_flag = False

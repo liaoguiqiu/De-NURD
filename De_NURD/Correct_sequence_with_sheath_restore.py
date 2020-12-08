@@ -3,7 +3,7 @@ operatedir_matrix_unprocessed  =  "../../saved_matrix_unprocessed/"
 
 # reference folder
 #reference_dir  =  "D:/PhD/trying/tradition_method/OCT/sheath registration/pairB/with ruler/1/"
-reference_dir  =  "D:/PhD/trying/tradition_method/OCT/sheath registration/pairB/with ruler/correct/"
+reference_dir  =  "D:/PhD/trying/tradition_method/OCT/sheath registration/pairB/with ruler/correct2/"
 
 reference_start = 5  
 
@@ -257,18 +257,18 @@ class VIDEO_PEOCESS:
         # PI fusion
         #shift_integral = shift_integral + shift_diff  # not += : this is iteration way
         shift_integral = PATH_POST.path_integral(shift_integral,shift_diff)
-        shift_integral = shift_integral - 0.2*(shift_integral-overall_shift) - 0.000001* I
+        shift_integral = shift_integral - 0.2*(shift_integral-overall_shift)  - 0.1*(np.average (shift_integral) - overall_shift)   - 0.01* I 
         # EKF fusion
         #shift_integral = myekf.update(shift_diff,overall_shift)
 
 
-        #shift_integral = np.clip(shift_integral,overall_shift- Window_LEN/2,overall_shift+ Window_LEN/2)
+        #shift_integral = np.clip(shift_integral,np.average (shift_integral)- 10,np.average (shift_integral)+ 10)
         #shift_integral = gaussian_filter1d(shift_integral,5) # smooth the path 
 
         #shift_integral = shift_integral - 0.2*(shift_integral-overall_shift) - 0.0000001*I
         #shift_integral = shift_integral*0 + overall_shift  
 
-        #shift_integral = gaussian_filter1d(shift_integral,3) # smooth the path 
+        shift_integral = gaussian_filter1d(shift_integral,3) # smooth the path 
 
         shift_integral = gaussian_filter1d(shift_integral,10) # smooth the path 
        
