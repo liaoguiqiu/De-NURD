@@ -39,6 +39,9 @@
     <Compile Include="Correct_sequence_with_sheath_restore.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Correct_smooth.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="cost_matrix.py">
       <SubType>Code</SubType>
     </Compile>

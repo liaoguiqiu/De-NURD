@@ -341,7 +341,7 @@ class VIDEO_PEOCESS:
         shift_integral = np.zeros(832)
         
 
-        Len_steam =10
+        Len_steam =2
         H,W= gray_video.shape  #get size of image
         H_start = 0
         H_end = int(H)
@@ -365,7 +365,7 @@ class VIDEO_PEOCESS:
 
                 if(sequence_num<read_start+ 5):
                     # bffer a resized one to coputer the path and cost matrix
-                    steam=np.append(steam,[gray_video[H_start:H_end,:] ],axis=0) # save sequence
+                    steam=np.append(steam,[gray_video[H_start:H_end,:] ],axis=0) # save sequence3
                     # normal beffer process
                     steam= np.delete(steam , 0,axis=0)
       
@@ -379,7 +379,7 @@ class VIDEO_PEOCESS:
                     steam2=np.append(steam2,[gray_video[H_start:H_end,:] ],axis=0) # save sequence
                     steam2= np.delete(steam2 , 0,axis=0)
 
-                    Corrected_img  = myfilter.steam_filter_avg(steam2)
+                    Corrected_img  = myfilter.steam_filter_avg (steam2)
                      
                      
 

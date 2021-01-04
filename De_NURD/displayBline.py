@@ -156,10 +156,10 @@ def diplay_bline():
 
             rectan1 = cv2.medianBlur(rectan1,5)
             rectan2 = cv2.medianBlur(rectan2,5)
-            B_line1 = np.sum(rectan1[1:H_ini,:], axis=0)/(rectan1.shape[0]-1)
-            B_line2 = np.sum(rectan2[1:H_ini,:], axis=0)/(rectan2.shape[0]-1)
-            #B_line1 = B_line1/np.max(B_line1) *255
-            #B_line2 = B_line2/np.max(B_line2) *255
+            B_line1 = np.sum(rectan1[220:H_ini,:], axis=0)/(rectan1.shape[0]-1)
+            B_line2 = np.sum(rectan2[220:H_ini,:], axis=0)/(rectan2.shape[0]-1)
+            B_line1 = B_line1/np.max(B_line1) *255
+            B_line2 = B_line2/np.max(B_line2) *255
             #B_line1=B_line1*B_line1
             #B_line2=B_line2*B_line2
             #B_line1=B_line1*200

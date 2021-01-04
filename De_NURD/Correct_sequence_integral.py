@@ -252,7 +252,7 @@ class VIDEO_PEOCESS:
         shift_integral = shift_integral + shift_diff  # not += : this is iteration way
         #shift_integral = PATH_POST.path_integral(shift_integral,shift_diff)
 
-        shift_integral = shift_integral - 0.15*(shift_integral-overall_shift) - 0.000001* I
+        shift_integral = shift_integral - 0.10*(shift_integral-overall_shift) - 0.00001* I
         # EKF fusion
         #shift_integral = myekf.update(shift_diff,overall_shift)
 
@@ -265,7 +265,7 @@ class VIDEO_PEOCESS:
 
         #shift_integral = gaussian_filter1d(shift_integral,3) # smooth the path 
 
-        shift_integral = gaussian_filter1d(shift_integral,10) # smooth the path 
+        shift_integral = gaussian_filter1d(shift_integral,8) # smooth the path 
        
         return shift_integral
 #----------------------#

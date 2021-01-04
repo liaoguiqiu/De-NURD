@@ -35,7 +35,7 @@ from basic_trans import Basic_oper
 from  matlab import Save_Signal_matlab
 matlab_saver  = Save_Signal_matlab()
 
-read_start = 150
+read_start = 0
 Padding_H  = 0
 
 #Padding_H  = 254
@@ -53,18 +53,24 @@ video_sizeW= 900
 
 class Derivation_validate(object):
     def  __init__(self, H,W):
-        self.Len_steam = 10
-        self.crop_startH = 200
-        self.cropH = int(700)
+        self.Len_steam = 3
+        self.crop_startH = 1
+        self.cropH = int(800)
+        #self.cropH = 700
+
         # the sheath std
         #self.crop_startH = 1
         #self.cropH = int(230)
-
+        
 
         self.crop_startW = 100
+        self.crop_startW = 1
+
         #self.crop_startW = 360
 
         self.cropW = int(800)
+        self.cropW = W
+
         #self.crop_startH = 0
         #self.cropH = int(700)
         #self.crop_startW = 0
@@ -90,8 +96,8 @@ class Derivation_validate(object):
         if self.cnt%self.sample_rate==0:
             #img1= np.clip(img1,85,255)-85
             #img2= np.clip(img2,85,255)-85
-            img1  = (img1 > 85)*  (img1*0+254)
-            img2  = (img2 > 35) * (img2*0+254)
+            #img1  = (img1 > 85)*  (img1*0+254)
+            #img2  = (img2 > 85) * (img2*0+254)
             #img1  = (img1 > 85)*  img1
             #img2  = (img2 > 85) * img2 
             #source1  =  cv2.GaussianBlur(img1,(5,5),0)
@@ -116,11 +122,38 @@ class Derivation_validate(object):
         #a_stack=a_stack.sum(dim=1)/(self.cropH -self.crop_startH)
         #b_stack=b_stack.sum(dim=1)/(self.cropH -self.crop_startH)
 
+        L,H,W = a_stack.size() 
 
-        stda =  a_stack.std( dim = 0)
-        stda = float(stda.data.mean())
-        stdb=  b_stack.std( dim = 0)
-        stdb = float( stdb.data.mean())
+        #stda =  a_stack.std( dim = 0)
+        avg = torch.sum(a_stack,dim=0) / L
+        dev  =  a_stack - avg
+        dev2 = torch.abs (dev)
+        stda =  torch.sum(dev2,dim=0) / L
+
+        mask1 = (stda > 20)
+        mask2 = (avg  > 40)
+        mask  = mask2 * mask1
+        stda = stda*mask
+        stda =  (torch.sum(mask)+1)
+        #stda = float(stda.data.mean())
+
+        L,H,W = b_stack.size() 
+
+        #stda =  a_stack.std( dim = 0)
+        avg = torch.sum(b_stack,dim=0) / L
+ 
+        dev  =  b_stack - avg
+        dev2 = torch.abs (dev)
+
+        stdb =  torch.sum(dev2,dim=0) / L
+        mask1 = (stdb > 20)
+ 
+        mask2 = (avg  > 40)
+        mask  = mask2 * mask1
+        stdb = stdb*mask
+        stdb = (torch.sum(mask)+1)
+        #stdb=  b_stack.std( dim = 0)
+        #stdb = float( stdb.data.mean())
         if self.cnt>self.Len_steam:
             if (stda>self.maxa):
                 self.maxa = stda
