@@ -5,7 +5,7 @@
     <ProjectGuid>07b9d663-4bc8-4016-8977-35b22d05cc4c</ProjectGuid>
     <ProjectHome>
     </ProjectHome>
-    <StartupFile>Correct_sequence_with_sheath_restore.py</StartupFile>
+    <StartupFile>display.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>

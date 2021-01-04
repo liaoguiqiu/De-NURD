@@ -1,9 +1,17 @@
 #operatedir_video = "D:/PhD/trying/tradition_method/OCT/sheath registration/pair A/with rectan/"
-operatedir_video = "D:/PhD/trying/tradition_method/OCT/sheath registration/pairB/with ruler/1/"
+operatedir_video = "D:/PhD/trying/tradition_method/OCT/sheath registration/pairC/rectangular/3/"
 
 #operatedir_video2 = "D:/PhD/trying/tradition_method/OCT/sheath registration/pair A/without rectan/"
-operatedir_video2 = "D:/PhD/trying/tradition_method/OCT/sheath registration/pairB/with ractangular/2/"
-#operatedir_video2 = "D:/PhD/trying/tradition_method/OCT/sheath registration/pairB/with ruler/1/"
+operatedir_video2 = "D:/PhD/trying/tradition_method/OCT//sheath registration/pairC/rectangular/3/"
+##operatedir_video2 = "D:/PhD/trying/tradition_method/OCT/sheath registration/pairC/ruler/2/"
+#operatedir_video2 = "D:/PhD/trying/tradition_method/OCT/sheath registration/pairC/phantom/1/"
+
+
+#operatedir_video2 = "D:/PhD/trying/tradition_method/OCT/sheath registration/pairC/ruler/2/"
+#operatedir_video2 = "D:/PhD/trying/tradition_method/OCT/sheath registration/pairC/rectangular/3/"
+
+#save_dir_rectan  =  "D:/PhD/trying/tradition_method/OCT/sheath registration/pairC/ruler/2_/"
+save_dir_rectan  =  "../../saved_original/"
 
 
 #savedir_process = "../../saved_pair2/"
@@ -22,7 +30,6 @@ savedir_origin_circle =  "../../saved_original_circular/"
 save_display_dir = "../../saved_display_compare/"
 
 save_displaygray_dir = "../../saved_display_compare_gray/"
-save_dir_rectan  = "../../saved_original/"
 import cv2
 import math 
 import numpy as np
@@ -42,7 +49,7 @@ from  matlab import Save_Signal_matlab
 matlab_saver  = Save_Signal_matlab()
 
 read_start1 = 89
-read_start2 = 106
+read_start2 = 88
 
 Padding_H  = 0
 
@@ -106,6 +113,8 @@ def diplay_sequence():
 
             # raws 
             img_path2 = operatedir_video2 +  "image" +  str(i+read_start2)+ ".jpg"
+            #img_path2 = operatedir_video2   +  str(i+read_start2)+ ".jpg"
+
             video2 = cv2.imread(img_path2)
             cv2.imwrite(save_dir_rectan  + str(i) +".jpg",video2 ) 
             gray_video2  =   cv2.cvtColor(video2, cv2.COLOR_BGR2GRAY)

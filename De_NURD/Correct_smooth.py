@@ -1,14 +1,6 @@
 operatedir_matrix  =  "../../saved_matrix/"
 operatedir_matrix_unprocessed  =  "../../saved_matrix_unprocessed/"
 
-# reference folder
-#reference_dir  =  "D:/PhD/trying/tradition_method/OCT/sheath registration/pairB/with ruler/1/"
-reference_dir  =  "D:/PhD/trying/tradition_method/OCT/sheath registration/pairB/with ruler/correct2/"
-reference_dir  =  "D:/PhD/trying/tradition_method/OCT/sheath registration/pairC/ruler/2_correct/"
-
-
-reference_start = 149 
-
  #saved_matrix_unprocessed
 operatedir_one =  "../../saved_matrix/126.jpg"
 operatedir_video = "../../saved_original/"
@@ -19,7 +11,6 @@ savedir_rectan_ = "../../saved_processed_polar/"
 from analy import Save_signal_flag
 # notificatiton for the naming of stream： all “steam” in this project means 
 #"stream"
-from Path_post_pcs import PATH_POST
 
 import cv2
 import math
@@ -43,6 +34,7 @@ import scipy.io
 from parrallel_thread import Dual_thread_Overall_shift_NURD
 from shift_deploy import Shift_Predict
 from  basic_trans import Basic_oper
+from Path_post_pcs import PATH_POST
 from ekf import EKF
 myekf = EKF()
 
@@ -50,7 +42,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 Resample_size =Window_LEN
 Path_length = 128
 #read_start = 100
-read_start = 138 
+read_start = 0
 
 Debug_flag  = True
 global intergral_flag
@@ -257,22 +249,21 @@ class VIDEO_PEOCESS:
         ##shift_diff = gaussian_filter1d(shift_diff,3) # smooth the path 
 
         # PI fusion
-        #shift_integral = shift_integral + shift_diff  # not += : this is iteration way
-        shift_integral = PATH_POST.path_integral(shift_integral,shift_diff)
-        shift_integral = shift_integral - 0.15*(shift_integral-overall_shift)      - 0.0000001* I 
-        #shift_integral = shift_integral - 0.45*(shift_integral-overall_shift)  - 0.01*(np.average (shift_integral) - overall_shift)   - 0.01* I 
-        
+        shift_integral = shift_integral + shift_diff  # not += : this is iteration way
+        #shift_integral = PATH_POST.path_integral(shift_integral,shift_diff)
+
+        shift_integral = shift_integral - 0.15*(shift_integral-overall_shift) - 0.000001* I
         # EKF fusion
         #shift_integral = myekf.update(shift_diff,overall_shift)
 
 
-        #shift_integral = np.clip(shift_integral,np.average (shift_integral)- 10,np.average (shift_integral)+ 10)
+        #shift_integral = np.clip(shift_integral,overall_shift- Window_LEN/2,overall_shift+ Window_LEN/2)
         #shift_integral = gaussian_filter1d(shift_integral,5) # smooth the path 
 
         #shift_integral = shift_integral - 0.2*(shift_integral-overall_shift) - 0.0000001*I
         #shift_integral = shift_integral*0 + overall_shift  
 
-        shift_integral = gaussian_filter1d(shift_integral,3) # smooth the path 
+        #shift_integral = gaussian_filter1d(shift_integral,3) # smooth the path 
 
         shift_integral = gaussian_filter1d(shift_integral,10) # smooth the path 
        
@@ -340,8 +331,6 @@ class VIDEO_PEOCESS:
 #---------main schedule-------------#
     def main():
 
-        shift_integral = np.zeros(832)
-
         read_sequence = os.listdir(operatedir_video) # read all file name
         seqence_Len = len(read_sequence)    # get all file number 
         img_path = operatedir_video +  str(read_start) +".jpg"
@@ -349,9 +338,10 @@ class VIDEO_PEOCESS:
         gray_video  =   cv2.cvtColor(video, cv2.COLOR_BGR2GRAY)
         H_ori , W_ori  = gray_video.shape
         gray_video = cv2.resize(gray_video, (832,H_ori), interpolation=cv2.INTER_LINEAR)
+        shift_integral = np.zeros(832)
         
 
-        Len_steam =5
+        Len_steam =10
         H,W= gray_video.shape  #get size of image
         H_start = 0
         H_end = int(H)
@@ -372,14 +362,7 @@ class VIDEO_PEOCESS:
                 H_ori , W_ori  = gray_video.shape
                 gray_video = cv2.resize(gray_video, (832,H_ori), interpolation=cv2.INTER_LINEAR)
                 start_time  = time()
-                referen_img_dir =  reference_dir + str(sequence_num+ reference_start - read_start)+ ".jpg" # starting from 10
-                #referen_img_dir =  reference_dir + "image" + str(sequence_num+ reference_start - read_start)+ ".jpg" # starting from 10
-                
-                referen_img = cv2.imread(referen_img_dir)
-                referen_img  =   cv2.cvtColor(referen_img, cv2.COLOR_BGR2GRAY)
 
-                referen_img = cv2.resize(referen_img, (832,H_ori), interpolation=cv2.INTER_LINEAR)
-                
                 if(sequence_num<read_start+ 5):
                     # bffer a resized one to coputer the path and cost matrix
                     steam=np.append(steam,[gray_video[H_start:H_end,:] ],axis=0) # save sequence
@@ -393,59 +376,12 @@ class VIDEO_PEOCESS:
                     steam=np.append(steam,[gray_video[H_start:H_end,:] ],axis=0) # save sequence
                     # no longer delete the fist  one
                     steam= np.delete(steam , 1,axis=0)
-                    # and set the first one as the reference imag 
-                    #steam[0,:,:]  = referen_img
-                    steam[0,:,:] = np.roll(referen_img, 174 , axis = 1)  # preshift the reference
-
                     steam2=np.append(steam2,[gray_video[H_start:H_end,:] ],axis=0) # save sequence
                     steam2= np.delete(steam2 , 0,axis=0)
 
-                    dual_thread.input(steam,steam2,Len_steam,addition_window_shift)
-
-                    dual_thread.runInParallel()
-                    
-                    overall_shifting,shift_used1 = dual_thread.output_overall()
-                    shift_mean_error = int(overall_shifting)- int(Overall_shiftting_WinLen/2)
-                    #shift_mean_error = overall_shifting- Overall_shiftting_WinLen/2
-
-                    #filter
-                    addition_window_shift =  int(shift_mean_error  +shift_used1)
-                    #addition_window_shift = 0.3*addition_window_shift+0.7* int(shift_mean_error  +shift_used1)
-
-
-                    path,Costmatrix,shift_used2  = dual_thread.output_NURD()
-                    #path =path+1
-                    # shifting used is zero in costmatrix caculation
- 
-                    # actuall overall shifting iterative way here is the shifting between frame
-                    #overall_shifting,shift_used1 = COSTMtrix.Img_fully_shifting_distance (steam[Len_steam-1,:,:],
-                    #                                          steam[0,:,:],  addition_window_shift)
-                    
-                    #Costmatrix,shift_used2 = COSTMtrix.matrix_cal_corre_full_version3_2GPU (steam2[Len_steam-1,:,:] ,
-                    #                                          steam2[Len_steam-2,:,:], 0) 
-
-
-
-                    ###Costmatrix = Costmatrix2
-                    #Costmatrix = cv2.blur(Costmatrix,(5,5))
-                    #Costmatrix  = myfilter.gauss_filter_s (Costmatrix) # smooth matrix
-                    #path  =  VIDEO_PEOCESS.get_warping_vextor(Costmatrix)
-
-                    shift_integral = VIDEO_PEOCESS.fusion_estimation(shift_integral,path,addition_window_shift,Window_ki_error)
-
-                    Window_ki_error = (shift_integral-addition_window_shift)+Window_ki_error
-                    #addition_window_shift = np.mean(shift_integral)
-
-                    #path = np.zeros(Costmatrix.shape[1])
-                    #path = path  + shift_used1 + overall_shifting
-                    ###get path and correct image
-                    ###Corrected_img,path,path_cost=   VIDEO_PEOCESS.correct_video(gray_video,Costmatrix,int(i),addition_window_shift +Kp )
-                    #Corrected_img,path,shift_integral,path_cost=   VIDEO_PEOCESS.correct_video(gray_video,overall_shifting,Costmatrix,
-                    #                                                                           shift_integral,int(sequence_num),
-                    #                                                                  shift_used2  )
-
-                    Corrected_img = VIDEO_PEOCESS.de_distortion_integral2(gray_video,shift_integral,sequence_num)
-                    
+                    Corrected_img  = myfilter.steam_filter_avg(steam2)
+                     
+                     
 
                     path_cost =0
                     #overall_shifting3,shift_used3 = COSTMtrix.Img_fully_shifting_correlation(Corrected_img[H_start:H_end,:],
@@ -454,7 +390,7 @@ class VIDEO_PEOCESS:
 
                     # remove the central shifting 
                     #addition_window_shift = -0.00055*(np.mean(path)- int(Window_LEN/2))+addition_window_shift
-                    path_mean_error = (np.mean(path)- int(Window_LEN/2))
+                   
                 
             
                     # remove intergral bias ( here just condsider the overal img should be in the center) 
@@ -477,31 +413,14 @@ class VIDEO_PEOCESS:
                     #steam2=np.append(steam2,[Corrected_img ],axis=0) # save sequence
                     ## no longer delete the fist  one
                     #steam2= np.delete(steam2 , 0,axis=0)
-                    if Debug_flag ==True:
-                        if(Save_signal_flag==True):
-      
-                            new = np.zeros((signal_saved.DIM,1))
-                            new[Save_signal_enum.image_iD.value] = sequence_num
-                            new[Save_signal_enum.additional_kp.value]=  Kp
-                            new[Save_signal_enum.additional_ki.value]=  addition_window_shift
-                            new[Save_signal_enum.path_cost.value]=  path_cost
-                            new[Save_signal_enum.mean_path_error.value]=  path_mean_error
-                            signal_saved.add_new_iteration_result(new,path)
-                            #
-                            signal_saved.buffer_path_integral(shift_integral)
-                            signal_saved.display_and_save2(sequence_num,new)
-                        show1 =  Costmatrix
                      
-                        circular = Basic_oper.tranfer_frome_rec2cir(Corrected_img)
-                        path = np.clip(path,0,Window_LEN-1)
-                        for i in range ( len(path)):
-                            show1[int(path[i]),i]=254 # plot the iterative path
-                            #show1[int(shift_integral[i]+int(Window_LEN/2)),i]=128 # plot the intergral
+                     
+                    circular = Basic_oper.tranfer_frome_rec2cir(Corrected_img)
+       
 
-                        cv2.imwrite(savedir_path  + str(sequence_num) +".jpg", circular)
-                        cv2.imwrite(operatedir_matrix_unprocessed  + str(sequence_num) +".jpg", Costmatrix)
-                        cv2.imwrite(operatedir_matrix  + str(sequence_num) +".jpg", show1)
-                        cv2.imwrite(savedir_rectan_  + str(sequence_num) +".jpg",Corrected_img )
+                    cv2.imwrite(savedir_path  + str(sequence_num) +".jpg", circular)
+            
+                    cv2.imwrite(savedir_rectan_  + str(sequence_num) +".jpg",Corrected_img )
 
                     print ("[%s]   is processed.   " % (sequence_num ))
                     test_time_point = time()

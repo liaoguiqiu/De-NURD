@@ -45,9 +45,9 @@ class Dual_thread_Overall_shift_NURD(object):
        #self.overall_shifting,shift_used1 = COSTMtrix.Img_fully_shifting_correlation (img1[200:H,:],
        #                                                       img3[200:H,:],  self.shift_used1 )
        #self.shift_used1 += self.overall_shifting
-       #self.overall_shifting,shift_used1 = COSTMtrix.Img_fully_shifting_correlation (img1[0:200,:],
-       #                                                       img3[0:200,:],  self.shift_used1 )
-       #self.shift_used1 += self.overall_shifting
+       self.overall_shifting,shift_used1 = COSTMtrix.Img_fully_shifting_correlation (img1[0:210,:],
+                                                              img3[0:210,:],  self.shift_used1 )
+       self.shift_used1 += self.overall_shifting
        img1 = np.roll(img1, self.shift_used1  , axis = 1)     # Positive x rolls right
        self.overall_shifting = self.shift_predictor.predict(img1,img2,img3) # THIS COST 0.01 s
 

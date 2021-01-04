@@ -1,7 +1,13 @@
+# this file can also be used for reading the rectangular video
+
+
 #operatedir_pic =  "../initialbackground/"
 #operatedir_video =  "D:/PhD/trying/OCT/P-ID_Name_25092019160318VIDEO.avi"
-#operatedir_video =  "../../OCT/P-ID_Name_25092019160318VIDEO.avi"
-operatedir_video =  "../../OCT/P-ID_Name_25092019161813-7500rpm-G1_0.05_4_25_extracted.avi"
+operatedir_video =  "../../OCT/P-ID_Name_25092019160318VIDEO.avi"
+#operatedir_video =  "../../OCT/P-ID_Name_25092019161813-7500rpm-G1_0.05_4_25_extracted.avi"
+#operatedir_video =  "E:/database/video_dots/tele_221202012295-resize.avi"
+#operatedir_video =  "../../OCT/needle__1.avi"
+
 #E:\PhD\trying\OCT\OCT aligment
 #operatedir_video =  "../../OCT/OCT aligment/22JAN2020AUTO_01.avi"
 #operatedir_video =  "../../OCT/OCT aligment/phantom-01_2412020121234.avi"

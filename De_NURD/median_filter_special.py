@@ -64,6 +64,22 @@ class myfilter:
        #c = steam[2,:,:]
        #new = middle(a,b,c)
        return mid
+    def steam_filter_avg(steam):
+       len,h,w = steam.shape
+       new=np.zeros((h,w))
+       #for i in range(h):
+       #    for j in range(w):
+       #        new[i,j] = np.median(steam[:,i,j] )  
+       #new=steam[0,:,:] + steam[1,:,:]
+       #new=new/2.0
+       #torch.set_default_tensor_type('torch.cuda.FloatTensor')
+       ten= torch.from_numpy(steam )
+       new= torch.sum(ren,dim=0) / len
+       #a = steam[0,:,:]
+       #b = steam[1,:,:]
+       #c = steam[2,:,:]
+       #new = middle(a,b,c)
+       return mid
 
 
     

@@ -1,8 +1,15 @@
 savedir_process = "../../saved_processed_polar/"
-savedir_process  = "D:/PhD/trying/tradition_method/OCT/sheath registration/pairB/with ruler/correct2/"
+#savedir_process  = "D:/PhD/trying/tradition_method/OCT/sheath registration/pairB/with ruler/correct2/"
+#savedir_process  = "D:/PhD/trying/tradition_method/OCT/sheath registration/pairC/ruler/2_correct/"
+#savedir_process  = "D:/PhD/trying/tradition_method/saved_original/robotic/1/"
+
+
 
 operatedir_video = "../../saved_original/"
-operatedir_video  = "D:/PhD/trying/tradition_method/OCT/sheath registration/pairB/with ruler/correct/"
+#operatedir_video  = "D:/PhD/trying/tradition_method/OCT/sheath registration/pairB/with ruler/correct/"
+#operatedir_video  = "D:/PhD/trying/tradition_method/OCT/sheath registration/pairC/ruler/2_/"
+#operatedir_video  = "D:/PhD/trying/tradition_method/saved_original/pullback no ref for std/"
+
 
 #savedir_process = "../../saved_pair2/"
 #operatedir_video = "../../saved_pair1/"
@@ -35,7 +42,7 @@ from mpl_toolkits.mplot3d import Axes3D
 from Correct_sequence_integral import read_start 
 from read_circu import tranfer_frome_rec2cir
 from PIL import Image, ImageEnhance
-read_start = 5
+read_start = 0
 Padding_H  = 1
 #from  path_finding import PATH
 Display_STD_flag = False
@@ -123,6 +130,8 @@ def diplay_bline():
             img_path1 = savedir_process + str(i+20)+ ".jpg"
             video1 = cv2.imread(img_path1)
             gray_video1  =   cv2.cvtColor(video1, cv2.COLOR_BGR2GRAY)
+            gray_video1 = cv2.resize(gray_video1, (W_ini,H_ini), interpolation=cv2.INTER_AREA)
+
             rectan1 = gray_video1
             circular1 = tranfer2circ_padding(gray_video1)
             gray_video1 = circular1
@@ -149,8 +158,8 @@ def diplay_bline():
             rectan2 = cv2.medianBlur(rectan2,5)
             B_line1 = np.sum(rectan1[1:H_ini,:], axis=0)/(rectan1.shape[0]-1)
             B_line2 = np.sum(rectan2[1:H_ini,:], axis=0)/(rectan2.shape[0]-1)
-            B_line1 = B_line1/np.max(B_line1) *255
-            B_line2 = B_line2/np.max(B_line2) *255
+            #B_line1 = B_line1/np.max(B_line1) *255
+            #B_line2 = B_line2/np.max(B_line2) *255
             #B_line1=B_line1*B_line1
             #B_line2=B_line2*B_line2
             #B_line1=B_line1*200
@@ -165,8 +174,8 @@ def diplay_bline():
 
 
 
-            cv2.imshow('1',enface1.astype(np.uint8))
-            cv2.imshow('2',enface2.astype(np.uint8))
+            cv2.imshow('process',enface1.astype(np.uint8))
+            cv2.imshow('origin',enface2.astype(np.uint8))
             cv2.imwrite(save_display_dir  +  "0_0.jpg",enface1.astype(np.uint8) )
             cv2.imwrite(save_display_dir  +  "0_1.jpg",enface2.astype(np.uint8) )
             print ("[%s]   bline" % (i ))

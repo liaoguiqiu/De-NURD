@@ -35,12 +35,12 @@ from basic_trans import Basic_oper
 from  matlab import Save_Signal_matlab
 matlab_saver  = Save_Signal_matlab()
 
-#read_start = 15
+read_start = 150
 Padding_H  = 0
 
 #Padding_H  = 254
 #from  path_finding import PATH
-Display_STD_flag = False
+Display_STD_flag = True
 Padd_zero_top = True
 Display_signal_flag = False
 Display_Matrix_flag = False
@@ -53,9 +53,14 @@ video_sizeW= 900
 
 class Derivation_validate(object):
     def  __init__(self, H,W):
-        self.Len_steam = 17
+        self.Len_steam = 10
         self.crop_startH = 200
         self.cropH = int(700)
+        # the sheath std
+        #self.crop_startH = 1
+        #self.cropH = int(230)
+
+
         self.crop_startW = 100
         #self.crop_startW = 360
 
@@ -86,7 +91,7 @@ class Derivation_validate(object):
             #img1= np.clip(img1,85,255)-85
             #img2= np.clip(img2,85,255)-85
             img1  = (img1 > 85)*  (img1*0+254)
-            img2  = (img2 > 85) * (img2*0 +254)
+            img2  = (img2 > 35) * (img2*0+254)
             #img1  = (img1 > 85)*  img1
             #img2  = (img2 > 85) * img2 
             #source1  =  cv2.GaussianBlur(img1,(5,5),0)
