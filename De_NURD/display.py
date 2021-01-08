@@ -35,12 +35,12 @@ from basic_trans import Basic_oper
 from  matlab import Save_Signal_matlab
 matlab_saver  = Save_Signal_matlab()
 
-read_start = 0
+read_start = 175
 Padding_H  = 0
 
 #Padding_H  = 254
 #from  path_finding import PATH
-Display_STD_flag = True
+Display_STD_flag = False
 Padd_zero_top = True
 Display_signal_flag = False
 Display_Matrix_flag = False
@@ -54,7 +54,7 @@ video_sizeW= 900
 class Derivation_validate(object):
     def  __init__(self, H,W):
         self.Len_steam = 3
-        self.crop_startH = 1
+        self.crop_startH = 0
         self.cropH = int(800)
         #self.cropH = 700
 
@@ -130,8 +130,10 @@ class Derivation_validate(object):
         dev2 = torch.abs (dev)
         stda =  torch.sum(dev2,dim=0) / L
 
+        #mask1 = (stda > 20)
         mask1 = (stda > 20)
-        mask2 = (avg  > 40)
+
+        mask2 = (avg  > 30)
         mask  = mask2 * mask1
         stda = stda*mask
         stda =  (torch.sum(mask)+1)
@@ -146,9 +148,11 @@ class Derivation_validate(object):
         dev2 = torch.abs (dev)
 
         stdb =  torch.sum(dev2,dim=0) / L
+        #mask1 = (stdb > 20)
         mask1 = (stdb > 20)
+
  
-        mask2 = (avg  > 40)
+        mask2 = (avg  > 30)
         mask  = mask2 * mask1
         stdb = stdb*mask
         stdb = (torch.sum(mask)+1)
@@ -172,7 +176,64 @@ class Derivation_validate(object):
         return stda, stdb
 
     pass
+    def calculate2(self):
+        a_stack  =  torch.from_numpy(self.steam1)
+        b_stack  =  torch.from_numpy(self.steam2)
+        #a_stack=a_stack.sum(dim=1)/(self.cropH -self.crop_startH)
+        #b_stack=b_stack.sum(dim=1)/(self.cropH -self.crop_startH)
 
+        L,H,W = a_stack.size() 
+
+        #stda =  a_stack.std( dim = 0)
+        avg = torch.sum(a_stack,dim=0) / L
+        dev  =  a_stack[0,:,:] - a_stack[1,:,:]
+        dev2 = torch.abs (dev)
+        stda = dev2 
+
+        #mask1 = (stda > 20)
+        mask1 = (stda >60)
+
+        mask2 = (avg  > 30)
+        mask  = mask2 * mask1
+        stda = stda*mask
+        stda =  (torch.sum(mask)+1)
+        #stda = float(stda.data.mean())
+
+        L,H,W = b_stack.size() 
+
+        #stda =  a_stack.std( dim = 0)
+        avg = torch.sum(b_stack,dim=0) / L
+        dev  =  b_stack[0,:,:] - b_stack[1,:,:]
+        dev2 = torch.abs (dev)
+        stdb = dev2 
+        #mask1 = (stdb > 20)
+        mask1 = (stdb > 60)
+
+ 
+        mask2 = (avg  > 30)
+        mask  = mask2 * mask1
+        stdb = stdb*mask
+        stdb = (torch.sum(mask)+1)
+        #stdb=  b_stack.std( dim = 0)
+        #stdb = float( stdb.data.mean())
+        if self.cnt>self.Len_steam:
+            if (stda>self.maxa):
+                self.maxa = stda
+            if (stdb>self.maxb):
+                    self.maxb = stdb
+            self.std_suma += stda
+            self.std_sumb += stdb
+
+            self.avga=self.std_suma /(self.cnt-self.Len_steam)
+            self.avgb=self.std_sumb /(self.cnt-self.Len_steam)
+  
+
+
+
+
+        return stda, stdb
+
+    pass
 
 if Display_signal_flag == True:
     from analy import MY_ANALYSIS
@@ -206,6 +267,7 @@ def diplay_sequence():
             img_path1 = savedir_process + str(i+20)+ ".jpg"
             video1 = cv2.imread(img_path1)
             gray_video1  =   cv2.cvtColor(video1, cv2.COLOR_BGR2GRAY)
+            gray_video1 = gray_video1  +60 
             rectan1 = gray_video1
             circular1 = tranfer2circ_padding(gray_video1)
             gray_video1 = circular1
@@ -218,8 +280,9 @@ def diplay_sequence():
 
             # raws 
             img_path2 = operatedir_video + str(i+20)+ ".jpg"
-            video2 = cv2.imread(img_path2)
+            video2 = cv2.imread(img_path2)  
             gray_video2  =   cv2.cvtColor(video2, cv2.COLOR_BGR2GRAY)
+            gray_video2 = gray_video2   +60
             gray_video2 = cv2.resize(gray_video2, (W_ini,H_ini), interpolation=cv2.INTER_AREA)
             rectan2 = gray_video2
             circular= tranfer2circ_padding(gray_video2)
@@ -382,7 +445,7 @@ def displayselected():
             cv2.imwrite(savedir_process_circle  + str(1) +".jpg",gray_video1 )
             if Display_STD_flag  ==True :
                 STD_call.buffer(rectan1 ,rectan2 )
-                std1,std2=STD_call.calculate()
+                std1,std2=STD_call.calculate2()
                 print("correct:"+str(std1))
                 print("origin:"+str(std2))
                 print("correct_ave:"+str(STD_call.avga))

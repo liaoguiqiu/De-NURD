@@ -27,6 +27,8 @@ Overall_shiftting_WinLen = 71
 Cost_M_sample_flag =True
 Down_sample_F = 3
 Down_sample_F2 = 3
+#Down_sample_F = 1
+#Down_sample_F2 = 1
 
 class COSTMtrix:
 

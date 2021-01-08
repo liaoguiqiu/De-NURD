@@ -1,8 +1,8 @@
 #operatedir_video = "D:/PhD/trying/tradition_method/OCT/sheath registration/pair A/with rectan/"
-operatedir_video = "D:/PhD/trying/tradition_method/OCT/sheath registration/pairC/rectangular/3/"
+operatedir_video = "D:/PhD/trying/tradition_method/OCT/sheath registration/pairC/rectangular/2/"
 
 #operatedir_video2 = "D:/PhD/trying/tradition_method/OCT/sheath registration/pair A/without rectan/"
-operatedir_video2 = "D:/PhD/trying/tradition_method/OCT//sheath registration/pairC/rectangular/3/"
+operatedir_video2 = "D:/PhD/trying/tradition_method/OCT//sheath registration/pairC/rectangular/2/"
 ##operatedir_video2 = "D:/PhD/trying/tradition_method/OCT/sheath registration/pairC/ruler/2/"
 #operatedir_video2 = "D:/PhD/trying/tradition_method/OCT/sheath registration/pairC/phantom/1/"
 

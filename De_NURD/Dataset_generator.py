@@ -471,21 +471,28 @@ class DATA_Generator(object):
             #get the path
             path  = self.path_DS.path_saving[read_id,:]
             path =  signal.resample(path, self.W)#resample the path
-
-            random_NURD   = np.random.random_sample(self.W)*5
-            random_NURD = gaussian_filter1d(random_NURD,5) # smooth the path 
-
             if NURD_remove_shift_flag ==True:
-                 path= path- (np.mean(path) - Window_LEN/2 )
-            path = random_NURD+ Window_LEN/2
+                path= path- (np.mean(path) - Window_LEN/2 )
+                #path= path*0+ int(Window_LEN/2 )
+            Dice=int(np.random.random_sample()*100)
+            if  Dice%2 == 0 or Use_random_NURD == True: 
+                path= path*0+ int(Window_LEN/2 )
+                fact1 = int(np.random.random_sample()*50)+20
+                fact2 = np.random.random_sample()
+                random_NURD   = np.random.random_sample(fact1)*30-15  
+            
+                random_NURD =  signal.resample(random_NURD, self.W)#resample the path
+                #random_NURD   = np.random.random_sample(self.W)*30-10 + np.random.random_sample()*40-20
+                random_NURD = gaussian_filter1d(random_NURD,10) # smooth the path 
+                path =path +random_NURD
             
             #   exragene for diaplay
             #path = (path -np.mean(path))*0.6+np.mean(path)
             #overall_shifting = Image_ID 
             #overall_shifting = min(overall_shifting,self.W/2) # limit the shifting here, maybe half the lenghth is sufficient  for the combination
             #overall_shifting = min(overall_shifting,self.W/2) # limit the shifting here, maybe half the lenghth is sufficient  for the combination
-            random_shifting = np.random.random_sample()*Overall_shiftting_WinLen
-            random_shifting = (random_shifting-Overall_shiftting_WinLen/2)+Overall_shiftting_WinLen/2
+            random_shifting = np.random.random_sample()*Overall_shiftting_WinLen/2
+            
             #Combine the overall shifting with NURD
 
             #path = path  + overall_shifting
@@ -506,7 +513,7 @@ class DATA_Generator(object):
             if Image_ID <100:
                 grower=+np.random.random_sample()*np.random.random_sample() *2
             else:
-                grower=+np.random.random_sample()*np.random.random_sample() *3
+                grower=+np.random.random_sample()*np.random.random_sample() *1
             growing+=  grower
             # addistional shift
             Shifted_IMG = np.roll(Shifted_IMG, int(growing), axis = 1) 
@@ -553,6 +560,6 @@ if __name__ == '__main__':
         #id,nurd,shift  =  save_test.read_pkl_infor_of_over_allshift_with_NURD()
  
         
-        generator.generate_NURD ()
-        #generator.generate_overall_shifting()
-        #generator.generate_NURD_overall_shifting()
+        #generator.generate_NURD ()
+        ##generator.generate_overall_shifting()
+        generator.generate_NURD_overall_shifting()

@@ -8,6 +8,8 @@ reference_dir  =  "D:/PhD/trying/tradition_method/OCT/sheath registration/pairC/
 
 
 reference_start = 149 
+reference_start = 156 
+
 
  #saved_matrix_unprocessed
 operatedir_one =  "../../saved_matrix/126.jpg"
@@ -50,7 +52,8 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 Resample_size =Window_LEN
 Path_length = 128
 #read_start = 100
-read_start = 138 
+read_start = 160 
+
 
 Debug_flag  = True
 global intergral_flag
@@ -259,7 +262,7 @@ class VIDEO_PEOCESS:
         # PI fusion
         #shift_integral = shift_integral + shift_diff  # not += : this is iteration way
         shift_integral = PATH_POST.path_integral(shift_integral,shift_diff)
-        shift_integral = shift_integral - 0.15*(shift_integral-overall_shift)      - 0.0000001* I 
+        shift_integral = shift_integral - 1.00*(shift_integral-overall_shift)  #    - 0.0001* I 
         #shift_integral = shift_integral - 0.45*(shift_integral-overall_shift)  - 0.01*(np.average (shift_integral) - overall_shift)   - 0.01* I 
         
         # EKF fusion
@@ -395,10 +398,13 @@ class VIDEO_PEOCESS:
                     steam= np.delete(steam , 1,axis=0)
                     # and set the first one as the reference imag 
                     #steam[0,:,:]  = referen_img
-                    steam[0,:,:] = np.roll(referen_img, 174 , axis = 1)  # preshift the reference
+                    #steam[0,:,:] = np.roll(referen_img, 174 , axis = 1)  # preshift the reference
+                    steam[0,:,:] = np.roll(referen_img, 274 , axis = 1)  # preshift the reference
+
 
                     steam2=np.append(steam2,[gray_video[H_start:H_end,:] ],axis=0) # save sequence
                     steam2= np.delete(steam2 , 0,axis=0)
+                    #addition_window_shift = int(np.mean(shift_integral))
 
                     dual_thread.input(steam,steam2,Len_steam,addition_window_shift)
 
@@ -434,7 +440,6 @@ class VIDEO_PEOCESS:
                     shift_integral = VIDEO_PEOCESS.fusion_estimation(shift_integral,path,addition_window_shift,Window_ki_error)
 
                     Window_ki_error = (shift_integral-addition_window_shift)+Window_ki_error
-                    #addition_window_shift = np.mean(shift_integral)
 
                     #path = np.zeros(Costmatrix.shape[1])
                     #path = path  + shift_used1 + overall_shifting
