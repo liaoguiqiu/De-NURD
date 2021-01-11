@@ -1,6 +1,6 @@
 savedir_process = "../../saved_processed_polar/"
 #savedir_process  = "D:/PhD/trying/tradition_method/OCT/sheath registration/pairB/with ruler/correct2/"
-#savedir_process  = "D:/PhD/trying/tradition_method/OCT/sheath registration/pairC/ruler/2_correct/"
+#savedir_process  = "D:/PhD/trying/tradition_method/OCT/sheath registration/pairD/ref_correct/"
 #savedir_process  = "D:/PhD/trying/tradition_method/saved_original/robotic/1/"
 
 
@@ -8,6 +8,8 @@ savedir_process = "../../saved_processed_polar/"
 operatedir_video = "../../saved_original/"
 #operatedir_video  = "D:/PhD/trying/tradition_method/OCT/sheath registration/pairB/with ruler/correct/"
 #operatedir_video  = "D:/PhD/trying/tradition_method/OCT/sheath registration/pairC/ruler/2_/"
+#operatedir_video  = "D:/PhD/trying/tradition_method/OCT/sheath registration/pairD/ref_/"
+
 #operatedir_video  = "D:/PhD/trying/tradition_method/saved_original/pullback no ref for std/"
 
 

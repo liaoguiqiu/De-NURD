@@ -52,6 +52,8 @@ class Shift_Predict(object):
         H,W = img1.shape
         pair1  =   img1[self.Crop_start:self.Crop_end,:] 
         pair2  =   img3[self.Crop_start:self.Crop_end,:] 
+        #pair1  =   img1[self.Crop_end:H,:] 
+        #pair2  =   img3[self.Crop_end:H,:] 
         pair3  =   img1
         pair4  =   img2
         #pair3  =   img2

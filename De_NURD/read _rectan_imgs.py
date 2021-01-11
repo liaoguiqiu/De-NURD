@@ -1,8 +1,16 @@
 #operatedir_video = "D:/PhD/trying/tradition_method/OCT/sheath registration/pair A/with rectan/"
-operatedir_video = "D:/PhD/trying/tradition_method/OCT/sheath registration/pairC/rectangular/2/"
+#operatedir_video = "D:/PhD/trying/tradition_method/OCT/sheath registration/pairC/rectangular/2/"
+operatedir_video = "D:/PhD/trying/tradition_method/OCT/sheath registration/pairD/phantom/1/"
+operatedir_video2 = "D:/PhD/trying/tradition_method/OCT//sheath registration/pairD/phantom/1/"
+
+
 
 #operatedir_video2 = "D:/PhD/trying/tradition_method/OCT/sheath registration/pair A/without rectan/"
-operatedir_video2 = "D:/PhD/trying/tradition_method/OCT//sheath registration/pairC/rectangular/2/"
+#operatedir_video2 = "D:/PhD/trying/tradition_method/OCT//sheath registration/pairC/rectangular/2/"
+operatedir_video2 = "D:/PhD/trying/tradition_method/OCT//sheath registration/pairD/ref/"
+operatedir_video2 = "D:/PhD/trying/tradition_method/OCT//sheath registration/pairD/phantom/1/"
+
+
 ##operatedir_video2 = "D:/PhD/trying/tradition_method/OCT/sheath registration/pairC/ruler/2/"
 #operatedir_video2 = "D:/PhD/trying/tradition_method/OCT/sheath registration/pairC/phantom/1/"
 
@@ -11,7 +19,8 @@ operatedir_video2 = "D:/PhD/trying/tradition_method/OCT//sheath registration/pai
 #operatedir_video2 = "D:/PhD/trying/tradition_method/OCT/sheath registration/pairC/rectangular/3/"
 
 #save_dir_rectan  =  "D:/PhD/trying/tradition_method/OCT/sheath registration/pairC/ruler/2_/"
-save_dir_rectan  =  "../../saved_original/"
+#save_dir_rectan  =  "../../saved_original/"
+save_dir_rectan = "D:/PhD/trying/tradition_method/OCT//sheath registration/pairD/phantom/1_/"
 
 
 #savedir_process = "../../saved_pair2/"
@@ -48,8 +57,8 @@ from basic_trans import Basic_oper
 from  matlab import Save_Signal_matlab
 matlab_saver  = Save_Signal_matlab()
 
-read_start1 = 89
-read_start2 = 88
+read_start1 = 1
+read_start2 = 1
 
 Padding_H  = 0
 
@@ -93,11 +102,11 @@ def diplay_sequence():
     H_ini,W_ini= gray_video2.shape
     
 
-
-    for i in range(0,seqence_Len ):
+    First  = 0
+    for i in range(read_start1,seqence_Len ):
     #for i in os.listdir("E:/estimagine/vs_project/PythonApplication_data_au/pic/"):
     ##      process
-            img_path1 = operatedir_video +  "image" +  str(i +read_start1)+ ".jpg"
+            img_path1 = operatedir_video +  "image" +  str(i  )+ ".jpg"
             video1 = cv2.imread(img_path1)
             gray_video1  =   cv2.cvtColor(video1, cv2.COLOR_BGR2GRAY)
             gray_video1 =   1.3*  cv2.resize(gray_video1, (800,800), interpolation=cv2.INTER_AREA) +30
@@ -112,7 +121,7 @@ def diplay_sequence():
             #cv2.imshow('step_process',gray_video1)  
 
             # raws 
-            img_path2 = operatedir_video2 +  "image" +  str(i+read_start2)+ ".jpg"
+            img_path2 = operatedir_video2 +  "image" +  str(i+read_start2-read_start1)+ ".jpg"
             #img_path2 = operatedir_video2   +  str(i+read_start2)+ ".jpg"
 
             video2 = cv2.imread(img_path2)
@@ -157,7 +166,8 @@ def diplay_sequence():
                 #show_2 = cv2.resize(show_2, (int(video_sizeW),int(video_sizeH)), interpolation=cv2.INTER_AREA)
 
 
-            if(i == 0): # initialize the color sequence 
+            if(First == 0): # initialize the color sequence 
+                First  = 1 
                 stream=np.zeros((show_2.shape[0],show_2.shape[1],3))
             else:
 

@@ -42,7 +42,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 Resample_size =Window_LEN
 Path_length = 128
 #read_start = 100
-read_start = 5
+read_start = 166
 
 Debug_flag  = True
 global intergral_flag
@@ -252,7 +252,7 @@ class VIDEO_PEOCESS:
         shift_integral = shift_integral + shift_diff  # not += : this is iteration way
         #shift_integral = PATH_POST.path_integral(shift_integral,shift_diff)
 
-        shift_integral = shift_integral - 0.15*(shift_integral-overall_shift)   - 0.00001* I
+        shift_integral = shift_integral - 1*(shift_integral-overall_shift) #  - 0.00001* I
         # EKF fusion
         #shift_integral = myekf.update(shift_diff,overall_shift)
 
@@ -353,7 +353,7 @@ class VIDEO_PEOCESS:
         Window_kp_error = 0
         Kp=0 # initial shifting paramerter
         dual_thread  = Dual_thread_Overall_shift_NURD()
-        for sequence_num in range(read_start,seqence_Len):
+        for sequence_num in range(read_start,read_start+seqence_Len):
         #for i in os.listdir("E:/estimagine/vs_project/PythonApplication_data_au/pic/"):
                 # read imag for process 
                 img_path = operatedir_video + str(sequence_num+0)+ ".jpg" # starting from 10

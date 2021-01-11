@@ -5,10 +5,14 @@ operatedir_matrix_unprocessed  =  "../../saved_matrix_unprocessed/"
 #reference_dir  =  "D:/PhD/trying/tradition_method/OCT/sheath registration/pairB/with ruler/1/"
 reference_dir  =  "D:/PhD/trying/tradition_method/OCT/sheath registration/pairB/with ruler/correct2/"
 reference_dir  =  "D:/PhD/trying/tradition_method/OCT/sheath registration/pairC/ruler/2_correct/"
+reference_dir  =  "D:/PhD/trying/tradition_method/OCT/sheath registration/pairD/ref_correct2/"
+
 
 
 reference_start = 149 
 reference_start = 156 
+reference_start = 172 
+
 
 
  #saved_matrix_unprocessed
@@ -52,7 +56,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 Resample_size =Window_LEN
 Path_length = 128
 #read_start = 100
-read_start = 160 
+read_start = 235 
 
 
 Debug_flag  = True
@@ -257,12 +261,12 @@ class VIDEO_PEOCESS:
     def fusion_estimation( shift_integral,path,overall_shift,I):
         #overall_shift =0
         shift_diff= path - int(Window_LEN/2)  # additional compensation 
-        ##shift_diff = gaussian_filter1d(shift_diff,3) # smooth the path 
+        shift_diff = gaussian_filter1d(shift_diff,10) # smooth the path 
 
         # PI fusion
         #shift_integral = shift_integral + shift_diff  # not += : this is iteration way
         shift_integral = PATH_POST.path_integral(shift_integral,shift_diff)
-        shift_integral = shift_integral - 1.00*(shift_integral-overall_shift)  #    - 0.0001* I 
+        shift_integral = shift_integral - 0.3*(shift_integral-overall_shift)  - 0.00000001* I 
         #shift_integral = shift_integral - 0.45*(shift_integral-overall_shift)  - 0.01*(np.average (shift_integral) - overall_shift)   - 0.01* I 
         
         # EKF fusion
@@ -399,7 +403,7 @@ class VIDEO_PEOCESS:
                     # and set the first one as the reference imag 
                     #steam[0,:,:]  = referen_img
                     #steam[0,:,:] = np.roll(referen_img, 174 , axis = 1)  # preshift the reference
-                    steam[0,:,:] = np.roll(referen_img, 274 , axis = 1)  # preshift the reference
+                    steam[0,:,:] = np.roll(referen_img, int((1689 -320)*832/1970) , axis = 1)  # preshift the reference
 
 
                     steam2=np.append(steam2,[gray_video[H_start:H_end,:] ],axis=0) # save sequence
