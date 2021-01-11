@@ -364,6 +364,8 @@ class VIDEO_PEOCESS:
         H_end = int(H)
         steam=np.zeros((Len_steam,H_end-H_start,W))
         steam2=np.zeros((Len_steam,H_end-H_start ,W))
+        steam3=np.zeros((Len_steam,H_end-H_start ,W))
+
         save_sequence_num = 0  # processing iteration initial 
         addition_window_shift=0 # innitial shifting parameter
         Window_ki_error = 0
@@ -396,22 +398,31 @@ class VIDEO_PEOCESS:
 
                     steam2=np.append(steam2,[gray_video[H_start:H_end,:] ],axis=0) # save sequence
                     steam2= np.delete(steam2 , 0,axis=0)
+                    r_referen_img =  np.roll(referen_img, int((1689 -320)*832/1970) , axis = 1)  # preshift the reference
+                    steam3=np.append(steam3,[r_referen_img[H_start:H_end,:] ],axis=0) # save sequence
+                    steam3= np.delete(steam3 , 0,axis=0)
+
                 else:
+                    r_referen_img =  np.roll(referen_img, int((1689 -320)*832/1970) , axis = 1)  # preshift the reference
+
                     steam=np.append(steam,[gray_video[H_start:H_end,:] ],axis=0) # save sequence
                     # no longer delete the fist  one
                     steam= np.delete(steam , 1,axis=0)
                     # and set the first one as the reference imag 
                     #steam[0,:,:]  = referen_img
                     #steam[0,:,:] = np.roll(referen_img, 174 , axis = 1)  # preshift the reference
-                    steam[0,:,:] = np.roll(referen_img, int((1689 -320)*832/1970) , axis = 1)  # preshift the reference
+                    steam[0,:,:] = r_referen_img  # preshift the reference
 
 
                     steam2=np.append(steam2,[gray_video[H_start:H_end,:] ],axis=0) # save sequence
                     steam2= np.delete(steam2 , 0,axis=0)
+                    steam3=np.append(steam3,[r_referen_img[H_start:H_end,:] ],axis=0) # save sequence
+                    steam3= np.delete(steam3 , 0,axis=0)
+
                     #addition_window_shift = int(np.mean(shift_integral))
 
                     dual_thread.input(steam,steam2,Len_steam,addition_window_shift)
-
+                    dual_thread.inputaddition(steam3)
                     dual_thread.runInParallel()
                     
                     overall_shifting,shift_used1 = dual_thread.output_overall()
