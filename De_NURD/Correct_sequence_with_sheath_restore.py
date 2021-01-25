@@ -56,7 +56,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 Resample_size =Window_LEN
 Path_length = 128
 #read_start = 100
-read_start = 235 
+read_start = 236
 
 
 Debug_flag  = True
@@ -261,12 +261,12 @@ class VIDEO_PEOCESS:
     def fusion_estimation( shift_integral,path,overall_shift,I):
         #overall_shift =0
         shift_diff= path - int(Window_LEN/2)  # additional compensation 
-        shift_diff = gaussian_filter1d(shift_diff,10) # smooth the path 
+        #shift_diff = gaussian_filter1d(shift_diff,10) # smooth the path 
 
         # PI fusion
         #shift_integral = shift_integral + shift_diff  # not += : this is iteration way
         shift_integral = PATH_POST.path_integral(shift_integral,shift_diff)
-        shift_integral = shift_integral - 0.3*(shift_integral-overall_shift)  - 0.00000001* I 
+        shift_integral = shift_integral - 1*(shift_integral-overall_shift) # - 0.00000001* I 
         #shift_integral = shift_integral - 0.45*(shift_integral-overall_shift)  - 0.01*(np.average (shift_integral) - overall_shift)   - 0.01* I 
         
         # EKF fusion
@@ -398,12 +398,12 @@ class VIDEO_PEOCESS:
 
                     steam2=np.append(steam2,[gray_video[H_start:H_end,:] ],axis=0) # save sequence
                     steam2= np.delete(steam2 , 0,axis=0)
-                    r_referen_img =  np.roll(referen_img, int((1689 -320)*832/1970) , axis = 1)  # preshift the reference
+                    r_referen_img =  np.roll(referen_img, int((1392 -320)*832/1970) , axis = 1)  # preshift the reference
                     steam3=np.append(steam3,[r_referen_img[H_start:H_end,:] ],axis=0) # save sequence
                     steam3= np.delete(steam3 , 0,axis=0)
 
                 else:
-                    r_referen_img =  np.roll(referen_img, int((1689 -320)*832/1970) , axis = 1)  # preshift the reference
+                    r_referen_img =  np.roll(referen_img, int((1392 -320)*832/1970) , axis = 1)  # preshift the reference
 
                     steam=np.append(steam,[gray_video[H_start:H_end,:] ],axis=0) # save sequence
                     # no longer delete the fist  one

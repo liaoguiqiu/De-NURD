@@ -5,7 +5,7 @@
     <ProjectGuid>07b9d663-4bc8-4016-8977-35b22d05cc4c</ProjectGuid>
     <ProjectHome>
     </ProjectHome>
-    <StartupFile>Correct_sequence_with_sheath_restore.py</StartupFile>
+    <StartupFile>read _rectan_imgs.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -27,6 +27,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="analy_visdom.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="app_needle_detect\needle_detect.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="basic_trans.py">
@@ -124,6 +127,7 @@
   <ItemGroup>
     <Folder Include="DeepPathsearch\" />
     <Folder Include="Deep_shift\" />
+    <Folder Include="app_needle_detect\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="DeepPathsearch\README.md" />
