@@ -1,5 +1,5 @@
-savedir_process = "E:/database/Needle injection/3D scan/90/cartesian/"
-operatedir_video = "E:/database/Needle injection/3D scan/90/cartesian/"
+savedir_process = "E:/database/Needle injection/3D scan/90_i2/cartesian/"
+operatedir_video = "E:/database/Needle injection/3D scan/90_i2/cartesian/"
 
 #savedir_process = "../../saved_pair2/"
 #operatedir_video = "../../saved_pair1/"
@@ -32,6 +32,7 @@ from Correct_sequence_integral import read_start
 from read_circu import tranfer_frome_rec2cir
 from basic_trans import Basic_oper
 from  matlab import Save_Signal_matlab
+from line_detection import Line_detect
 matlab_saver  = Save_Signal_matlab()
 
 read_start = 1
@@ -52,14 +53,10 @@ video_sizeW= 900
 
 class Derivation_validate(object):
     def  __init__(self, H,W):
-        self.Len_steam = 5
+        self.Len_steam = 1
         self.crop_startH = 0
         self.cropH = H
-        #self.cropH = 700
-
-        # the sheath std
-        #self.crop_startH = 1
-        #self.cropH = int(230)
+     
         
 
         
@@ -93,14 +90,7 @@ class Derivation_validate(object):
         if self.initial ==0:
            mask = (img1 > 100)
         if self.cnt%self.sample_rate==0:
-            #img1= np.clip(img1,85,255)-85
-            #img2= np.clip(img2,85,255)-85
-            #img1  = (img1 > 85)*  (img1*0+254)
-            #img2  = (img2 > 85) * (img2*0+254)
-            #img1  = (img1 > 85)*  img1
-            #img2  = (img2 > 85) * img2 
-            #source1  =  cv2.GaussianBlur(img1,(5,5),0)
-            #source2  =  cv2.GaussianBlur(img2,(5,5),0)
+        
             source1  =  img1 
             source2  =  img2 
 
@@ -130,131 +120,13 @@ class Derivation_validate(object):
         dev  =  a_stack - avg
         dev2 = torch.abs (dev)
         stda =  torch.sum(dev2,dim=0) / L
+        Line_detect.detection(result_img)
         #result_img=torch.Tensor.cpu(stda).detach().numpy()
-        ret,thresh1 = cv2.threshold(result_img,80,255,cv2.THRESH_BINARY)
-        cv2.imshow('01',thresh1.astype(np.uint8) ) 
-
-        edges = cv2.Canny(result_img.astype(np.uint8),100,251,apertureSize = 3)
-        kernel = np.ones((3,3),np.uint8)
-        #opening = cv2.morphologyEx(thresh1, cv2.MORPH_OPEN, kernel)
-        edges = cv2.morphologyEx(edges, cv2.MORPH_CLOSE, kernel)
-        cv2.imshow('edge',edges.astype(np.uint8) ) 
-
-        minLineLength = 30
-        maxLineGap =20
-        lines = cv2.HoughLinesP(edges,1,np.pi/180,30,minLineLength,maxLineGap)
         
-        if lines is not None:
-            number,_,_ = lines.shape
-            for ii in range(number):
-
-                for x1,y1,x2,y2 in lines[ii] :
-                    cv2.line(result_img,(x1,y1),(x2,y2),(255,255,255),2)
-        cv2.imshow('std',result_img.astype(np.uint8) ) 
-
-        #mask1 = (stda > 20)
-        mask1 = (stda > 20)
-
-        mask2 = (avg  > 30)
-        mask  = mask2 * mask1
-        stda = stda*mask
-        stda =  (torch.sum(mask)+1)
-        #stda = float(stda.data.mean())
-
-        L,H,W = b_stack.size() 
-
-        #stda =  a_stack.std( dim = 0)
-        avg = torch.sum(b_stack,dim=0) / L
- 
-        dev  =  b_stack - avg
-        dev2 = torch.abs (dev)
-
-        stdb =  torch.sum(dev2,dim=0) / L
-        #mask1 = (stdb > 20)
-        mask1 = (stdb > 20)
-
- 
-        mask2 = (avg  > 30)
-        mask  = mask2 * mask1
-        stdb = stdb*mask
-        stdb = (torch.sum(mask)+1)
-        #stdb=  b_stack.std( dim = 0)
-        #stdb = float( stdb.data.mean())
-        if self.cnt>self.Len_steam:
-            if (stda>self.maxa):
-                self.maxa = stda
-            if (stdb>self.maxb):
-                    self.maxb = stdb
-            self.std_suma += stda
-            self.std_sumb += stdb
-
-            self.avga=self.std_suma /(self.cnt-self.Len_steam)
-            self.avgb=self.std_sumb /(self.cnt-self.Len_steam)
-  
-
-
-
-
-        return stda, stdb
+         
 
     pass
-    #def calculate2(self):
-    #    a_stack  =  torch.from_numpy(self.steam1)
-    #    b_stack  =  torch.from_numpy(self.steam2)
-    #    #a_stack=a_stack.sum(dim=1)/(self.cropH -self.crop_startH)
-    #    #b_stack=b_stack.sum(dim=1)/(self.cropH -self.crop_startH)
-
-    #    L,H,W = a_stack.size() 
-
-    #    #stda =  a_stack.std( dim = 0)
-    #    avg = torch.sum(a_stack,dim=0) / L
-    #    dev  =  a_stack[0,:,:] - a_stack[1,:,:]
-    #    dev2 = torch.abs (dev)
-    #    stda = dev2 
-    #    #mask1 = (stda > 20)
-    #    mask1 = (stda >60)
-
-    #    mask2 = (avg  > 30)
-    #    mask  = mask2 * mask1
-    #    stda = stda*mask
-    #    stda =  (torch.sum(mask)+1)
-    #    #stda = float(stda.data.mean())
-
-    #    L,H,W = b_stack.size() 
-
-    #    #stda =  a_stack.std( dim = 0)
-    #    avg = torch.sum(b_stack,dim=0) / L
-    #    dev  =  b_stack[0,:,:] - b_stack[1,:,:]
-    #    dev2 = torch.abs (dev)
-    #    stdb = dev2 
-    #    #mask1 = (stdb > 20)
-    #    mask1 = (stdb > 60)
-
- 
-    #    mask2 = (avg  > 30)
-    #    mask  = mask2 * mask1
-    #    stdb = stdb*mask
-    #    stdb = (torch.sum(mask)+1)
-    #    #stdb=  b_stack.std( dim = 0)
-    #    #stdb = float( stdb.data.mean())
-    #    if self.cnt>self.Len_steam:
-    #        if (stda>self.maxa):
-    #            self.maxa = stda
-    #        if (stdb>self.maxb):
-    #                self.maxb = stdb
-    #        self.std_suma += stda
-    #        self.std_sumb += stdb
-
-    #        self.avga=self.std_suma /(self.cnt-self.Len_steam)
-    #        self.avgb=self.std_sumb /(self.cnt-self.Len_steam)
-  
-
-
-
-
-    #    return stda, stdb
-
-    #pass
+     
 
 if Display_signal_flag == True:
     from analy import MY_ANALYSIS
@@ -281,7 +153,7 @@ def diplay_sequence():
     gray_video2 = cv2.resize(gray_video2, (800,800), interpolation=cv2.INTER_AREA)
 
     H_ini,W_ini= gray_video2.shape
-    STD_call  = Derivation_validate(H_ini,W_ini)
+    STD_call  = Derivation_validate(500,500)
 
 
     for i in range(read_start,seqence_Len+read_start):
@@ -334,26 +206,7 @@ def diplay_sequence():
                 
             #cv2.imshow('matrix',MATRIX_RESULT)
             else: 
-                #show_2  = np.append(circular[:,300:W_ini-300],gray_video1[:,300:W_ini-300],axis=1) # cascade
-                #show_2  = np.append(circular[:,:],gray_video1[:,:],axis=1) # cascade
-                #show_2  = np.append(circular,zero,axis=1) # cascade
-                #show_2  = np.append(show_2,gray_video1,axis=1) # cascade
-                #show_2  = np.append(rectan2[:,:],zero,axis=1) # cascade
-                #show_2  = np.append(show_2,rectan1[:,:],axis=1) # cascade
-                #zero = np.zeros ((circular1.shape[0],10))
-
-                #show_2  = np.append(circular[:,:],zero,axis=1) # cascade
-                #show_2  = np.append(show_2,circular1[:,:],axis=1) # cascade
-
-                ##zero = np.zeros ((rectan2.shape[0],50))
-
-                ##show_2  = np.append(rectan2[:,:],zero,axis=1) # cascade
-                ##show_2  = np.append(show_2,rectan1[:,:],axis=1) # cascade
-
-                ##show_2 = cv2.resize(show_2, (int(show_2.shape[1]/1.5),int(show_2.shape[0]/1.5)), interpolation=cv2.INTER_AREA)
-                #show_2 = cv2.resize(show_2, (int(show_2.shape[1]/1.1),int(show_2.shape[0]/1.1)), interpolation=cv2.INTER_AREA)
-
-                #show_2 = cv2.resize(show_2, (int(video_sizeW),int(video_sizeH)), interpolation=cv2.INTER_AREA)
+              
                 show_2 = circular
 
             if(i == read_start): # initialize the color sequence 
@@ -376,17 +229,10 @@ def diplay_sequence():
             cv2.imwrite(savedir_origin_circle  + str(i) +".jpg",circular )
             cv2.imwrite(savedir_process_circle  + str(i) +".jpg",gray_video1 )
             if Display_STD_flag  ==True :
-                STD_call.buffer(rectan1 ,rectan2 )
-                std1,std2=STD_call.calculate()
-                print("correct:"+str(std1)) # 1 is the process
-                print("origin:"+str(std2))
-                print("correct_ave:"+str(STD_call.avga))
-                print("origin_ave:"+str(STD_call.avgb))
-                print("correct_max:"+str(STD_call.maxa))
-                print("origin_max:"+str(STD_call.maxb))
-                if save_matlab_flag == True:
-                    matlab_saver.buffer2(std1,std2)
-                pass
+                STD_call.buffer(rectan1[150:650,150:650] ,rectan2[150:650,150:650] )
+                STD_call.calculate()
+                
+                
 
             print("update"+str(i)+":")
 
