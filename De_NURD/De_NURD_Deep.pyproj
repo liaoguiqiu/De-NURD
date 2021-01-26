@@ -5,7 +5,7 @@
     <ProjectGuid>07b9d663-4bc8-4016-8977-35b22d05cc4c</ProjectGuid>
     <ProjectHome>
     </ProjectHome>
-    <StartupFile>read _rectan_imgs.py</StartupFile>
+    <StartupFile>app_needle_detect\needle_detect.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -27,6 +27,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="analy_visdom.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="app_needle_detect\line_detection.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="app_needle_detect\needle_detect.py">
