@@ -1,5 +1,7 @@
 savedir_process = "E:/database/Needle injection/3D scan/90_i2/cartesian/"
 operatedir_video = "E:/database/Needle injection/3D scan/90_i2/cartesian/"
+out_dir = "E:/database/Needle injection/3D scan/90_i2/output/"
+
 
 #savedir_process = "../../saved_pair2/"
 #operatedir_video = "../../saved_pair1/"
@@ -120,12 +122,14 @@ class Derivation_validate(object):
         dev  =  a_stack - avg
         dev2 = torch.abs (dev)
         stda =  torch.sum(dev2,dim=0) / L
-        Line_detect.detection(result_img)
+        final_result = cv2.cvtColor(result_img.astype(np.uint8),cv2.COLOR_GRAY2RGB)
+        result =  Line_detect.detection(result_img[150:650,150:650])
+        final_result[150:650,150:650,:]=  result
         #result_img=torch.Tensor.cpu(stda).detach().numpy()
-        
+        return final_result
          
 
-    pass
+     
      
 
 if Display_signal_flag == True:
@@ -153,7 +157,7 @@ def diplay_sequence():
     gray_video2 = cv2.resize(gray_video2, (800,800), interpolation=cv2.INTER_AREA)
 
     H_ini,W_ini= gray_video2.shape
-    STD_call  = Derivation_validate(500,500)
+    STD_call  = Derivation_validate(800,800)
 
 
     for i in range(read_start,seqence_Len+read_start):
@@ -229,9 +233,10 @@ def diplay_sequence():
             cv2.imwrite(savedir_origin_circle  + str(i) +".jpg",circular )
             cv2.imwrite(savedir_process_circle  + str(i) +".jpg",gray_video1 )
             if Display_STD_flag  ==True :
-                STD_call.buffer(rectan1[150:650,150:650] ,rectan2[150:650,150:650] )
-                STD_call.calculate()
-                
+                 
+                STD_call.buffer(rectan1 ,rectan2  )
+                final_result =  STD_call.calculate()
+                cv2.imwrite(out_dir  + str(i) +".jpg",final_result )
                 
 
             print("update"+str(i)+":")
