@@ -1,7 +1,8 @@
 #operatedir_video = "D:/PhD/trying/tradition_method/OCT/sheath registration/pair A/with rectan/"
 #operatedir_video = "D:/PhD/trying/tradition_method/OCT/sheath registration/pairC/rectangular/2/"
-operatedir_video = "E:/database/Needle injection/3D scan/0/"
-operatedir_video2 = "E:/database/Needle injection/3D scan/0/"
+#operatedir_video = "E:/database/Needle injection/3D scan/0/"
+operatedir_video =   "E:/database/Needle injection/28th Jan/raw_pullback/1/"
+operatedir_video2 =  "E:/database/Needle injection/28th Jan/raw_pullback/1/"
 #operatedir_video2 = "D:/PhD/trying/tradition_method/OCT//sheath registration/pairD/phantom/1/"
 
 
@@ -10,7 +11,7 @@ operatedir_video2 = "E:/database/Needle injection/3D scan/0/"
 #operatedir_video2 = "D:/PhD/trying/tradition_method/OCT/sheath registration/pair A/without rectan/"
 #operatedir_video2 = "D:/PhD/trying/tradition_method/OCT//sheath registration/pairC/rectangular/2/"
 #operatedir_video2 = "D:/PhD/trying/tradition_method/OCT//sheath registration/pairD/ref/"
-#operatedir_video2 = "D:/PhD/trying/tradition_method/OCT//sheath registration/pairD/phantom/1/"
+#operatedir_video2 = "D:/PhD/trying/tradition_method/OCT//sheath registration/pairD/phantom/1/"|
 
 
 ##operatedir_video2 = "D:/PhD/trying/tradition_method/OCT/sheath registration/pairC/ruler/2/"
@@ -22,16 +23,13 @@ operatedir_video2 = "E:/database/Needle injection/3D scan/0/"
 
 #save_dir_rectan  =  "D:/PhD/trying/tradition_method/OCT/sheath registration/pairC/ruler/2_/"
 #save_dir_rectan  =  "../../saved_original/"
-save_dir_rectan =  "E:/database/Needle injection/3D scan/0/polar/"
-savedir_origin_circle =  "E:/database/Needle injection/3D scan/0/cartesian/"
+save_dir_rectan =  "E:/database/Needle injection/28th Jan/pullback/1/polar/"
+savedir_origin_circle =  "E:/database/Needle injection/28th Jan/pullback/1/cartesian/"
 
 
 #savedir_process = "../../saved_pair2/"
 #operatedir_video = "../../saved_pair1/"
-
-operatedir_matrix  =  "../../saved_matrix/"
  
-operatedir_one =  "../../saved_matrix/126.jpg"
 #operatedir_video = "E:/PhD/trying/saved_filtered_img/"
 savedir_path = "../../saved_processed/"
 savedir_process_circle = "../../saved_processed/"
@@ -59,8 +57,8 @@ from basic_trans import Basic_oper
 from  matlab import Save_Signal_matlab
 matlab_saver  = Save_Signal_matlab()
 
-read_start1 = 1
-read_start2 = 1
+read_start1 = 79
+read_start2 = 79
 
 Padding_H  = 0
 
@@ -99,7 +97,7 @@ def diplay_sequence():
     img_path1 = operatedir_video + "image"+ str(read_start1)+ ".jpg"
     video2 = cv2.imread(img_path1)
     gray_video2  =   cv2.cvtColor(video2, cv2.COLOR_BGR2GRAY)
-    gray_video2 = cv2.resize(gray_video2, (800,800), interpolation=cv2.INTER_AREA)
+    gray_video2 = cv2.resize(gray_video2, (1000,1000), interpolation=cv2.INTER_AREA)
 
     H_ini,W_ini= gray_video2.shape
     
@@ -111,8 +109,8 @@ def diplay_sequence():
             img_path1 = operatedir_video +  "image" +  str(i  )+ ".jpg"
             video1 = cv2.imread(img_path1)
             gray_video1  =   cv2.cvtColor(video1, cv2.COLOR_BGR2GRAY)
-            gray_video1 =   1.3*  cv2.resize(gray_video1, (800,800), interpolation=cv2.INTER_AREA) +30
-            rectan1 = gray_video1 * 1.6
+            gray_video1 =      cv2.resize(gray_video1, (W_ini,H_ini), interpolation=cv2.INTER_AREA) 
+            rectan1 = gray_video1  
             circular1 = tranfer2circ_padding(gray_video1)
             gray_video1 = circular1
             #cv2.imshow('circular video',circular )      
@@ -129,7 +127,7 @@ def diplay_sequence():
             video2 = cv2.imread(img_path2)
             cv2.imwrite(save_dir_rectan  + str(i) +".jpg",video2 ) 
             gray_video2  =   cv2.cvtColor(video2, cv2.COLOR_BGR2GRAY)
-            gray_video2 = 1.3* cv2.resize(gray_video2, (800,800), interpolation=cv2.INTER_AREA) +30
+            gray_video2 =   cv2.resize(gray_video2, (W_ini,H_ini), interpolation=cv2.INTER_AREA)  
 
              
             rectan2 = gray_video2 

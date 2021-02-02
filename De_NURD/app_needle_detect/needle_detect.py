@@ -1,6 +1,6 @@
-savedir_process = "E:/database/Needle injection/3D scan/90_i2/cartesian/"
-operatedir_video = "E:/database/Needle injection/3D scan/90_i2/cartesian/"
-out_dir = "E:/database/Needle injection/3D scan/90_i2/output/"
+savedir_process = "E:/database/Needle injection/28th Jan/back_forward/1/cartesian/"
+operatedir_video = "E:/database/Needle injection/28th Jan/back_forward/1/cartesian/"
+out_dir = "E:/database/Needle injection/28th Jan/back_forward/1/output/"
 
 
 #savedir_process = "../../saved_pair2/"
@@ -37,7 +37,7 @@ from  matlab import Save_Signal_matlab
 from line_detection import Line_detect
 matlab_saver  = Save_Signal_matlab()
 
-read_start = 1
+read_start = 80
 Padding_H  = 0
 
 #Padding_H  = 254
@@ -151,7 +151,7 @@ def diplay_sequence():
     #show the image results
     read_sequence = os.listdir(savedir_process)
     seqence_Len = len(read_sequence)
-    img_path1 = savedir_process + str(read_start+20)+ ".jpg"
+    img_path1 = savedir_process + str(read_start)+ ".jpg"
     video2 = cv2.imread(img_path1)
     gray_video2  =   cv2.cvtColor(video2, cv2.COLOR_BGR2GRAY)
     gray_video2 = cv2.resize(gray_video2, (800,800), interpolation=cv2.INTER_AREA)
@@ -163,7 +163,7 @@ def diplay_sequence():
     for i in range(read_start,seqence_Len+read_start):
     #for i in os.listdir("E:/estimagine/vs_project/PythonApplication_data_au/pic/"):
     ##      process
-            img_path1 = savedir_process + str(i+20)+ ".jpg"
+            img_path1 = savedir_process + str(i)+ ".jpg"
             video1 = cv2.imread(img_path1)
             gray_video1  =   cv2.cvtColor(video1, cv2.COLOR_BGR2GRAY)
             gray_video1 = cv2.resize(gray_video1, (800,800), interpolation=cv2.INTER_AREA)
