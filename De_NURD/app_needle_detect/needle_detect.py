@@ -1,6 +1,6 @@
-savedir_process = "E:/database/Needle injection/28th Jan/back_forward/1/cartesian/"
-operatedir_video = "E:/database/Needle injection/28th Jan/back_forward/1/cartesian/"
-out_dir = "E:/database/Needle injection/28th Jan/back_forward/1/output/"
+savedir_process = "E:/database/Needle injection/28th Jan/pullback/2/cartesian/"
+operatedir_video = "E:/database/Needle injection/28th Jan/pullback/2/cartesian/"
+out_dir = "E:/database/Needle injection/28th Jan/pullback/2/output/"
 
 
 #savedir_process = "../../saved_pair2/"

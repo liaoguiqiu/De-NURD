@@ -33,15 +33,32 @@ class Line_detect:
 
         edges = cv2.Canny(result_img.astype(np.uint8),130,130,apertureSize = 3)
         lines  = Line_detect.Hough (edges)
-        final_box,MP = Line_detect.contour(edges,lines,"edge contour")
+        final_box,MP,CM = Line_detect.contour(edges,lines,"edge contour")
 
 
         cv2.imshow('edge',edges.astype(np.uint8) ) 
         if final_box is not None:
 
-            #backtorgb = cv2.drawContours(backtorgb,[final_box],0,(0,0,255),2)
+            backtorgb = cv2.drawContours(backtorgb,[final_box],0,(0,0,255),1)
             #cv2.line(backtorgb,(final_box[0][0],final_box[0][1]),(final_box[2][0],final_box[2][1]),(0,255,0),2)
-            cv2.line(backtorgb,(MP[0][0],MP[0][1]),(MP[1][0],MP[1][1]),(0,255,0),2)
+            cv2.line(backtorgb,(MP[0][0],MP[0][1]),(MP[1][0],MP[1][1]),(255,0,0),2)
+            d1 = math.sqrt((MP[0][0] - CM[0])**2 +  (MP[0][1] - CM[1])**2)
+            d2 = math.sqrt((MP[1][0] - CM[0])**2 +  (MP[1][1] - CM[1])**2)
+            if d1 < d2 :
+                start = (int(MP[1][0]),int(MP[1][1]))
+                end = (int(MP[0][0]),int(MP[0][1]))
+
+                backtorgb = cv2.arrowedLine(backtorgb, start,end, 
+                                     (0, 255, 0)  , thickness=2)  
+                backtorgb = cv2.circle(backtorgb, (int(MP[0][0]),int(MP[0][1])), radius=3, color=(255, 0, 0), thickness=-1)
+
+            else:
+                start = (int(MP[0][0]),int(MP[0][1]))
+                end = (int(MP[1][0]),int(MP[1][1]))
+
+                backtorgb = cv2.arrowedLine(backtorgb, start,end, 
+                                     (0, 255, 0)  , thickness=2)  
+                backtorgb = cv2.circle(backtorgb, (int(MP[1][0]),int(MP[1][1])), radius=3, color=(255, 0, 0), thickness=-1)
 
         cv2.imshow('Detection needle',backtorgb.astype(np.uint8) ) 
         return backtorgb
@@ -56,9 +73,9 @@ class Line_detect:
         backtorgb = backtorgb*0
         cv2.drawContours(backtorgb, contours, -1, (255,255,255), 1)
         if contours is not None:
-            backtorgb,final_box,final_MP = Line_detect.select_contour(contours,lines,  backtorgb)
+            backtorgb,final_box,final_MP,CM = Line_detect.select_contour(contours,lines,  backtorgb)
         cv2.imshow(display,backtorgb.astype(np.uint8) ) 
-        return final_box ,final_MP
+        return final_box ,final_MP,CM
 
     def Hough (edges,display = "hough1"):
         minLineLength = 3
@@ -93,6 +110,7 @@ class Line_detect:
         final_box = None
         satisfy = 0 
         final_MP =  np.zeros((2,2))
+        CM = None
         for i in range( number): 
             cnt  = contours[i] # this contpo
             this_clen  = len(cnt)
@@ -184,7 +202,7 @@ class Line_detect:
 
                     center_coordinates = (int(H/2), int(W/2))
 # Radius of circle
-                    radius = 50
+                    radius = 60
   
                     # Blue color in BGR
                     #color = (255, 0, 0)
@@ -204,9 +222,16 @@ class Line_detect:
 
                     backtorgb2  = (backtorgb2>100)*1
                     backtorgb2 = backtorgb2 * Mask2
+                    m = cv2.moments(backtorgb2.astype(np.uint8))
+                    CM = [m['m10']/m['m00'], m['m01']/m['m00']]
+ 
+
+
+
                     Select  = Mask * backtorgb2
                     backtorgb2 = backtorgb2 *255
                     backtorgb = cv2.cvtColor(backtorgb2.astype(np.uint8),cv2.COLOR_GRAY2RGB)
+                    
 
                     #warped = cv2.warpPerspective(backtorgb.astype(np.uint8), M, (width, height))
                     #warped  =   cv2.cvtColor(warped, cv2.COLOR_BGR2GRAY)
@@ -215,6 +240,7 @@ class Line_detect:
                     #cv2.imshow("warp" + str (satisfy),backtorgb.astype(np.uint8) * 0  )# back gorund first 
                     #cv2.imshow("warp" + str (satisfy),Select.astype(np.uint8) ) 
                     backtorgb = cv2.drawContours(backtorgb,[box],0,(0,0,255),1)
+                    backtorgb = cv2.circle(backtorgb, (int(CM[0]),int(CM[1])), radius=1, color=(0, 255, 255), thickness=-1)
                     err_sum = np.abs(EdgeLen/2/(height + width) - 1)
 
 
@@ -227,5 +253,5 @@ class Line_detect:
         #if len(contours) >0 :
         #    cnt = contours[len(contours)-1]
             
-        return  backtorgb, final_box,final_MP
+        return  backtorgb, final_box,final_MP,CM
          
