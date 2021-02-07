@@ -5,7 +5,7 @@
 #operatedir_video =  "D:/PhD/trying/OCT/P-ID_Name_25092019160318VIDEO.avi"
 #operatedir_video =  "../../OCT/P-ID_Name_25092019160318VIDEO.avi"
 #operatedir_video =  "../../OCT/P-ID_Name_25092019161813-7500rpm-G1_0.05_4_25_extracted.avi"
-operatedir_video =    "E:/database/Needle injection/28th Jan/2.avi"
+operatedir_video =    "E:/database/Needle injection/28th Jan/1.avi"
 #operatedir_video =  "E:/database/video_dots/tele_221202012295-resize.avi"
 #operatedir_video =  "../../OCT/needle__1.avi"
 
@@ -44,6 +44,9 @@ try:
 except ImportError: 
     import xml.etree.ElementTree as ET 
 import sys 
+
+from read_circu import tranfer_frome_rec2cir
+
 Down_sample_flag =False
 #GPU acceleration
 #from numba import vectorize
@@ -77,6 +80,16 @@ H_end = H
 steam=np.zeros((Len_steam,H_end-H_start,W))
 steam2=np.zeros((Len_steam,H_end-H_start,W))
 save_sequence_num = 0
+Padding_H  = 40
+Padd_zero_top = True
+
+def tranfer2circ_padding(img):
+    H,W_ini = img.shape
+    padding = np.zeros((Padding_H,W_ini))
+    if Padd_zero_top ==True:
+            img  = np.append(padding,img,axis=0)
+    circular = tranfer_frome_rec2cir(img)
+    return circular
 while(cap.isOpened()):
   # Capture frame-by-frame
   ret, frame = cap.read()
@@ -103,14 +116,15 @@ while(cap.isOpened()):
     #cv2.imshow('steamfilter',stea_filter.astype(np.uint8))
     #cv2.imshow('ffilter',filter_img)
     #cv2.imshow('costmatrix',Costmatrix.astype(np.uint8))
-    new_frame2=cv2.rotate(gray,rotateCode = 2) 
-    new_frame3= new_frame2.astype(float)
-    H,W= new_frame2.shape
-    circular3=np.ones((H,W))
-    circular2=circular3.astype(float)
-    circular = circular2*2
-    circular = cv2.linearPolar(new_frame3, (int(W/2) , int(H/2)),400, cv2.WARP_INVERSE_MAP)
-    circular=circular.astype(np.uint8)
+    #new_frame2=cv2.rotate(gray,rotateCode = 2) 
+    #new_frame3= new_frame2.astype(float)
+    #H,W= new_frame2.shape
+    #circular3=np.ones((H,W))
+    #circular2=circular3.astype(float)
+    #circular = circular2*2
+    #circular = cv2.linearPolar(new_frame3, (int(W/2) , int(H/2)),400, cv2.WARP_INVERSE_MAP)
+    #circular=circular.astype(np.uint8)
+    circular = tranfer2circ_padding(gray)
     H_ori , W_ori  = crop_H_test.shape
     gray_video = cv2.resize(crop_H_test, (832,H_ori), interpolation=cv2.INTER_LINEAR)
     #cv2.imwrite(savedir_matrix  + str(save_sequence_num) +".jpg", Costmatrix)

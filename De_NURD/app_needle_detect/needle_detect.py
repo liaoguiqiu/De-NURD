@@ -1,6 +1,6 @@
-savedir_process = "E:/database/Needle injection/28th Jan/pullback/2/cartesian/"
-operatedir_video = "E:/database/Needle injection/28th Jan/pullback/2/cartesian/"
-out_dir = "E:/database/Needle injection/28th Jan/pullback/2/output/"
+savedir_process = "E:/database/Needle injection/28th Jan/back_forward/2/cartesian/"
+operatedir_video = "E:/database/Needle injection/28th Jan/back_forward/2/cartesian/"
+out_dir = "E:/database/Needle injection/28th Jan/back_forward/2/output/"
 
 
 #savedir_process = "../../saved_pair2/"
@@ -27,6 +27,7 @@ import os
 import torch
 import scipy.signal as signal
 from scipy.stats.stats import pearsonr   
+from scipy import ndimage
 import random
 from matplotlib.pyplot import *
 from mpl_toolkits.mplot3d import Axes3D
@@ -37,7 +38,7 @@ from  matlab import Save_Signal_matlab
 from line_detection import Line_detect
 matlab_saver  = Save_Signal_matlab()
 
-read_start = 80
+read_start = 79
 Padding_H  = 0
 
 #Padding_H  = 254
@@ -55,7 +56,7 @@ video_sizeW= 900
 
 class Derivation_validate(object):
     def  __init__(self, H,W):
-        self.Len_steam = 1
+        self.Len_steam = 3
         self.crop_startH = 0
         self.cropH = H
      
@@ -225,7 +226,7 @@ def diplay_sequence():
  
 
             #cv2.imshow('combin video',show_2.astype(np.uint8)) 
-            cv2.imshow('show 3 imgs sequence with color',stream.astype(np.uint8) ) 
+            #cv2.imshow('show 3 imgs sequence with color',stream.astype(np.uint8) ) 
             #videoout.write(stream)
             cv2.imwrite(save_display_dir  + str(i) +".jpg",stream )
             cv2.imwrite(save_displaygray_dir  + str(i) +".jpg",show_2 )
@@ -236,6 +237,8 @@ def diplay_sequence():
                  
                 STD_call.buffer(rectan1 ,rectan2  )
                 final_result =  STD_call.calculate()
+
+                #final_result = ndimage.rotate(final_result, 45)
                 cv2.imwrite(out_dir  + str(i) +".jpg",final_result )
                 
 

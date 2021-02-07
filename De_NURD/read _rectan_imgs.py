@@ -1,8 +1,8 @@
 #operatedir_video = "D:/PhD/trying/tradition_method/OCT/sheath registration/pair A/with rectan/"
 #operatedir_video = "D:/PhD/trying/tradition_method/OCT/sheath registration/pairC/rectangular/2/"
 #operatedir_video = "E:/database/Needle injection/3D scan/0/"
-operatedir_video =   "E:/database/Needle injection/28th Jan/raw_pullback/1/"
-operatedir_video2 =  "E:/database/Needle injection/28th Jan/raw_pullback/1/"
+operatedir_video =   "E:/database/Needle injection/28th Jan/raw_pullback/3/"
+operatedir_video2 =  "E:/database/Needle injection/28th Jan/raw_pullback/3/"
 #operatedir_video2 = "D:/PhD/trying/tradition_method/OCT//sheath registration/pairD/phantom/1/"
 
 
@@ -23,8 +23,8 @@ operatedir_video2 =  "E:/database/Needle injection/28th Jan/raw_pullback/1/"
 
 #save_dir_rectan  =  "D:/PhD/trying/tradition_method/OCT/sheath registration/pairC/ruler/2_/"
 #save_dir_rectan  =  "../../saved_original/"
-save_dir_rectan =  "E:/database/Needle injection/28th Jan/pullback/1/polar/"
-savedir_origin_circle =  "E:/database/Needle injection/28th Jan/pullback/1/cartesian/"
+save_dir_rectan =  "E:/database/Needle injection/28th Jan/pullback/3/polar/"
+savedir_origin_circle =  "E:/database/Needle injection/28th Jan/pullback/3/cartesian/"
 
 
 #savedir_process = "../../saved_pair2/"
@@ -60,7 +60,7 @@ matlab_saver  = Save_Signal_matlab()
 read_start1 = 79
 read_start2 = 79
 
-Padding_H  = 0
+Padding_H  = 31
 
 #Padding_H  = 254
 #from  path_finding import PATH

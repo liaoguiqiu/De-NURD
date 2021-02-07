@@ -18,79 +18,98 @@ from  matlab import Save_Signal_matlab
 class Line_detect:
     def detection(result_img):
         backtorgb = cv2.cvtColor(result_img.astype(np.uint8),cv2.COLOR_GRAY2RGB)
-        result_img = cv2.GaussianBlur(result_img,(5,5),0)
+        #result_img = cv2.GaussianBlur(result_img,(5,5),0)
+        #result_img = cv2.GaussianBlur(result_img,(5,5),0)
+
         result_img =   result_img.astype(np.uint8)
 
         #ret2,thresh1 = cv2.threshold(result_img,200,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)
         #thresh1 = cv2.adaptiveThreshold(result_img,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,\
         #    cv2.THRESH_BINARY,11,2)
-        ret,thresh1 = cv2.threshold(result_img,60,255,cv2.THRESH_BINARY)
+        ret,thresh1 = cv2.threshold(result_img,80,255,cv2.THRESH_BINARY)
         
         #opening = cv2.morphologyEx(thresh1, cv2.MORPH_OPEN, kernel)
         #Line_detect.Hough (thresh1 ,display = " threshoud hough")
 
         #Line_detect.contour(thresh1)
 
-        edges = cv2.Canny(result_img.astype(np.uint8),130,130,apertureSize = 3)
+        #edges = cv2.Canny(result_img.astype(np.uint8),150,180,apertureSize = 3)
+        edges = cv2.Canny(result_img.astype(np.uint8),1000,2000,apertureSize = 3)
+
         lines  = Line_detect.Hough (edges)
-        final_box,MP,CM = Line_detect.contour(edges,lines,"edge contour")
+        final_box,MP,CM = Line_detect.contour(thresh1,edges,result_img,lines,"edge contour")
 
 
         cv2.imshow('edge',edges.astype(np.uint8) ) 
         if final_box is not None:
 
-            backtorgb = cv2.drawContours(backtorgb,[final_box],0,(0,0,255),1)
+            #backtorgb = cv2.drawContours(backtorgb,[final_box],0,(0,0,255),1)
             #cv2.line(backtorgb,(final_box[0][0],final_box[0][1]),(final_box[2][0],final_box[2][1]),(0,255,0),2)
-            cv2.line(backtorgb,(MP[0][0],MP[0][1]),(MP[1][0],MP[1][1]),(255,0,0),2)
+            #cv2.line(backtorgb,(MP[0][0],MP[0][1]),(MP[1][0],MP[1][1]),(255,0,0),2)
             d1 = math.sqrt((MP[0][0] - CM[0])**2 +  (MP[0][1] - CM[1])**2)
             d2 = math.sqrt((MP[1][0] - CM[0])**2 +  (MP[1][1] - CM[1])**2)
+            overlay = backtorgb.copy()
             if d1 < d2 :
                 start = (int(MP[1][0]),int(MP[1][1]))
                 end = (int(MP[0][0]),int(MP[0][1]))
 
-                backtorgb = cv2.arrowedLine(backtorgb, start,end, 
-                                     (0, 255, 0)  , thickness=2)  
-                backtorgb = cv2.circle(backtorgb, (int(MP[0][0]),int(MP[0][1])), radius=3, color=(255, 0, 0), thickness=-1)
+                overlay = cv2.arrowedLine(overlay, start,end, 
+                                     (0, 255, 0)  , thickness=2,tipLength = 0.05)  
+                overlay = cv2.circle(overlay, (int(MP[0][0]),int(MP[0][1])), radius=1, color=(0, 0, 255), thickness=-1)
 
             else:
                 start = (int(MP[0][0]),int(MP[0][1]))
                 end = (int(MP[1][0]),int(MP[1][1]))
 
-                backtorgb = cv2.arrowedLine(backtorgb, start,end, 
-                                     (0, 255, 0)  , thickness=2)  
-                backtorgb = cv2.circle(backtorgb, (int(MP[1][0]),int(MP[1][1])), radius=3, color=(255, 0, 0), thickness=-1)
+                overlay = cv2.arrowedLine(overlay, start,end, 
+                                     (0, 255, 0)  , thickness=2,tipLength = 0.05)  
+                overlay = cv2.circle(overlay, (int(MP[1][0]),int(MP[1][1])), radius=1, color=(0, 0, 255), thickness=-1)
+            alpha = 1 # Transparency factor.
 
+            # Following line overlays transparent rectangle over the image
+            backtorgb = cv2.addWeighted(overlay, alpha, backtorgb, 1 - alpha, 0)
         cv2.imshow('Detection needle',backtorgb.astype(np.uint8) ) 
         return backtorgb
 
 
-    def contour (thresh1,lines,display = "conotur1"):
-        kernel = np.ones((3,3),np.uint8)
+    def contour (thresh1,edge,result_img,lines,display = "conotur1"):
+        kernel = np.ones((5,5),np.uint8)
+        #thresh1 = cv2.morphologyEx(thresh1, cv2.MORPH_OPEN, kernel)
         #thresh1 = cv2.morphologyEx(thresh1, cv2.MORPH_CLOSE, kernel)
+
         thresh1 = thresh1.astype(np.uint8)
         _,contours,hierarchy = cv2.findContours(thresh1,cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+        _,contours2,hierarchy2 = cv2.findContours(edge,cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+
         backtorgb = cv2.cvtColor(thresh1,cv2.COLOR_GRAY2RGB)
+        backtorgb2  = backtorgb
+        cv2.drawContours(backtorgb2, contours2, -1, (0,255,255), 2)
+        cv2.imshow('original contour',backtorgb2.astype(np.uint8) ) 
+
+
         backtorgb = backtorgb*0
-        cv2.drawContours(backtorgb, contours, -1, (255,255,255), 1)
+        cv2.drawContours(backtorgb, contours2, -1, (255,255,255), 1)
         if contours is not None:
-            backtorgb,final_box,final_MP,CM = Line_detect.select_contour(contours,lines,  backtorgb)
+            backtorgb,final_box,final_MP,CM = Line_detect.select_contour(contours2,result_img,lines,  backtorgb,thresh1)
         cv2.imshow(display,backtorgb.astype(np.uint8) ) 
         return final_box ,final_MP,CM
 
     def Hough (edges,display = "hough1"):
-        minLineLength = 3
-        maxLineGap =3
-        kernel = np.ones((2,2),np.uint8)
-        #edges = cv2.morphologyEx(edges, cv2.MORPH_CLOSE, kernel)
-        #edges = cv2.morphologyEx(edges, cv2.MORPH_OPEN, kernel)
-        #edges = cv2.morphologyEx(edges, cv2.MORPH_CLOSE, kernel)
-
-        #edges = cv2.morphologyEx(edges, cv2.MORPH_CLOSE, kernel)
+        minLineLength = 10
+        maxLineGap =10
+        kernel = np.ones((3,3),np.uint8)
+        edges = cv2.morphologyEx(edges, cv2.MORPH_CLOSE, kernel)
+        edges = cv2.morphologyEx(edges, cv2.MORPH_CLOSE, kernel)
 
         #edges = cv2.morphologyEx(edges, cv2.MORPH_OPEN, kernel)
+        #edges = cv2.morphologyEx(edges, cv2.MORPH_CLOSE, kernel)
+
+        #edges = cv2.morphologyEx(edges, cv2.MORPH_CLOSE, kernel)
+
+        #edges = cv2.morphologyEx(edges, cv2.MORPH_OPEN, kernel)
 
 
-        lines = cv2.HoughLinesP(edges,1,np.pi/360,1,minLineLength,maxLineGap)
+        lines = cv2.HoughLinesP(edges,10,np.pi/360,10,minLineLength,maxLineGap)
         result_img =  cv2.cvtColor(edges,cv2.COLOR_GRAY2RGB)
         if lines is not None:
             number,_,_ = lines.shape
@@ -100,7 +119,7 @@ class Line_detect:
                     cv2.line(result_img,(x1,y1),(x2,y2),(0,255,0),2)
         cv2.imshow(display,result_img.astype(np.uint8) ) 
         return lines
-    def select_contour (contours ,lines, backtorgb):
+    def select_contour (contours ,result_img,lines, backtorgb,thresh1):
         
         number  = len (contours)
         Min_Lratio  = 1
@@ -150,7 +169,7 @@ class Line_detect:
                     MP[1][0] = (box[2][0]+box[3][0])/2
                     MP[1][1] = (box[2][1]+box[3][1])/2
 
-                    if L1/L2 < 0.25 and L2>40:
+                    if L1/L2 < 0.15 and L2>30 and L1 <13:
                         L_ratio   = L1/L2
                         Long_rec = True
                         
@@ -159,7 +178,7 @@ class Line_detect:
                     MP[0][1] = (box[0][1]+box[3][1])/2
                     MP[1][0] = (box[2][0]+box[1][0])/2
                     MP[1][1] = (box[2][1]+box[1][1])/2
-                    if L2/L1 < 0.25  and L1>40:
+                    if L2/L1 < 0.15  and L1>30 and L2 <13 :
                         L_ratio   = L2/L1
                         Long_rec = True
                 # is straight or not :
@@ -202,7 +221,7 @@ class Line_detect:
 
                     center_coordinates = (int(H/2), int(W/2))
 # Radius of circle
-                    radius = 60
+                    radius = 75
   
                     # Blue color in BGR
                     #color = (255, 0, 0)
@@ -222,8 +241,9 @@ class Line_detect:
 
                     backtorgb2  = (backtorgb2>100)*1
                     backtorgb2 = backtorgb2 * Mask2
-                    m = cv2.moments(backtorgb2.astype(np.uint8))
-                    CM = [m['m10']/m['m00'], m['m01']/m['m00']]
+                    thresh1 = thresh1 * Mask2
+                    m = cv2.moments(thresh1.astype(np.uint8))
+                    CM = [m['m10']/(m['m00']+0.00001), m['m01']/(m['m00']+0.00001)]
  
 
 
@@ -240,11 +260,11 @@ class Line_detect:
                     #cv2.imshow("warp" + str (satisfy),backtorgb.astype(np.uint8) * 0  )# back gorund first 
                     #cv2.imshow("warp" + str (satisfy),Select.astype(np.uint8) ) 
                     backtorgb = cv2.drawContours(backtorgb,[box],0,(0,0,255),1)
-                    backtorgb = cv2.circle(backtorgb, (int(CM[0]),int(CM[1])), radius=1, color=(0, 255, 255), thickness=-1)
-                    err_sum = np.abs(EdgeLen/2/(height + width) - 1)
+                    backtorgb = cv2.circle(backtorgb, (int(CM[0]),int(CM[1])), radius=5, color=(0, 255, 255), thickness=-1)
+                    Ratio2 = np.abs(EdgeLen/2/(height + width) - 1)
+                    err_sum  = Ratio2 + ratio_err + L_ratio
 
-
-                    if err_sum <Min_err and err_sum <0.2 :
+                    if err_sum <Min_err and Ratio2 <0.10 :
                         final_box = box
                         Min_err = err_sum
                         final_MP =  MP.astype(np.int) 
