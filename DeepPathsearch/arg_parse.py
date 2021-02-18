@@ -3,7 +3,7 @@ import os
 import random
 import torch
 import torch.backends.cudnn as cudnn
-from dataset import Resample_size
+from DeepPathsearch.dataset import Resample_size
 # imagenet
 
 # python3 main.py --dataset=imagenet --dataroot=/media/annusha/BigPapa/Study/DL/ImageNet_images

@@ -1,88 +1,184 @@
 import torch
 import torch.nn as nn
-import arg_parse
-from arg_parse import kernels, strides, pads
+import torchvision.models
+import math
+Path_length =832
+ 
 
-nz = int(arg_parse.opt.nz)
-ngf = int(arg_parse.opt.ngf)
-ndf = int(arg_parse.opt.ndf)
-nc = 3
-# nc  is the input deepth of the image
-
-class _netPath(nn.Module):
+def conv_keep_W(indepth,outdepth,k=(4,3),s=(2,1),p=(1,1)):
+#output width=((W-F+2*P )/S)+1
+# Conv2d(in_channels, out_channels, kernel_size, stride=1, padding=0, dilation=1, groups=1, bias=True)
+    module = nn.Sequential(
+             nn.Conv2d(indepth, outdepth,k, s, p, bias=False),          
+             nn.BatchNorm2d(outdepth),
+             nn.LeakyReLU(0.1,inplace=True)
+             )
+    return module
+def conv_dv_2(indepth,outdepth,k=(4,4),s=(2,2),p=(1,1)):
+#output width=((W-F+2*P )/S)+1
+# Conv2d(in_channels, out_channels, kernel_size, stride=1, padding=0, dilation=1, groups=1, bias=True)
+    module = nn.Sequential(
+             nn.Conv2d(indepth, outdepth,k, s, p, bias=False),          
+             nn.BatchNorm2d(outdepth),
+             nn.LeakyReLU(0.1,inplace=True)
+             )
+    return module
+def conv_keep(indepth,outdepth,k=(3,3),s=(1,1),p=(1,1)):
+#output width=((W-F+2*P )/S)+1
+# Conv2d(in_channels, out_channels, kernel_size, stride=1, padding=0, dilation=1, groups=1, bias=True)
+    module = nn.Sequential(
+             nn.Conv2d(indepth, outdepth,k, s, p, bias=False),          
+             #nn.BatchNorm2d(outdepth),
+             nn.LeakyReLU(0.1,inplace=True)
+             )
+    return module
+    
+class _netD_8_multiscal_fusion_long(nn.Module):
     def __init__(self):
-        super(_netPath, self).__init__()
+        super(_netD_8_multiscal_fusion_long, self).__init__()
+        kernels = [6, 6, 4, 4, 2,2]
+        strides = [2, 2, 2, 2, 2,1]
+        pads =    [2, 2, 1, 1, 0,0]
+        self.fully_connect_len = 1000
+        layer_len = len(kernels)
 
-        # Conv2d(in_channels, out_channels, kernel_size, stride=1, padding=0, dilation=1, groups=1, bias=True)
-         # input is (nc) x 128 x 128
-        self.conv1 = nn.Sequential(
-            nn.Conv2d(nc, ndf, kernels[5], strides[5], pads[5], bias=False),
-            nn.LeakyReLU(0.2, inplace=True)
-        )
+        #a side branch predict with original iamge with rectangular kernel
+        # 71*832 - 35*832
+        feature = 8
+        self.side_branch1  =  nn.ModuleList()
+        #self.side_branch1.append( conv_keep(3,feature))
+        self.side_branch1.append( conv_keep_W(3,2*feature))
+        feature = feature *2
 
-        # input is (nc) x 64 x 64
-        self.conv2 = nn.Sequential(
-            nn.Conv2d(ndf, ndf * 2, kernels[4], strides[4], pads[4], bias=False),
-            nn.BatchNorm2d(ndf * 2),
-            nn.LeakyReLU(0.2, inplace=True)
-        )
+        # 35*832 - 17*832
+        #self.side_branch1.append( conv_keep(feature,feature))
+        self.side_branch1.append( conv_keep_W(feature,2*feature))
+        feature = feature *2
+        # 17*832  - 8*832
+        #self.side_branch1.append( conv_keep(feature,feature))
+        self.side_branch1.append( conv_keep_W(feature,2*feature))
+        feature = feature *2
+        # 8*64  - 4*832
+        #self.side_branch1.append( conv_keep(feature,feature))
+        self.side_branch1.append( conv_keep_W(feature,2*feature))
+        feature = feature *2
+        #self.side_branch1.append( nn.Sequential(
+        #     nn.Conv2d(256, 512,(64,3), (1,1), (0,1), bias=False),          
+        #     nn.BatchNorm2d(512),
+        #     nn.LeakyReLU(0.1,inplace=True)
+            
+        #                                            )
+        #                         )
+        self.side_branch1.append( nn.Sequential(
+             nn.Conv2d(feature, feature*2,(4,1), (1,1), (0,0), bias=False),          
+             nn.BatchNorm2d(feature*2),
+             nn.LeakyReLU(0.1,inplace=True)
+            
+                                                    )
+                                 )
+        feature = feature *2
+        self.side_branch1.append( nn.Sequential(
+              
+             nn.Conv2d(feature, 1,(1,1), (1,1), (0,0), bias=False)         
+             #nn.BatchNorm2d(1),
+             #nn.LeakyReLU(0.1,inplace=True)
+                                                    )
+                                 )
 
-        # state size. (ndf) x 32 x 32
-        self.conv3 = nn.Sequential(
-            nn.Conv2d(ndf*2, ndf * 4, kernels[3], strides[3], pads[3], bias=False),
-            nn.BatchNorm2d(ndf * 4),
-            nn.LeakyReLU(0.2, inplace=True)
-        )
+        # fully connect fuion
 
-        # state size. (ndf*2) x 16 x 16
-        self.conv4 = nn.Sequential(
-            nn.Conv2d(ndf * 4, ndf * 8, kernels[2], strides[2], pads[2], bias=False),
-            nn.BatchNorm2d(ndf * 8),
-            nn.LeakyReLU(0.2, inplace=True)
-        )
+        feature = 12
+        self.side_branch2  =  nn.ModuleList()
+        # 71*832 - 35*416
 
-        # state size. (ndf*4) x 8 x 8
-        self.conv5 = nn.Sequential(
-            nn.Conv2d(ndf * 8, ndf * 16, kernels[1], strides[1], pads[1], bias=False),
-            nn.BatchNorm2d(ndf * 16),
-            nn.LeakyReLU(0.2, inplace=True)
-        )
+        #self.side_branch1.append( conv_keep(3,feature))
+        self.side_branch2.append( conv_dv_2 (3,2*feature))
+        feature = feature *2
 
-        # state size. (ndf*8) x 4 x 4
-        self.conv6 = nn.Sequential(
-            nn.Conv2d(ndf * 16, 1, kernels[0], strides[0], pads[0], bias=False),
-            nn.Sigmoid()
-        )
+        # 35*416 - 17*208
+        #self.side_branch1.append( conv_keep(feature,feature))
+        self.side_branch2.append( conv_dv_2(feature,2*feature))
+        feature = feature *2
+        # 17*208  - 8*104
+        #self.side_branch1.append( conv_keep(feature,feature))
+        self.side_branch2.append( conv_dv_2(feature,2*feature))
+        feature = feature *2
+        # 8*104  - 4*52
+        #self.side_branch1.append( conv_keep(feature,feature))
+        self.side_branch2.append( conv_dv_2(feature,2*feature))
+        feature = feature *2
+        #self.side_branch1.append( nn.Sequential(
+        #     nn.Conv2d(256, 512,(64,3), (1,1), (0,1), bias=False),          
+        #     nn.BatchNorm2d(512),
+        #     nn.LeakyReLU(0.1,inplace=True)
+            
+        #                                            )
+        #                         )
+        self.side_branch2.append( nn.Sequential(
+             nn.Conv2d(feature, feature*2,(4,1), (1,1), (0,0), bias=False),          
+             nn.BatchNorm2d(feature*2),
+             nn.LeakyReLU(0.1,inplace=True)
+            
+                                                    )
+                                 )
+        feature = feature *2
+        self.side_branch2.append( nn.Sequential(
+              
+             nn.Conv2d(feature, 1,(1,1), (1,1), (0,0), bias=False)         
+             #nn.BatchNorm2d(1),
+             #nn.LeakyReLU(0.1,inplace=True)
+                                                    )
+                                 )
 
+            #self.layers.append(this_layer)
+        self.branch1LU = nn.LeakyReLU(0.1,inplace=False)
+        self.branch2LU = nn.LeakyReLU(0.1,inplace=False)
+        self.fusion_layer = nn.Conv2d(2,1,(1,3), (1,1), (0,1), bias=False)       
 
-    def forward(self, input):
-        # output = self.main(input)
+    def forward(self, x):
+        #output = self.main(input)
+        #layer_len = len(kernels)
+        #for layer_point in range(layer_len):
+        #    if(layer_len==0):
+        #        output = self.layers[layer_point](input)
+        #    else:
+        #        output = self.layers[layer_point](output)
+        #for i, name in enumerate(self.layers):
+        #    x = self.layers[i](x)
+        side_out =x
+        for j, name in enumerate(self.side_branch1):
+            side_out = self.side_branch1[j](side_out)
+            test=side_out[0,0,0,0].cpu().detach().numpy()
+            if math.isnan(test):
+                path = 0
 
-        out_conv1 = self.conv1(input)
-        out_conv2 = self.conv2(out_conv1)
-        out_conv3 = self.conv3(out_conv2)
-        out_conv4 = self.conv4(out_conv3)
-        out_conv5 = self.conv5(out_conv4)
-        out_conv6 = self.conv6(out_conv5)
-        return out_conv6.view(-1, 1).squeeze(1)
+                pass
+             
+        
 
-    def get_features(self, input):
-        out_conv1 = self.conv1(input)
-        out_conv2 = self.conv2(out_conv1)
-        out_conv3 = self.conv3(out_conv2)
-        out_conv4 = self.conv4(out_conv3)
-        out_conv5 = self.conv5(out_conv4)
+        side_out2 =x
+        for j, name in enumerate(self.side_branch2):
+            side_out2 = self.side_branch2[j](side_out2)
+             
 
-        max_pool1 = nn.MaxPool2d(int(out_conv1.size(2) / 4))
-        max_pool2 = nn.MaxPool2d(int(out_conv2.size(2) / 4))
-        max_pool3 = nn.MaxPool2d(int(out_conv3.size(2) / 4))
-        # max_pool4 = nn.MaxPool2d(int(out_conv4.size(2) / 4))
+        #fusion
+        fuse1=self.branch1LU(side_out)
+        side_out2 = nn.functional.interpolate(side_out2, size=(1, Path_length), mode='bilinear') 
 
-        vector1 = max_pool1(out_conv1).view(input.size(0), -1).squeeze(1)
-        vector2 = max_pool2(out_conv2).view(input.size(0), -1).squeeze(1)
-        vector3 = max_pool3(out_conv3).view(input.size(0), -1).squeeze(1)
-        # vector4 = max_pool4(out_conv4).view(input.size(0), -1).squeeze(1)
+        fuse2=self.branch2LU(side_out2)
 
-        return torch.cat((vector1, vector2, vector3), 1)
+        fuse=torch.cat((fuse1,fuse2),1)
+        fuse=self.fusion_layer(fuse)
+        #local_bz,_,_,local_l = fuse.size() 
 
+        side_out = side_out.view(-1,Path_length).squeeze(1)# squess before fully connected
+        side_out2 = side_out2.view(-1,Path_length).squeeze(1)# squess before fully connected
 
+        out  = fuse.view(-1,Path_length).squeeze(1)# squess before fully connected
+        out = 0.4*out + 0.3*side_out+ 0.3*side_out2
+        #out  = side_out
+        # return x
+        # return side_out
+        return out#,side_out,side_out2
+        # return x
+       

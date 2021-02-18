@@ -1,10 +1,11 @@
-save_dir_analys =  "..\\..\\saved_stastics\\"
+save_dir_analys =  "../../saved_stastics/"
 #used python packages
 #import keyboard
 import cv2
 import math
 import numpy as np
 import os
+import scipy.io
 import random
 from matplotlib.pyplot import *
 #from mpl_toolkits.mplot3d import Axes3D
@@ -27,8 +28,6 @@ from enum import Enum
 Save_signal_flag = True
 Visidom_flag = False
 display_flag  = False
-
-
 all_statics_dir = os.path.join(save_dir_analys, 'signals.pkl')
 labels = ('mean path error','path cost','additional kp','additional ki')
 
@@ -46,15 +45,18 @@ class Save_signal_enum(Enum):
 class MY_ANALYSIS(object):
 
     def __init__(self ):
-         
+        self.save_matlab_flag = True
+        self.save_matlab_dir = os.path.join(save_dir_analys, 'matlab_sig.mat')
         #self.signal_label=displayed_labels
         self.DIM= len(Save_signal_enum)
         self.signals= np.zeros((self.DIM,1))
         self.all_statics_dir = os.path.join(save_dir_analys, 'signals.pkl')
         self.path_saving =[]   
         self.first_data_flag = True
+        self.path_integral = []
    # add new step of all signals
-
+    def buffer_path_integral(self, path_intr):
+        self.path_integral.append(path_intr)
     def add_new_iteration_result(self,new_step,this_path):
         #self.signals  = np.append(self.signals,new_step,axis=1) 
         
@@ -71,11 +73,21 @@ class MY_ANALYSIS(object):
             #self.path_saving.append(this_path)
 
             # display and save 2 :using the visdom
+    def save(self):
+            #save
+             
+        with open(self.all_statics_dir, 'wb') as f:
+            pickle.dump(self , f, pickle.HIGHEST_PROTOCOL)
     def display_and_save2(self,iteration_num,new):
         #save
-        if(int(iteration_num)%2==0):
+        if(int(iteration_num)%1==0):
+            #save python data 
             with open(self.all_statics_dir, 'wb') as f:
                 pickle.dump(self , f, pickle.HIGHEST_PROTOCOL)
+            #save matlab data 
+            if (self.save_matlab_flag == True):
+                scipy.io.savemat(self.save_matlab_dir, mdict={'NURD_intergral': self})
+        #display the debug
         if (display_flag ==True):
             if(Visidom_flag==True):
                 #plot with visidom

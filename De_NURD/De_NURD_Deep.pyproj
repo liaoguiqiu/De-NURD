@@ -1,0 +1,150 @@
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>07b9d663-4bc8-4016-8977-35b22d05cc4c</ProjectGuid>
+    <ProjectHome>
+    </ProjectHome>
+    <StartupFile>app_needle_detect\needle_detect.py</StartupFile>
+    <SearchPath>
+    </SearchPath>
+    <WorkingDirectory>.</WorkingDirectory>
+    <OutputPath>.</OutputPath>
+    <Name>De_NURD_Deep</Name>
+    <RootNamespace>De_NURD</RootNamespace>
+    <InterpreterId>Global|ContinuumAnalytics|Anaconda36-64</InterpreterId>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <DebugSymbols>true</DebugSymbols>
+    <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DebugSymbols>true</DebugSymbols>
+    <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="analy.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="analy_visdom.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="app_needle_detect\line_detection.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="app_needle_detect\needle_detect.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="app_needle_detect\tracking.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="basic_trans.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="correct_sequence.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Correct_sequence_integral.py" />
+    <Compile Include="Correct_sequence_with_sheath_restore.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Correct_smooth.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="cost_matrix.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Dataset_augmentor.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Dataset_generator.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DeepPathsearch\analy.py" />
+    <Compile Include="DeepPathsearch\analy_visdom.py" />
+    <Compile Include="DeepPathsearch\arg_parse.py" />
+    <Compile Include="DeepPathsearch\arithmetic.py" />
+    <Compile Include="DeepPathsearch\classifier_svm.py" />
+    <Compile Include="DeepPathsearch\dataset.py" />
+    <Compile Include="DeepPathsearch\deeppathlong.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DeepPathsearch\extract_imagenet.py" />
+    <Compile Include="DeepPathsearch\gan_body.py" />
+    <Compile Include="DeepPathsearch\get_samples.py" />
+    <Compile Include="DeepPathsearch\imagenet.py" />
+    <Compile Include="DeepPathsearch\image_trans.py" />
+    <Compile Include="DeepPathsearch\main.py" />
+    <Compile Include="DeepPathsearch\PathNetbody.py" />
+    <Compile Include="DeepPathsearch\path_train.py" />
+    <Compile Include="DeepPathsearch\testDataReading.py" />
+    <Compile Include="DeepPathsearch\test_Deep_finding.py" />
+    <Compile Include="Deep_shift\ShiftingNetBody_V2.py" />
+    <Compile Include="Dataset_generator_OLG.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Deep_shift\ShiftNetBodyV3.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="displayBline.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="display_pure.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ekf.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="matlab.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Path_post_pcs.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="read _rectan_imgs.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="shift_deploy.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="De_NURD.py" />
+    <Compile Include="Correct_sequence_iteration.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="display.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="median_filter_special.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="parrallel_thread.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="path_finding.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="read_circu.py">
+      <SubType>Code</SubType>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <InterpreterReference Include="Global|ContinuumAnalytics|Anaconda36-64" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="DeepPathsearch\" />
+    <Folder Include="Deep_shift\" />
+    <Folder Include="app_needle_detect\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="DeepPathsearch\README.md" />
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
+  <!-- Uncomment the CoreCompile target to enable the Build command in
+       Visual Studio and specify your pre- and post-build commands in
+       the BeforeBuild and AfterBuild targets below. -->
+  <!--<Target Name="CoreCompile" />-->
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+</Project>

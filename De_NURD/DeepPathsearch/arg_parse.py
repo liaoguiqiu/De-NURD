@@ -19,15 +19,21 @@ parser.add_argument('--batchSize', type=int, default=1, help='input batch size')
 parser.add_argument('--imageSize', type=int, default=Resample_size, help='the height / width of the input image to network')
 parser.add_argument('--nz', type=int, default=780, help='size of the latent z vector')
 parser.add_argument('--ngf', type=int, default=32)
-parser.add_argument('--ndf', type=int, default=2)
+parser.add_argument('--ndf', type=int, default=16)
 parser.add_argument('--niter', type=int, default=5000, help='number of epochs to train for')
-parser.add_argument('--lr', type=float, default=0.00005, help='learning rate, default=0.0002')
+#parser.add_argument('--lr', type=float, default=0.00003, help='learning rate, default=0.0002')
+parser.add_argument('--lr', type=float, default=0.0000003, help='learning rate, default=0.0002')
+#parser.add_argument('--lr', type=float, default=0.000005, help='learning rate, default=0.0002')
+
+
 parser.add_argument('--beta1', type=float, default=0.5, help='beta1 for adam. default=0.5')
 #parser.add_argument('--netG', default='..\\DCGANproject\\out\\netG_epoch_50.pth', help="path to netG (to continue training)")
 #parser.add_argument('--netD', default='..\\DCGANproject\\out\\netD_epoch_50.pth', help="path to netD (to continue training)")
 parser.add_argument('--netG', default='', help="path to netG (to continue training)")
-parser.add_argument('--netD', default='', help="path to netD (to continue training)")
-parser.add_argument('--outf', default='..\\DeepPathFinding\\out', help='folder to output images and model checkpoints')
+parser.add_argument('--netD', default='..\\DeepPathFinding_long_matrix_Self_design_layers\\out\\netD_epoch_44.pth', help="path to netD (to continue training)")
+#parser.add_argument('--netD', default='', help="path to netD (to continue training)")
+
+parser.add_argument('--outf', default='..\\DeepPathFinding_long_matrix_Self_design_layers\\out', help='folder to output images and model checkpoints')
 parser.add_argument('--manualSeed', type=int, help='manual seed')
 parser.add_argument('--train_svm', action='store_true', help='enable train svm using saved features')
 
@@ -55,10 +61,13 @@ kernels = []
 strides = []
 pads = []
 #output width=((W-F+2*P )/S)+1
+kernels = [2, 3, 4, 4, 4,4]
+strides = [1, 1, 2, 2, 2,2]
+pads =    [0, 0, 1, 1, 1,1]
 if opt.imageSize == 64:
-    kernels = [2, 3, 4, 4, 4,4]
-    strides = [1, 1, 2, 2, 2,2]
-    pads =    [0, 0, 1, 1, 1,1]
+    kernels = [6, 4, 4, 4, 2,2]
+    strides = [2, 2, 2, 2, 2,1]
+    pads =    [2, 1, 1, 1, 0,0]
 
 if opt.imageSize == 128:
     kernels = [4, 2, 4, 4, 6,8]

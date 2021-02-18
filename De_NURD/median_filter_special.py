@@ -58,12 +58,30 @@ class myfilter:
        ten=ten.to(device)
       #sort the tensor by frame sequence
        sort_ten,_=ten.sort(dim=0)
-       mid= sort_ten[2,:,:]
+       mid= sort_ten[int(len/2),:,:]
        #a = steam[0,:,:]
        #b = steam[1,:,:]
        #c = steam[2,:,:]
        #new = middle(a,b,c)
-       return mid
+       new =  torch.Tensor.cpu(mid).detach().numpy()
+       return new
+    def steam_filter_avg(steam):
+       len,h,w = steam.shape
+       new=np.zeros((h,w))
+       #for i in range(h):
+       #    for j in range(w):
+       #        new[i,j] = np.median(steam[:,i,j] )  
+       #new=steam[0,:,:] + steam[1,:,:]
+       #new=new/2.0
+       #torch.set_default_tensor_type('torch.cuda.FloatTensor')
+       ten= torch.from_numpy(steam)
+       image= torch.sum(ten,dim=0) / len
+       new =  torch.Tensor.cpu(image).detach().numpy()
+       #a = steam[0,:,:]
+       #b = steam[1,:,:]
+       #c = steam[2,:,:]
+       #new = middle(a,b,c)
+       return new
 
 
     
