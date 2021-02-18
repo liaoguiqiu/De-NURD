@@ -26,15 +26,17 @@ class Line_detect:
         #ret2,thresh1 = cv2.threshold(result_img,200,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)
         #thresh1 = cv2.adaptiveThreshold(result_img,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,\
         #    cv2.THRESH_BINARY,11,2)
-        ret,thresh1 = cv2.threshold(result_img,80,255,cv2.THRESH_BINARY)
+        ret,thresh1 = cv2.threshold(result_img,30,255,cv2.THRESH_BINARY)
         
         #opening = cv2.morphologyEx(thresh1, cv2.MORPH_OPEN, kernel)
         #Line_detect.Hough (thresh1 ,display = " threshoud hough")
 
         #Line_detect.contour(thresh1)
 
-        #edges = cv2.Canny(result_img.astype(np.uint8),150,180,apertureSize = 3)
-        edges = cv2.Canny(result_img.astype(np.uint8),1000,2000,apertureSize = 3)
+        edges = cv2.Canny(result_img.astype(np.uint8),50,90,apertureSize = 3)
+        cv2.imshow('edges needle',edges.astype(np.uint8) ) 
+
+        #edges = cv2.Canny(result_img.astype(np.uint8),1000,2000,apertureSize = 3)
 
         lines  = Line_detect.Hough (edges)
         final_box,MP,CM = Line_detect.contour(thresh1,edges,result_img,lines,"edge contour")
@@ -73,17 +75,22 @@ class Line_detect:
 
 
     def contour (thresh1,edge,result_img,lines,display = "conotur1"):
-        kernel = np.ones((5,5),np.uint8)
-        #thresh1 = cv2.morphologyEx(thresh1, cv2.MORPH_OPEN, kernel)
-        #thresh1 = cv2.morphologyEx(thresh1, cv2.MORPH_CLOSE, kernel)
+        kernel = np.ones((3,3),np.uint8)
+        kernel2 = np.ones((2,2),np.uint8)
 
+        #thresh1 = cv2.morphologyEx(thresh1, cv2.MORPH_CLOSE, kernel)
+        #thresh1 = cv2.morphologyEx(thresh1, cv2.MORPH_CLOSE, kernel2)
+        #thresh1 = cv2.morphologyEx(thresh1, cv2.MORPH_OPEN, kernel2)
+        #thresh1 = cv2.morphologyEx(thresh1, cv2.MORPH_CLOSE, kernel2)
         thresh1 = thresh1.astype(np.uint8)
+        cv2.imshow('thresh1 needle',thresh1.astype(np.uint8) ) 
+
         _,contours,hierarchy = cv2.findContours(thresh1,cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
         _,contours2,hierarchy2 = cv2.findContours(edge,cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
 
-        backtorgb = cv2.cvtColor(thresh1,cv2.COLOR_GRAY2RGB)
+        backtorgb = cv2.cvtColor(edge,cv2.COLOR_GRAY2RGB)
         backtorgb2  = backtorgb
-        cv2.drawContours(backtorgb2, contours2, -1, (0,255,255), 2)
+        cv2.drawContours(backtorgb2, contours2, -1, (0,0,255),2)
         cv2.imshow('original contour',backtorgb2.astype(np.uint8) ) 
 
 
@@ -98,9 +105,12 @@ class Line_detect:
         minLineLength = 10
         maxLineGap =10
         kernel = np.ones((3,3),np.uint8)
-        edges = cv2.morphologyEx(edges, cv2.MORPH_CLOSE, kernel)
-        edges = cv2.morphologyEx(edges, cv2.MORPH_CLOSE, kernel)
+        kernel2 = np.ones((2,2),np.uint8)
 
+        edges = cv2.morphologyEx(edges, cv2.MORPH_CLOSE, kernel)
+        edges = cv2.morphologyEx(edges, cv2.MORPH_CLOSE, kernel2)
+        edges = cv2.morphologyEx(edges, cv2.MORPH_OPEN, kernel2)
+        edges = cv2.morphologyEx(edges, cv2.MORPH_CLOSE, kernel2)
         #edges = cv2.morphologyEx(edges, cv2.MORPH_OPEN, kernel)
         #edges = cv2.morphologyEx(edges, cv2.MORPH_CLOSE, kernel)
 
@@ -168,8 +178,8 @@ class Line_detect:
                     MP[0][1] = (box[0][1]+box[1][1])/2
                     MP[1][0] = (box[2][0]+box[3][0])/2
                     MP[1][1] = (box[2][1]+box[3][1])/2
-
-                    if L1/L2 < 0.15 and L2>30 and L1 <13:
+                    Length = L2
+                    if L1/L2 < 0.15 and L2>30 and L1 <20:
                         L_ratio   = L1/L2
                         Long_rec = True
                         
@@ -178,7 +188,8 @@ class Line_detect:
                     MP[0][1] = (box[0][1]+box[3][1])/2
                     MP[1][0] = (box[2][0]+box[1][0])/2
                     MP[1][1] = (box[2][1]+box[1][1])/2
-                    if L2/L1 < 0.15  and L1>30 and L2 <13 :
+                    Length = L1
+                    if L2/L1 < 0.15  and L1>30 and L2 <20 :
                         L_ratio   = L2/L1
                         Long_rec = True
                 # is straight or not :
@@ -206,7 +217,7 @@ class Line_detect:
                 ratio_err = np.abs(ratio - 1)
 
                 #if ratio_err<0.3 and Long_rec ==True and Straight == True:
-                if   Long_rec ==True and Straight == True:
+                if   Long_rec ==True : # and Straight == True:
                     satisfy += 1 
                     #err_sum = 0.5*L_ratio + 0.5 * Straight_ratio_error #+ 0.3 * ratio_err
 
@@ -221,7 +232,7 @@ class Line_detect:
 
                     center_coordinates = (int(H/2), int(W/2))
 # Radius of circle
-                    radius = 75
+                    radius = 120
   
                     # Blue color in BGR
                     #color = (255, 0, 0)
@@ -241,16 +252,39 @@ class Line_detect:
 
                     backtorgb2  = (backtorgb2>100)*1
                     backtorgb2 = backtorgb2 * Mask2
-                    thresh1 = thresh1 * Mask2
-                    m = cv2.moments(thresh1.astype(np.uint8))
+                    #Mass = thresh1 * Mask2
+                    Mass = thresh1 * Mask2
+
+                    m = cv2.moments(Mass.astype(np.uint8))
                     CM = [m['m10']/(m['m00']+0.00001), m['m01']/(m['m00']+0.00001)]
- 
+
+                    #determin the tip of one line 
+                    d1 = math.sqrt((MP[0][0] - CM[0])**2 +  (MP[0][1] - CM[1])**2)
+                    d2 = math.sqrt((MP[1][0] - CM[0])**2 +  (MP[1][1] - CM[1])**2)
+                    overlay = backtorgb.copy()
+                    Mass_center_ratio =0
+                    distance_mass  = (d1 + d2)/2
+                    if d1 < d2 :
+                        start = (int(MP[1][0]),int(MP[1][1]))
+                        end = (int(MP[0][0]),int(MP[0][1]))
+                        Mass_center_ratio = (d2 - d1) /Length
+                        Mass_center_ratio_err = np.abs(1 - Mass_center_ratio)
+                        
+                    else:
+                        start = (int(MP[0][0]),int(MP[0][1]))
+                        end = (int(MP[1][0]),int(MP[1][1]))
+                        Mass_center_ratio = (d1 - d2) /Length
+                        Mass_center_ratio_err = np.abs(1 - Mass_center_ratio)
+
+                      
+
+
 
 
 
                     Select  = Mask * backtorgb2
                     backtorgb2 = backtorgb2 *255
-                    backtorgb = cv2.cvtColor(backtorgb2.astype(np.uint8),cv2.COLOR_GRAY2RGB)
+                    #backtorgb = cv2.cvtColor(backtorgb2.astype(np.uint8),cv2.COLOR_GRAY2RGB)
                     
 
                     #warped = cv2.warpPerspective(backtorgb.astype(np.uint8), M, (width, height))
@@ -262,9 +296,11 @@ class Line_detect:
                     backtorgb = cv2.drawContours(backtorgb,[box],0,(0,0,255),1)
                     backtorgb = cv2.circle(backtorgb, (int(CM[0]),int(CM[1])), radius=5, color=(0, 255, 255), thickness=-1)
                     Ratio2 = np.abs(EdgeLen/2/(height + width) - 1)
-                    err_sum  = Ratio2 + ratio_err + L_ratio
+                    #err_sum  = Ratio2 + ratio_err + L_ratio
+                    err_sum  = Ratio2   + Mass_center_ratio_err + np.abs(1 - distance_mass/100 ) + Length/50
 
-                    if err_sum <Min_err and Ratio2 <0.10 :
+
+                    if err_sum <Min_err and Ratio2 <0.20 and Mass_center_ratio_err <0.2 and distance_mass >50 and Length > 50:
                         final_box = box
                         Min_err = err_sum
                         final_MP =  MP.astype(np.int) 

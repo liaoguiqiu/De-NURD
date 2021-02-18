@@ -1,6 +1,6 @@
-savedir_process = "E:/database/Needle injection/28th Jan/back_forward/2/cartesian/"
-operatedir_video = "E:/database/Needle injection/28th Jan/back_forward/2/cartesian/"
-out_dir = "E:/database/Needle injection/28th Jan/back_forward/2/output/"
+savedir_process = "E:/database/Needle injection/28th Jan/phantom/cartesian/"
+operatedir_video = "E:/database/Needle injection/28th Jan/phantom/cartesian/"
+out_dir = "E:/database/Needle injection/28th Jan/phantom/output/"
 
 
 #savedir_process = "../../saved_pair2/"
@@ -38,7 +38,7 @@ from  matlab import Save_Signal_matlab
 from line_detection import Line_detect
 matlab_saver  = Save_Signal_matlab()
 
-read_start = 79
+read_start = 0
 Padding_H  = 0
 
 #Padding_H  = 254
@@ -56,7 +56,7 @@ video_sizeW= 900
 
 class Derivation_validate(object):
     def  __init__(self, H,W):
-        self.Len_steam = 3
+        self.Len_steam = 1
         self.crop_startH = 0
         self.cropH = H
      
@@ -124,8 +124,11 @@ class Derivation_validate(object):
         dev2 = torch.abs (dev)
         stda =  torch.sum(dev2,dim=0) / L
         final_result = cv2.cvtColor(result_img.astype(np.uint8),cv2.COLOR_GRAY2RGB)
+        cv2.imshow('original',final_result.astype(np.uint8) ) 
+
         result =  Line_detect.detection(result_img[150:650,150:650])
         final_result[150:650,150:650,:]=  result
+
         #result_img=torch.Tensor.cpu(stda).detach().numpy()
         return final_result
          
