@@ -27,6 +27,7 @@ class TRACKING(object):
     def trancking(self,p_start,p_end,start,end,result_img):
         backtorgb = cv2.cvtColor(result_img.astype(np.uint8),cv2.COLOR_GRAY2RGB)
         # whether it is the first of detection 
+        H,W   = result_img .shape
         if start is None and p_start is None :
             return None,None
 
@@ -34,7 +35,7 @@ class TRACKING(object):
             new_st = start
             new_ed = end 
         else:
-            e_start , e_end = TRACKING.cross_corrlate( p_start,p_end, self.template, result_img)
+            e_start , e_end = self.cross_corrlate( p_start,p_end, self.template, result_img)
            
 
             if start is not None :
@@ -46,9 +47,9 @@ class TRACKING(object):
                 p_end = np.asarray(p_end)
                 d_1 = math.sqrt((e_start[0] - start[0])**2 +  (e_start[1] - start[1])**2)
                 d_2 = math.sqrt((e_end[0] - end[0])**2 +  (e_end[1] - end[1])**2)
-                if (d_1 + d_2)/2 <50:
-                    new_st =  (start + e_start )/2.0
-                    new_ed =  (end + e_end )/2.0 
+                if (d_1 + d_2)/2 <100:
+                    new_st =  (0.8 *start + 0.2 * e_start ) 
+                    new_ed =  (0.8 *end + 0.2 * e_end ) 
                  
 
                 
@@ -73,6 +74,10 @@ class TRACKING(object):
         right= int(max(new_st[0],new_ed[0]))
         top= int( min(new_st[1],new_ed[1]))
         bottom= int(max(new_st[1],new_ed[1]))
+        left = np.clip(left,0,W)
+        right = np.clip(right,0,W)
+        top = np.clip(top,0,H)
+        bottom = np.clip(bottom,0,H)
         # update the template
         self.template  = result_img[top:bottom, left:right] 
 
@@ -80,7 +85,7 @@ class TRACKING(object):
 
 
         return new_st , new_ed
-    def cross_corrlate( p_start,p_end,template, result_img):
+    def cross_corrlate(self, p_start,p_end,template, result_img):
         # define area 
         H,W  = result_img.shape
 
@@ -99,13 +104,24 @@ class TRACKING(object):
         S_area2 =  S_area  -  S_area.mean ()
 
         cross_corr = signal.correlate2d(S_area2, template2,boundary='symm', mode='same') 
-        cross_corr = cross_corr / np.max(cross_corr)
-        cross_corr = np.clip(cross_corr *200,1,255)
-        #full_corr_m  =
+        cross_corr = cross_corr  / np.max(cross_corr)
+        #cross_corr = np.clip(cross_corr *200,1,255)
+        full_corr_m  = result_img *0
+        full_corr_m = full_corr_m.astype(float)
+        full_corr_m [top:bottom, left:right]  = cross_corr
+        full_corr_m = np.clip(full_corr_m ,0,255)
+        if self.p_corr_m is None:
 
-        y, x = np.unravel_index(np.argmax(cross_corr), cross_corr.shape) 
-        y = y + top
-        x = x + left
+            fuse = full_corr_m
+        else :
+            fuse = full_corr_m + self.p_corr_m
+            fuse = fuse  / np.max(fuse)
+        
+        self.p_corr_m  = fuse
+
+        y, x = np.unravel_index(np.argmax(fuse), fuse.shape) 
+        #y = y + top
+        #x = x + left
 
         shiftx = x - (p_start[0] + p_end[0])/2
         shifty = y - (p_start[1] + p_end[1])/2
@@ -127,7 +143,7 @@ class TRACKING(object):
                                      (255, 255, 255)  , thickness=2,tipLength = 0.05)  
         #cv2.imshow('S_area',S_area.astype(np.uint8) ) 
         cv2.imshow('template',template.astype(np.uint8) ) 
-        #cv2.imshow('cross_corr',cross_corr.astype(np.uint8) ) 
+        cv2.imshow('cross_corr',(fuse*200).astype(np.uint8) ) 
         cv2.imshow('result_img',result_img.astype(np.uint8) ) 
 
 

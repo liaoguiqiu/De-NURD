@@ -41,7 +41,7 @@ class Line_detect(object):
 
         #Line_detect.contour(thresh1)
 
-        edges = cv2.Canny(result_img.astype(np.uint8),50,90,apertureSize = 3)
+        edges = cv2.Canny(result_img.astype(np.uint8),70,120,apertureSize = 3)
         cv2.imshow('edges needle',edges.astype(np.uint8) ) 
 
         #edges = cv2.Canny(result_img.astype(np.uint8),1000,2000,apertureSize = 3)
@@ -319,7 +319,7 @@ class Line_detect(object):
                     err_sum  = Ratio2   + Mass_center_ratio_err + np.abs(1 - distance_mass/100 ) + Length/50
 
 
-                    if err_sum <Min_err and Ratio2 <0.20 and Mass_center_ratio_err <0.2 and distance_mass >50 and Length > 50:
+                    if err_sum <Min_err and Ratio2 <0.15 and Mass_center_ratio_err <0.2 and distance_mass >50 and Length > 50:
                         final_box = box
                         Min_err = err_sum
                         final_MP =  MP.astype(np.int) 

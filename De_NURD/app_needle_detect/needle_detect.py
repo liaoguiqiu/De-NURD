@@ -38,7 +38,7 @@ from  matlab import Save_Signal_matlab
 from line_detection import Line_detect
 matlab_saver  = Save_Signal_matlab()
 
-read_start = 300
+read_start = 990
 Padding_H  = 0
 
 #Padding_H  = 254
