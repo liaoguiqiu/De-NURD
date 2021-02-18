@@ -35,6 +35,9 @@
     <Compile Include="app_needle_detect\needle_detect.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="app_needle_detect\tracking.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="basic_trans.py">
       <SubType>Code</SubType>
     </Compile>

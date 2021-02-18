@@ -38,7 +38,7 @@ from  matlab import Save_Signal_matlab
 from line_detection import Line_detect
 matlab_saver  = Save_Signal_matlab()
 
-read_start = 0
+read_start = 300
 Padding_H  = 0
 
 #Padding_H  = 254
@@ -59,7 +59,7 @@ class Derivation_validate(object):
         self.Len_steam = 1
         self.crop_startH = 0
         self.cropH = H
-     
+        self.needledetector = Line_detect()
         
 
         
@@ -126,7 +126,7 @@ class Derivation_validate(object):
         final_result = cv2.cvtColor(result_img.astype(np.uint8),cv2.COLOR_GRAY2RGB)
         cv2.imshow('original',final_result.astype(np.uint8) ) 
 
-        result =  Line_detect.detection(result_img[150:650,150:650])
+        result =  self. needledetector.detection(result_img[150:650,150:650])
         final_result[150:650,150:650,:]=  result
 
         #result_img=torch.Tensor.cpu(stda).detach().numpy()

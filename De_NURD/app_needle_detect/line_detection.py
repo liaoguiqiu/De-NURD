@@ -14,9 +14,17 @@ from Correct_sequence_integral import read_start
 from read_circu import tranfer_frome_rec2cir
 from basic_trans import Basic_oper
 from  matlab import Save_Signal_matlab
+from tracking import TRACKING
+class Line_detect(object):
+    def __init__(self):
+        self.final_box =None
+        self.MP = None
+        self.CM  = None
+        self.start  = None
+        self.end =None
+        self.tracker = TRACKING()
 
-class Line_detect:
-    def detection(result_img):
+    def detection(self,result_img):
         backtorgb = cv2.cvtColor(result_img.astype(np.uint8),cv2.COLOR_GRAY2RGB)
         #result_img = cv2.GaussianBlur(result_img,(5,5),0)
         #result_img = cv2.GaussianBlur(result_img,(5,5),0)
@@ -43,6 +51,8 @@ class Line_detect:
 
 
         cv2.imshow('edge',edges.astype(np.uint8) ) 
+        start = None
+        end = None
         if final_box is not None:
 
             #backtorgb = cv2.drawContours(backtorgb,[final_box],0,(0,0,255),1)
@@ -50,26 +60,35 @@ class Line_detect:
             #cv2.line(backtorgb,(MP[0][0],MP[0][1]),(MP[1][0],MP[1][1]),(255,0,0),2)
             d1 = math.sqrt((MP[0][0] - CM[0])**2 +  (MP[0][1] - CM[1])**2)
             d2 = math.sqrt((MP[1][0] - CM[0])**2 +  (MP[1][1] - CM[1])**2)
-            overlay = backtorgb.copy()
             if d1 < d2 :
                 start = (int(MP[1][0]),int(MP[1][1]))
                 end = (int(MP[0][0]),int(MP[0][1]))
 
-                overlay = cv2.arrowedLine(overlay, start,end, 
-                                     (0, 255, 0)  , thickness=2,tipLength = 0.05)  
-                overlay = cv2.circle(overlay, (int(MP[0][0]),int(MP[0][1])), radius=1, color=(0, 0, 255), thickness=-1)
+                
 
             else:
                 start = (int(MP[0][0]),int(MP[0][1]))
                 end = (int(MP[1][0]),int(MP[1][1]))
 
-                overlay = cv2.arrowedLine(overlay, start,end, 
-                                     (0, 255, 0)  , thickness=2,tipLength = 0.05)  
-                overlay = cv2.circle(overlay, (int(MP[1][0]),int(MP[1][1])), radius=1, color=(0, 0, 255), thickness=-1)
+                
+
+            #update the result of detection ( measure ment and ait for the tracking alagorithm to correct)
+             
+        self.start, self.end = self.tracker.trancking(self.start,self.end, start , end, result_img)
+
+        if self.start is not None :
+            overlay = backtorgb.copy()
+
+            overlay = cv2.arrowedLine(overlay, self.start,self.end, 
+                                        (0, 255, 0)  , thickness=2,tipLength = 0.05)  
+            overlay = cv2.circle(overlay, (int(self.end[0]),int(self.end[1])), radius=1, color=(0, 0, 255), thickness=-1)
             alpha = 1 # Transparency factor.
 
             # Following line overlays transparent rectangle over the image
             backtorgb = cv2.addWeighted(overlay, alpha, backtorgb, 1 - alpha, 0)
+
+
+
         cv2.imshow('Detection needle',backtorgb.astype(np.uint8) ) 
         return backtorgb
 
