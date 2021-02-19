@@ -20,66 +20,110 @@ from  matlab import Save_Signal_matlab
 class TRACKING(object):
     def __init__(self):
       
-        self.start  = None
-        self.end = None
+        self.remember_start  = None
+        self.remember_end = None
         self.template  = None
         self.p_corr_m = None
+        self.forgeting =0
     def trancking(self,p_start,p_end,start,end,result_img):
         backtorgb = cv2.cvtColor(result_img.astype(np.uint8),cv2.COLOR_GRAY2RGB)
+        new_st = None
+        new_ed = None
+
         # whether it is the first of detection 
         H,W   = result_img .shape
         if start is None and p_start is None :
             return None,None
 
-        if (p_start is None) or (p_end is None):
-            new_st = start
-            new_ed = end 
-        else:
-            e_start , e_end = self.cross_corrlate( p_start,p_end, self.template, result_img)
+        if self.remember_start is None :
+            self.remember_start = start
+            self.remember_end = end
+        D=0
+        if start is not None:
+            D = math.sqrt((self.remember_start [0] - start[0])**2 +  (self.remember_start[1] - start[1])**2)
+        
+        if D <100:
+            if (p_start is None) or (p_end is None):
+                new_st = start
+                new_ed = end 
+            
+
+                # update the template
+
+                        #conver line to a box 
+                left= int(min(new_st[0],new_ed[0]))
+                right= int(max(new_st[0],new_ed[0]))
+                top= int( min(new_st[1],new_ed[1]))
+                bottom= int(max(new_st[1],new_ed[1]))
+                left = np.clip(left,0,W)
+                right = np.clip(right,0,W)
+                top = np.clip(top,0,H)
+                bottom = np.clip(bottom,0,H)
+                self.template  = result_img[top:bottom, left:right] 
+            else:
+                e_start , e_end = self.cross_corrlate( p_start,p_end, self.template, result_img)
            
 
-            if start is not None :
-                e_start = np.asarray(e_start)
-                start = np.asarray(start)
-                p_start = np.asarray(p_start)
-                e_end = np.asarray(e_end)
-                end = np.asarray(end)
-                p_end = np.asarray(p_end)
-                d_1 = math.sqrt((e_start[0] - start[0])**2 +  (e_start[1] - start[1])**2)
-                d_2 = math.sqrt((e_end[0] - end[0])**2 +  (e_end[1] - end[1])**2)
-                if (d_1 + d_2)/2 <100:
-                    new_st =  (0.8 *start + 0.2 * e_start ) 
-                    new_ed =  (0.8 *end + 0.2 * e_end ) 
-                 
+                if start is not None :
+                    e_start = np.asarray(e_start)
+                    start = np.asarray(start)
+                    p_start = np.asarray(p_start)
+                    e_end = np.asarray(e_end)
+                    end = np.asarray(end)
+                    p_end = np.asarray(p_end)
+                    d_1 = math.sqrt((e_start[0] - start[0])**2 +  (e_start[1] - start[1])**2)
+                    d_2 = math.sqrt((e_end[0] - end[0])**2 +  (e_end[1] - end[1])**2)
+                    if (d_1 + d_2)/2 <100:
+                        new_st =  (0.8 *start + 0.2 * e_start ) 
+                        new_ed =  (0.8 *end + 0.2 * e_end ) 
+                    
+                        # update the template
+
+                        #conver line to a box 
+                        left= int(min(new_st[0],new_ed[0]))
+                        right= int(max(new_st[0],new_ed[0]))
+                        top= int( min(new_st[1],new_ed[1]))
+                        bottom= int(max(new_st[1],new_ed[1]))
+                        left = np.clip(left,0,W)
+                        right = np.clip(right,0,W)
+                        top = np.clip(top,0,H)
+                        bottom = np.clip(bottom,0,H)
+                        self.template  = result_img[top:bottom, left:right] 
 
                 
+                    else:
+                        new_st =  (e_start +p_start)/2.0
+                        new_ed =  (e_end + p_end)/2.0 
                 else:
+                    self.forgeting += 1
+
+                    e_start = np.asarray(e_start)
+                    e_end = np.asarray(e_end)
+           
+                    p_start = np.asarray(p_start)
+                    p_end = np.asarray(p_end)
+
                     new_st =  (e_start +p_start)/2.0
                     new_ed =  (e_end + p_end)/2.0 
-            else:
-                e_start = np.asarray(e_start)
-           
-                p_start = np.asarray(p_start)
-                e_end = np.asarray(e_end)
-            
-                p_end = np.asarray(p_end)
-                new_st =  (e_start +p_start)/2.0
-                new_ed =  (e_end + p_end)/2.0 
-            new_st = tuple( new_st.astype(int))
-            new_ed = tuple( new_ed .astype(int))
+                    if self.forgeting >3:
+                        self.forgeting =0
+                        new_st =  None
+                        new_ed =  None
 
 
-        #conver line to a box 
-        left= int(min(new_st[0],new_ed[0]))
-        right= int(max(new_st[0],new_ed[0]))
-        top= int( min(new_st[1],new_ed[1]))
-        bottom= int(max(new_st[1],new_ed[1]))
-        left = np.clip(left,0,W)
-        right = np.clip(right,0,W)
-        top = np.clip(top,0,H)
-        bottom = np.clip(bottom,0,H)
+            #new_st  = start
+            #new_ed  = end
+
+                if new_st is not None:
+                    new_st = tuple( new_st.astype(int))
+                    new_ed = tuple( new_ed .astype(int))
+
+
+        
         # update the template
-        self.template  = result_img[top:bottom, left:right] 
+        if (start is not None) and (end is not None):
+            pass
+           
 
 
 
@@ -94,10 +138,10 @@ class TRACKING(object):
         top= min(p_start[1],p_end[1])
         bottom= max(p_start[1],p_end[1])
 
-        left = np.clip(left-20,0,W)
-        right = np.clip(right+20,0,W)
-        top = np.clip(top-20,0,H)
-        bottom = np.clip(bottom+20,0,H)
+        left = np.clip(left-5,0,W)
+        right = np.clip(right+5,0,W)
+        top = np.clip(top-5,0,H)
+        bottom = np.clip(bottom+5,0,H)
         template2 = template -template.mean()
         S_area  =   result_img[top:bottom, left:right] 
         #S_area2 =  S_area + np.random.randn(*S_area.shape) * 50 

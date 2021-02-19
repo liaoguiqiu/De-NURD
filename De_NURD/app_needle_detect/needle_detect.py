@@ -1,6 +1,6 @@
-savedir_process = "E:/database/Needle injection/28th Jan/phantom/cartesian/"
-operatedir_video = "E:/database/Needle injection/28th Jan/phantom/cartesian/"
-out_dir = "E:/database/Needle injection/28th Jan/phantom/output/"
+savedir_process = "E:/database/Needle injection/28th Jan/back_forward/2/cartesian/"
+operatedir_video = "E:/database/Needle injection/28th Jan/back_forward/2/cartesian/"
+out_dir = "E:/database/Needle injection/28th Jan/back_forward/2/output/"
 
 
 #savedir_process = "../../saved_pair2/"
@@ -38,7 +38,9 @@ from  matlab import Save_Signal_matlab
 from line_detection import Line_detect
 matlab_saver  = Save_Signal_matlab()
 
-read_start = 990
+read_start = 0
+read_end = 182
+
 Padding_H  = 0
 
 #Padding_H  = 254
@@ -56,7 +58,7 @@ video_sizeW= 900
 
 class Derivation_validate(object):
     def  __init__(self, H,W):
-        self.Len_steam = 1
+        self.Len_steam = 2
         self.crop_startH = 0
         self.cropH = H
         self.needledetector = Line_detect()
@@ -164,7 +166,7 @@ def diplay_sequence():
     STD_call  = Derivation_validate(800,800)
 
 
-    for i in range(read_start,seqence_Len+read_start):
+    for i in range(read_start,read_end):
     #for i in os.listdir("E:/estimagine/vs_project/PythonApplication_data_au/pic/"):
     ##      process
             img_path1 = savedir_process + str(i)+ ".jpg"
