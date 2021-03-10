@@ -42,7 +42,7 @@ class TRACKING(object):
         if start is not None:
             D = math.sqrt((self.remember_start [0] - start[0])**2 +  (self.remember_start[1] - start[1])**2)
         
-        if D <100:
+        if D <50:
             if (p_start is None) or (p_end is None):
                 new_st = start
                 new_ed = end 
@@ -73,7 +73,7 @@ class TRACKING(object):
                     p_end = np.asarray(p_end)
                     d_1 = math.sqrt((e_start[0] - start[0])**2 +  (e_start[1] - start[1])**2)
                     d_2 = math.sqrt((e_end[0] - end[0])**2 +  (e_end[1] - end[1])**2)
-                    if (d_1 + d_2)/2 <100:
+                    if (d_1 + d_2)/2 <50:
                         new_st =  (0.8 *start + 0.2 * e_start ) 
                         new_ed =  (0.8 *end + 0.2 * e_end ) 
                     
@@ -186,7 +186,7 @@ class TRACKING(object):
         result_img = cv2.arrowedLine(result_img, e_start ,e_end, 
                                      (255, 255, 255)  , thickness=2,tipLength = 0.05)  
         #cv2.imshow('S_area',S_area.astype(np.uint8) ) 
-        cv2.imshow('template',template.astype(np.uint8) ) 
+        #cv2.imshow('template',template.astype(np.uint8) ) 
         cv2.imshow('cross_corr',(fuse*200).astype(np.uint8) ) 
         cv2.imshow('result_img',result_img.astype(np.uint8) ) 
 

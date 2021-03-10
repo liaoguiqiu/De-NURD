@@ -1,6 +1,6 @@
-savedir_process = "E:/database/Needle injection/28th Jan/back_forward/2/cartesian/"
-operatedir_video = "E:/database/Needle injection/28th Jan/back_forward/2/cartesian/"
-out_dir = "E:/database/Needle injection/28th Jan/back_forward/2/output/"
+savedir_process = "E:/database/Needle injection/28th Jan/back_forward/1/cartesian/"
+operatedir_video = "E:/database/Needle injection/28th Jan/back_forward/1/cartesian/"
+out_dir = "E:/database/Needle injection/28th Jan/back_forward/1/output/"
 
 
 #savedir_process = "../../saved_pair2/"
@@ -16,6 +16,7 @@ savedir_process_circle = "../../saved_processed/"
 savedir_origin_circle =  "../../saved_original_circular/"
 #saved_processed_polar
 save_display_dir = "../../saved_display_compare/"
+import time
 
 save_displaygray_dir = "../../saved_display_compare_gray/"
 import cv2
@@ -39,7 +40,7 @@ from line_detection import Line_detect
 matlab_saver  = Save_Signal_matlab()
 
 read_start = 0
-read_end = 182
+read_end = 452
 
 Padding_H  = 0
 
@@ -58,7 +59,7 @@ video_sizeW= 900
 
 class Derivation_validate(object):
     def  __init__(self, H,W):
-        self.Len_steam = 2
+        self.Len_steam = 1
         self.crop_startH = 0
         self.cropH = H
         self.needledetector = Line_detect()
@@ -241,10 +242,14 @@ def diplay_sequence():
             if Display_STD_flag  ==True :
                  
                 STD_call.buffer(rectan1 ,rectan2  )
+                start_time  = time.time()
+
                 final_result =  STD_call.calculate()
+                end_time  = time.time()
 
                 #final_result = ndimage.rotate(final_result, 45)
                 cv2.imwrite(out_dir  + str(i) +".jpg",final_result )
+                print (" all test point time is [%f] " % ( end_time - start_time))
                 
 
             print("update"+str(i)+":")
