@@ -14,10 +14,11 @@ from scipy.ndimage import gaussian_filter1d
 import pickle
 from shift_deploy import Shift_Predict
 from cost_matrix import COSTMtrix ,Overall_shiftting_WinLen , Window_LEN,Down_sample_F2
+from basic_trans import Basic_Operator
 visdom_show_flag = False
-Save_matlab_flag = False
+Save_matlab_flag = True
 validation_flag = False
-Use_random_NURD = False
+Use_random_NURD = True
 if visdom_show_flag == True:
     from analy_visdom import VisdomLinePlotter
 
@@ -338,14 +339,14 @@ class DATA_Generator(object):
             #get the path
             #path =  signal.resample(path, self.W)#resample the path
             if NURD_remove_shift_flag ==True:
-                path= path- (np.mean(path) - Window_LEN/2 )
+                path= path- (np.mean(path) - Window_LEN/2)
                 #path= path*0+ int(Window_LEN/2 )
             Dice=int(np.random.random_sample()*100)
             if  Dice%2 == 0 or Use_random_NURD == True: 
                 path= path*0+ int(Window_LEN/2 )
                 fact1 = int(np.random.random_sample()*20)+20
                 fact2 = np.random.random_sample()
-                random_NURD   = np.random.random_sample(fact1)*30-15 + fact2*71-35
+                random_NURD   = np.random.random_sample(fact1)*30-15 + fact2*50-25
             
                 random_NURD =  signal.resample(random_NURD, self.W)#resample the path
                 #random_NURD   = np.random.random_sample(self.W)*30-10 + np.random.random_sample()*40-20
@@ -367,6 +368,8 @@ class DATA_Generator(object):
             self.path_DS.path_saving[read_id,:] = path
             self.path_DS.save()
             if add_noise_flag == True:
+                #original_IMG = Basic_Operator.add_speckle_or_not(original_IMG)
+                #Shifted_IMG =  Basic_Operator.add_speckle_or_not(Shifted_IMG)
                 noise_it = np.random.random_sample()*100
                 noise_type  =  str(self.noise_selector[int(noise_it)%4])
                 #noise_type = "gauss_noise"
@@ -374,6 +377,10 @@ class DATA_Generator(object):
                 noise_it = np.random.random_sample()*100
                 noise_type  =  str(self.noise_selector[int(noise_it)%4])
                 Shifted_IMG  =  self.noisy(noise_type,Shifted_IMG)
+
+
+                #Shifted_IMG  =  self.noisy(noise_type,Shifted_IMG)
+
             # save all the result
 
             cv2.imwrite(self.data_pair1_root  + str(Image_ID) +".jpg", original_IMG)
@@ -560,6 +567,6 @@ if __name__ == '__main__':
         #id,nurd,shift  =  save_test.read_pkl_infor_of_over_allshift_with_NURD()
  
         
-        #generator.generate_NURD ()
+        generator.generate_NURD ()
         ##generator.generate_overall_shifting()
-        generator.generate_NURD_overall_shifting()
+        #generator.generate_NURD_overall_shifting()
