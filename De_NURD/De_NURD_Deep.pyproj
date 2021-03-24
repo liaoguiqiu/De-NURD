@@ -5,9 +5,8 @@
     <ProjectGuid>07b9d663-4bc8-4016-8977-35b22d05cc4c</ProjectGuid>
     <ProjectHome>
     </ProjectHome>
-    <StartupFile>Dataset_generator.py</StartupFile>
-    <SearchPath>
-    </SearchPath>
+    <StartupFile>Correct_sequence_integral.py</StartupFile>
+    <SearchPath>test_model;pair2path</SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
     <Name>De_NURD_Deep</Name>
@@ -98,6 +97,17 @@
     <Compile Include="matlab.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="model\base_model.py" />
+    <Compile Include="model\cGAN_build2.py" />
+    <Compile Include="model\networks.py" />
+    <Compile Include="model\options\base_options.py" />
+    <Compile Include="model\options\train_options.py" />
+    <Compile Include="model\options\__init__.py" />
+    <Compile Include="model\pix2line_model2.py" />
+    <Compile Include="model\__init__.py" />
+    <Compile Include="pair2path\pair2path.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Path_post_pcs.py">
       <SubType>Code</SubType>
     </Compile>
@@ -126,6 +136,9 @@
     <Compile Include="read_circu.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="test_model\fusion_nets3.py" />
+    <Compile Include="test_model\layer_body_sheath_res2.py" />
+    <Compile Include="test_model\loss_MTL.py" />
   </ItemGroup>
   <ItemGroup>
     <InterpreterReference Include="Global|ContinuumAnalytics|Anaconda36-64" />
@@ -134,9 +147,27 @@
     <Folder Include="DeepPathsearch\" />
     <Folder Include="Deep_shift\" />
     <Folder Include="app_needle_detect\" />
+    <Folder Include="model\" />
+    <Folder Include="model\options\" />
+    <Folder Include="model\options\__pycache__\" />
+    <Folder Include="model\__pycache__\" />
+    <Folder Include="pair2path\" />
+    <Folder Include="test_model\" />
+    <Folder Include="test_model\__pycache__\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="DeepPathsearch\README.md" />
+    <Content Include="model\options\__pycache__\base_options.cpython-36.pyc" />
+    <Content Include="model\options\__pycache__\train_options.cpython-36.pyc" />
+    <Content Include="model\options\__pycache__\__init__.cpython-36.pyc" />
+    <Content Include="model\__pycache__\base_model.cpython-36.pyc" />
+    <Content Include="model\__pycache__\cGAN_build2.cpython-36.pyc" />
+    <Content Include="model\__pycache__\networks.cpython-36.pyc" />
+    <Content Include="model\__pycache__\pix2line_model2.cpython-36.pyc" />
+    <Content Include="model\__pycache__\__init__.cpython-36.pyc" />
+    <Content Include="test_model\__pycache__\fusion_nets3.cpython-36.pyc" />
+    <Content Include="test_model\__pycache__\layer_body_sheath_res2.cpython-36.pyc" />
+    <Content Include="test_model\__pycache__\loss_MTL.cpython-36.pyc" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in

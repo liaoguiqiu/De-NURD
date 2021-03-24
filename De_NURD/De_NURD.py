@@ -5,8 +5,8 @@
 #operatedir_video =  "D:/PhD/trying/OCT/P-ID_Name_25092019160318VIDEO.avi"
 #operatedir_video =  "../../OCT/P-ID_Name_25092019160318VIDEO.avi"
 operatedir_video =  "../../OCT/P-ID_Name_25092019161813-7500rpm-G1_0.05_4_25_extracted.avi"
-operatedir_video =   "E:/database/pantom contour and paper contour/paper.avi"
-operatedir_video =   "E:/database/2th032021 phantom and hand/hand.avi"
+#operatedir_video =   "E:/database/pantom contour and paper contour/paper.avi"
+#operatedir_video =   "E:/database/2th032021 phantom and hand/hand.avi"
 
 
 #operatedir_video =    "E:/database/Needle injection/28th Jan/1.avi"

@@ -6,6 +6,7 @@ from shift_deploy import Shift_Predict
 from median_filter_special import  myfilter
 from path_finding import PATH
 from time import time
+from pair2path import Pair2Path
 import cv2
 class Dual_thread_Overall_shift_NURD(object):
     def __init__(self):
@@ -21,6 +22,7 @@ class Dual_thread_Overall_shift_NURD(object):
         self.strmlen = []
         self.add_shift  = []
         self.shift_predictor = Shift_Predict()
+        self.path_predictor  = Pair2Path()
         pass
     def input(self,strm1,strm2,strmlen,addshift):
         self.stream1 =strm1
@@ -72,12 +74,17 @@ class Dual_thread_Overall_shift_NURD(object):
  
     #calculate the NURD
     def func2(self):
-      print('NURD start  ')
-
+      print('NURD start')
+      image1 = self.stream2[self.strmlen-1,:,:]
+      h,w = image1.shape
+      window_wid = self.path_predictor.Original_window_Len
+      self.costmatrix = np.zeros ((window_wid, w))
       
       self.costmatrix,self.shift_used2= COSTMtrix.matrix_cal_corre_block_version3_3GPU  (
                                                               self.stream2[self.strmlen-1,:,:] ,
                                                               self.stream2[self.strmlen-2,:,:], 0) 
+
+
       #self.costmatrix,self.shift_used2= COSTMtrix.     matrix_cal_corre_full_version_2  (self.stream2,0)
       #self.costmatrix  = myfilter.gauss_filter_s (self.costmatrix) # smooth matrix
       #self.costmatrix  = cv2.GaussianBlur(self.costmatrix,(5,5),0)
@@ -90,6 +97,9 @@ class Dual_thread_Overall_shift_NURD(object):
       # THE COST MATRIX COST 0.24 S
 
       self.path  =  PATH.get_warping_vextor(self.costmatrix)  # THIS COST 0.03S
+
+      #self.path = self.path_predictor.predict(self.stream2[self.strmlen-1,:,:],  self.stream2[self.strmlen-2,:,:])
+
       #start_point= PATH.find_the_starting(self.costmatrix) # starting point for path searching
       #self.path,pathcost1  = PATH.search_a_path(self.costmatrix,start_point)
       print('NURD end  ')

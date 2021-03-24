@@ -143,8 +143,6 @@ class DATA_Generator(object):
             #    show1[int(path[i]),i]=254
             #cv2.imwrite(self.data_mat_root  + str(Image_ID) +".jpg", show1)
 
-
-
             print ("[%s]   is processed. test point time is [%f] " % (read_id ,0.1))
 
             read_id +=1
