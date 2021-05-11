@@ -8,6 +8,7 @@ from path_finding import PATH
 from time import time
 from pair2path import Pair2Path
 import cv2
+from Correct_sequence_integral import Graph_searching_flag
 class Dual_thread_Overall_shift_NURD(object):
     def __init__(self):
         #give all parmeter initial(given the Memory for thread)
@@ -41,6 +42,8 @@ class Dual_thread_Overall_shift_NURD(object):
 
     # function 1 calculate tthe shift
     def func1(self):
+       start_time2 = time()
+
        print('shift star')
        img1 = self.stream1[self.strmlen-1,:,:]
        self.shift_used1   = self.add_shift
@@ -48,6 +51,8 @@ class Dual_thread_Overall_shift_NURD(object):
        img2 = self.stream1[self.strmlen-2,:,:]
        img3 = self.stream1[0,:,:]
        H,W = img1.shape 
+       self.overall_shifting2 = self.shift_predictor.predict_shaking(img1,self.stream2[self.strmlen-2,:,:])
+
        #self.overall_shifting,shift_used1 = COSTMtrix.Img_fully_shifting_correlation (img1[200:H,:],
        #                                                       img3[200:H,:],  self.shift_used1 )
        #self.shift_used1 += self.overall_shifting
@@ -62,6 +67,7 @@ class Dual_thread_Overall_shift_NURD(object):
        #self.shift_used1 += self.overall_shifting
        img1 = np.roll(img1, self.shift_used1  , axis = 1)     # Positive x rolls right
        self.overall_shifting = self.shift_predictor.predict(img1,img2,img3) # THIS COST 0.01 s
+       self.overall_shifting = 0.4* self.overall_shifting + 0.6*self.overall_shifting2
        #self.overall_shifting = 0.5*self.overall_shifting + 0.5 * self.last_overall_shift
        #self.last_overall_shift = self.overall_shifting
 
@@ -71,9 +77,12 @@ class Dual_thread_Overall_shift_NURD(object):
        #                                                       img3[0:200,:],  self.shift_used1 )
                                                   
        print('shift end')
- 
+       end_time2 = time()
+
+       print (" B time is [%f] " % ( end_time2 - start_time2))
     #calculate the NURD
     def func2(self):
+      start_time = time()
       print('NURD start')
       image1 = self.stream2[self.strmlen-1,:,:]
       h,w = image1.shape
@@ -99,23 +108,26 @@ class Dual_thread_Overall_shift_NURD(object):
       self.path  =  PATH.get_warping_vextor(self.costmatrix)  # THIS COST 0.03S
 
       #self.path = self.path_predictor.predict(self.stream2[self.strmlen-1,:,:],  self.stream2[self.strmlen-2,:,:])
-
+      end_time = time()
       #start_point= PATH.find_the_starting(self.costmatrix) # starting point for path searching
       #self.path,pathcost1  = PATH.search_a_path(self.costmatrix,start_point)
       print('NURD end  ')
+      print (" A time is [%f] " % ( end_time - start_time))
      
      #return x
     def runInParallel( self):
  
         p1 = Thread(target=self.func1)
         p2 = Thread(target=self.func2)
+        p2.start()
 
         p1.start()
-        p2.start()
+        p2.join()
         
         p1.join()
-        p2.join()
-
+    def ruuInCascade(self):
+        self.func1()
+        self.func2()
  
 if __name__ == '__main__':
     operator = Dual_thread_Overall_shift_NURD()

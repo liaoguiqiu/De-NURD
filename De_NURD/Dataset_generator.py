@@ -322,7 +322,7 @@ class DATA_Generator(object):
         num_path, path_len = self.path_DS.path_saving.shape
         for read_id in range(num_path):
             OriginalpathDirlist = os.listdir(self.original_root)    # 
-            sample = random.sample(OriginalpathDirlist, 1)  # 
+            sample = random.sample(OriginalpathDirlist,1)  # 
             Sample_path = self.original_root +   sample[0]
             original_IMG = cv2.imread(Sample_path)
             path  = self.path_DS.path_saving[read_id,:]
@@ -344,7 +344,7 @@ class DATA_Generator(object):
                 path= path*0+ int(Window_LEN/2 )
                 fact1 = int(np.random.random_sample()*20)+20
                 fact2 = np.random.random_sample()
-                random_NURD   = np.random.random_sample(fact1)*30-15 + fact2*50-25
+                random_NURD   = np.random.random_sample(fact1)*20-10 + fact2*20-10
             
                 random_NURD =  signal.resample(random_NURD, self.W)#resample the path
                 #random_NURD   = np.random.random_sample(self.W)*30-10 + np.random.random_sample()*40-20
@@ -384,7 +384,7 @@ class DATA_Generator(object):
             cv2.imwrite(self.data_pair1_root  + str(Image_ID) +".jpg", original_IMG)
             cv2.imwrite(self.data_pair2_root  + str(Image_ID) +".jpg", Shifted_IMG)
             ## validation 
-            self.validation(original_IMG,Shifted_IMG,path,Image_ID) 
+            #self.validation(original_IMG,Shifted_IMG,path,Image_ID) 
 
             #steam[Len_steam-1,:,:]  = original_IMG  # un-correct 
             #steam[Len_steam-2,:,:]  = Shifted_IMG  # correct 

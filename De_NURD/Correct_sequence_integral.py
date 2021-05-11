@@ -42,11 +42,12 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 Resample_size =Window_LEN
 Path_length = 128
 #read_start = 100
-read_start = 40
+read_start = 870
 
 Debug_flag  = True
 global intergral_flag
 intergral_flag =0
+Graph_searching_flag = True
  
 if (Save_signal_flag == True):
     from analy import MY_ANALYSIS
@@ -249,9 +250,9 @@ class VIDEO_PEOCESS:
         ##shift_diff = gaussian_filter1d(shift_diff,3) # smooth the path 
 
         # PI fusion
-        shift_integral = shift_integral + shift_diff  # not += : this is iteration way
-        #shift_integral = PATH_POST.path_integral(shift_integral,shift_diff)
-
+        #shift_integral = shift_integral + shift_diff  # not += : this is iteration way
+        shift_integral = PATH_POST.path_integral(shift_integral,shift_diff)
+        shift_integral = gaussian_filter1d(shift_integral,10)
         #shift_integral = shift_integral - 1*(shift_integral-overall_shift) #  - 0.00001* I
         # EKF fusion
         #shift_integral = myekf.update(shift_diff,overall_shift)
@@ -260,7 +261,7 @@ class VIDEO_PEOCESS:
         #shift_integral = np.clip(shift_integral,overall_shift- Window_LEN/2,overall_shift+ Window_LEN/2)
         #shift_integral = gaussian_filter1d(shift_integral,5) # smooth the path 
 
-        shift_integral = shift_integral - 0.15*(shift_integral-overall_shift) - 0.0000001*I
+        shift_integral = shift_integral - 0.2*(shift_integral-overall_shift)   - 0.000001*I
         #shift_integral = shift_integral*0 + overall_shift  
 
         #shift_integral = gaussian_filter1d(shift_integral,3) # smooth the path 
@@ -361,7 +362,7 @@ class VIDEO_PEOCESS:
                 gray_video  =   cv2.cvtColor(video, cv2.COLOR_BGR2GRAY)
                 H_ori , W_ori  = gray_video.shape
                 gray_video = cv2.resize(gray_video, (832,H_ori), interpolation=cv2.INTER_LINEAR)
-                start_time  = time()
+
                 if(sequence_num<read_start+ 5):
                     # bffer a resized one to coputer the path and cost matrix
                     steam=np.append(steam,[gray_video[H_start:H_end,:] ],axis=0) # save sequence
@@ -377,10 +378,17 @@ class VIDEO_PEOCESS:
                     steam= np.delete(steam , 1,axis=0)
                     steam2=np.append(steam2,[gray_video[H_start:H_end,:] ],axis=0) # save sequence
                     steam2= np.delete(steam2 , 0,axis=0)
+                    start_time  = time()
+
+
 
                     dual_thread.input(steam,steam2,Len_steam,addition_window_shift)
 
                     dual_thread.runInParallel()
+
+                    #dual_thread.ruuInCascade()
+
+                    test_time_point = time()
                     
                     overall_shifting,shift_used1 = dual_thread.output_overall()
                     shift_mean_error = int(overall_shifting)- int(Overall_shiftting_WinLen/2)
@@ -436,7 +444,6 @@ class VIDEO_PEOCESS:
                 
             
                     # remove intergral bias ( here just condsider the overal img should be in the center) 
-          
 
                     #correct method 1
                     #shift_integral = shift_integral - 1*(np.mean(shift_integral)-addition_window_shift) -  Window_ki_error
@@ -482,7 +489,6 @@ class VIDEO_PEOCESS:
                         cv2.imwrite(savedir_rectan_  + str(sequence_num) +".jpg",Corrected_img )
 
                     print ("[%s]   is processed.   " % (sequence_num ))
-                    test_time_point = time()
                     print (" all test point time is [%f] " % ( test_time_point - start_time))
 
 if __name__ == '__main__':

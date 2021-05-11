@@ -35,7 +35,7 @@ from basic_trans import Basic_oper
 from  matlab import Save_Signal_matlab
 matlab_saver  = Save_Signal_matlab()
 
-read_start = 50
+read_start = 870
 Padding_H  = 0
 
 #Padding_H  = 254
@@ -267,7 +267,7 @@ def diplay_sequence():
             img_path1 = savedir_process + str(i+20)+ ".jpg"
             video1 = cv2.imread(img_path1)
             gray_video1  =   cv2.cvtColor(video1, cv2.COLOR_BGR2GRAY)
-            gray_video1 = gray_video1  +60 
+            gray_video1 = gray_video1  
             rectan1 = gray_video1
             circular1 = tranfer2circ_padding(gray_video1)
             gray_video1 = circular1
@@ -282,7 +282,7 @@ def diplay_sequence():
             img_path2 = operatedir_video + str(i+20)+ ".jpg"
             video2 = cv2.imread(img_path2)  
             gray_video2  =   cv2.cvtColor(video2, cv2.COLOR_BGR2GRAY)
-            gray_video2 = gray_video2   +60
+            gray_video2 = gray_video2    
             gray_video2 = cv2.resize(gray_video2, (W_ini,H_ini), interpolation=cv2.INTER_AREA)
             rectan2 = gray_video2
             circular= tranfer2circ_padding(gray_video2)

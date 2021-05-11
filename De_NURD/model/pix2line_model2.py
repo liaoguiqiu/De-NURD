@@ -151,7 +151,7 @@ class Pix2LineModel(BaseModel):
         f3,self.out_pathes3,self.path_long3 = self.netG.side_branch3 (self.input_G) # coordinates encoding
         self.out_pathes0 =self.netG. fuse_forward( f1,f2,f3)
         test_time_point = time()
-        print (" all test point time is [%f] " % ( test_time_point - start_time))
+        print (" pair to path time [%f] " % ( test_time_point - start_time))
         self.out_pathes = [self.out_pathes0,self.out_pathes1,self.out_pathes2,self.out_pathes3]
 
 

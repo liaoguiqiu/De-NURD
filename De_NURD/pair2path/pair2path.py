@@ -17,7 +17,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 class Pair2Path(object):
     def __init__(self ):
-        pth_save_dir  = "../../DeepLearningModel/pair2path/cGANG_epoch_1.pth"
+        pth_save_dir  = "../../DeepLearningModel/pair2path/cGANG_epoch_4.pth"
         creator = cGAN_build2.CGAN_creator() # the Cgan for the segmentation 
         self.GANmodel= creator.creat_cgan()  #  G and D are created here 
         #netD = gan_body._netD_Resnet()

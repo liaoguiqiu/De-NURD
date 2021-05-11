@@ -13,9 +13,10 @@
 #operatedir_video =  "../../OCT/database_download/Lungs/1.mov"
 #operatedir_video =  "../../OCT/colon/animal.avi"
 #operatedir_video =  "../../OCT/colon/hiperPlastic_2.avi"
-operatedir_video =  "E:/database/video_dot/22JAN2020AUTO_02_2212020121028-Scale-0_5-41pix_Per_mm_CIRC-Rotated.avi"
+#operatedir_video =  "E:/database/video_dot/22JAN2020AUTO_02_2212020121028-Scale-0_5-41pix_Per_mm_CIRC-Rotated.avi"
 #operatedir_video =  "E:/database/video_dot/tele_221202012329_CIRC.avi"
-
+operatedir_video =  "D:/PhD/trying/tradition_method/OCT/shifting distance with previous shealth.mp4"
+operatedir_video =  "D:/PhD/trying/tradition_method/OCT/colon/hiperPlastic_1.avi"
  
 
 #phantom-01_2412020121234
@@ -167,12 +168,12 @@ if __name__ == '__main__':
         #H_start = 0
         #H_start = 270
         #H_start = 117
-        H_start = 81
+        H_start = 50
 
 
 
         #H_end = 1560
-        H_end = 750
+        H_end = 832
 
         #H_end = 1400
         #H_end = 700
