@@ -8,7 +8,9 @@ from path_finding import PATH
 from time import time
 from pair2path import Pair2Path
 import cv2
-from Correct_sequence_integral import Graph_searching_flag
+Graph_searching_flag = True
+
+
 class Dual_thread_Overall_shift_NURD(object):
     def __init__(self):
         #give all parmeter initial(given the Memory for thread)
@@ -104,13 +106,15 @@ class Dual_thread_Overall_shift_NURD(object):
 
 
       # THE COST MATRIX COST 0.24 S
-
-      self.path  =  PATH.get_warping_vextor(self.costmatrix)  # THIS COST 0.03S
-
+      if Graph_searching_flag == True:
+          start_point= PATH.find_the_starting(self.costmatrix) # starting point for path searching
+          self.path,pathcost1  = PATH.search_a_path(self.costmatrix,start_point)
+      else:
+          self.path  =  PATH.get_warping_vextor(self.costmatrix)  # THIS COST 0.03S
+        
       #self.path = self.path_predictor.predict(self.stream2[self.strmlen-1,:,:],  self.stream2[self.strmlen-2,:,:])
       end_time = time()
-      #start_point= PATH.find_the_starting(self.costmatrix) # starting point for path searching
-      #self.path,pathcost1  = PATH.search_a_path(self.costmatrix,start_point)
+     
       print('NURD end  ')
       print (" A time is [%f] " % ( end_time - start_time))
      

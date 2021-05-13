@@ -42,12 +42,13 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 Resample_size =Window_LEN
 Path_length = 128
 #read_start = 100
-read_start = 870
+read_start = 238
 
 Debug_flag  = True
 global intergral_flag
 intergral_flag =0
-Graph_searching_flag = True
+
+BranchA_flag = True
  
 if (Save_signal_flag == True):
     from analy import MY_ANALYSIS
@@ -260,8 +261,12 @@ class VIDEO_PEOCESS:
 
         #shift_integral = np.clip(shift_integral,overall_shift- Window_LEN/2,overall_shift+ Window_LEN/2)
         #shift_integral = gaussian_filter1d(shift_integral,5) # smooth the path 
+        if BranchA_flag == True:
+            shift_integral = shift_integral  
 
-        shift_integral = shift_integral - 0.2*(shift_integral-overall_shift)   - 0.000001*I
+            
+        else:
+            shift_integral = shift_integral - 0.2*(shift_integral-overall_shift)   - 0.000001*I 
         #shift_integral = shift_integral*0 + overall_shift  
 
         #shift_integral = gaussian_filter1d(shift_integral,3) # smooth the path 
