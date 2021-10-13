@@ -42,7 +42,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 Resample_size =Window_LEN
 Path_length = 128
 #read_start = 100
-read_start = 238
+read_start = 5
 
 Debug_flag  = True
 global intergral_flag
@@ -161,6 +161,8 @@ class VIDEO_PEOCESS:
         #every line will be moved to a new postion
         add_3   = np.append(shift_integral ,shift_integral,axis=0) # cascade
         add_3   = np.append(add_3,shift_integral,axis=0) # cascade
+        add_3  = signal.resample(add_3, 3*w)
+
         path_inv  = add_3*np.nan
 
         for i in range ( len(add_3)):
@@ -253,7 +255,7 @@ class VIDEO_PEOCESS:
         # PI fusion
         #shift_integral = shift_integral + shift_diff  # not += : this is iteration way
         shift_integral = PATH_POST.path_integral(shift_integral,shift_diff)
-        shift_integral = gaussian_filter1d(shift_integral,10)
+        shift_integral = gaussian_filter1d(shift_integral,3)
         #shift_integral = shift_integral - 1*(shift_integral-overall_shift) #  - 0.00001* I
         # EKF fusion
         #shift_integral = myekf.update(shift_diff,overall_shift)
@@ -266,10 +268,10 @@ class VIDEO_PEOCESS:
 
             
         else:
-            shift_integral = shift_integral - 0.2*(shift_integral-overall_shift)   - 0.000001*I 
+            shift_integral = shift_integral - 0.7*(shift_integral-overall_shift)   - I 
         #shift_integral = shift_integral*0 + overall_shift  
 
-        #shift_integral = gaussian_filter1d(shift_integral,3) # smooth the path 
+        shift_integral = gaussian_filter1d(shift_integral,3) # smooth the path 
 
         shift_integral = gaussian_filter1d(shift_integral,10) # smooth the path 
        
@@ -303,12 +305,8 @@ class VIDEO_PEOCESS:
         #long_path_upsam  = signal.resample(long_out, 3*W)
         #path_upsam = long_path_upsam[W:2*W]
         #path1  = path_upsam /Resample_size * H
-
         #path1,path_cost1=PATH.search_a_path_GPU (mat) # get the path and average cost of the path
-       
-       
-        
-        
+
         # applying the correct
         img_corrected,shift_integral = VIDEO_PEOCESS.de_distortion_integral (image,path1,shift_integral,sequence_num,addition_window_shift)
 
@@ -351,6 +349,8 @@ class VIDEO_PEOCESS:
         H,W= gray_video.shape  #get size of image
         H_start = 0
         H_end = int(H)
+        #H_end = 211
+
         steam=np.zeros((Len_steam,H_end-H_start,W))
         steam2=np.zeros((Len_steam,H_end-H_start ,W))
         save_sequence_num = 0  # processing iteration initial 
@@ -366,6 +366,7 @@ class VIDEO_PEOCESS:
                 video = cv2.imread(img_path)
                 gray_video  =   cv2.cvtColor(video, cv2.COLOR_BGR2GRAY)
                 H_ori , W_ori  = gray_video.shape
+                original_img = gray_video
                 gray_video = cv2.resize(gray_video, (832,H_ori), interpolation=cv2.INTER_LINEAR)
 
                 if(sequence_num<read_start+ 5):
@@ -424,7 +425,7 @@ class VIDEO_PEOCESS:
 
                     shift_integral = VIDEO_PEOCESS.fusion_estimation(shift_integral,path,addition_window_shift,Window_ki_error)
 
-                    Window_ki_error = (shift_integral-addition_window_shift)+Window_ki_error
+                    Window_ki_error =0.000001* (shift_integral-addition_window_shift)+Window_ki_error
                     #addition_window_shift = np.mean(shift_integral)
 
                     #path = np.zeros(Costmatrix.shape[1])
@@ -435,8 +436,8 @@ class VIDEO_PEOCESS:
                     #                                                                           shift_integral,int(sequence_num),
                     #                                                                  shift_used2  )
 
-                    Corrected_img = VIDEO_PEOCESS.de_distortion_integral2(gray_video,shift_integral,sequence_num)
-                    
+                    ori_Corrected_img = VIDEO_PEOCESS.de_distortion_integral2(original_img,shift_integral,sequence_num)
+                    Corrected_img = cv2.resize(ori_Corrected_img, (832,H_ori), interpolation=cv2.INTER_LINEAR)
 
                     path_cost =0
                     #overall_shifting3,shift_used3 = COSTMtrix.Img_fully_shifting_correlation(Corrected_img[H_start:H_end,:],

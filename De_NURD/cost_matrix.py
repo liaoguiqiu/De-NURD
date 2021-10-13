@@ -25,8 +25,8 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 Window_LEN = 71
 Overall_shiftting_WinLen = 71
 Cost_M_sample_flag =True
-Down_sample_F = 3
-Down_sample_F2 = 3
+#Down_sample_F = 1
+#Down_sample_F2 = 1
 #Down_sample_F = 1
 #Down_sample_F2 = 1
 
@@ -263,8 +263,8 @@ class COSTMtrix:
 #########################
 ###################
 # use the delayed one to realize   correction  block  correlation 
-    def matrix_cal_corre_block_version3_3GPU(present_img,previous_img,window_shift):
-       block_wid = 3
+    def matrix_cal_corre_block_version3_3GPU(present_img,previous_img,window_shift,block_wid = 3,Down_sample_F = 3,Down_sample_F2 = 3):
+       block_wid = 7
        block_cntr  = int(block_wid/2)
 
        window_wid= Window_LEN
@@ -291,8 +291,8 @@ class COSTMtrix:
        add_3_img  = np.append(previous_img,previous_img,axis=1) # cascade
        add_3_img = np.append(add_3_img,previous_img,axis=1) # cascade
        #  uniform  
-       add_3_img_p   = add_3_img_p / 250
-       add_3_img   = add_3_img   / 250 
+       add_3_img_p   = add_3_img_p / 250.0
+       add_3_img   = add_3_img   / 250.0 
 
        matrix = np.zeros ((window_wid, w))
        a_stack= np.zeros((window_wid,w,h,block_wid))

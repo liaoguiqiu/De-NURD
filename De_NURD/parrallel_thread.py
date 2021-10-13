@@ -91,14 +91,19 @@ class Dual_thread_Overall_shift_NURD(object):
       window_wid = self.path_predictor.Original_window_Len
       self.costmatrix = np.zeros ((window_wid, w))
       
-      self.costmatrix,self.shift_used2= COSTMtrix.matrix_cal_corre_block_version3_3GPU  (
+      self.costmatrix1,self.shift_used2= COSTMtrix.matrix_cal_corre_block_version3_3GPU  (
                                                               self.stream2[self.strmlen-1,:,:] ,
-                                                              self.stream2[self.strmlen-2,:,:], 0) 
+                                                              self.stream2[self.strmlen-2,:,:], 0,
+                                                              block_wid = 3,Down_sample_F = 3,Down_sample_F2 = 3) 
 
-
-      #self.costmatrix,self.shift_used2= COSTMtrix.     matrix_cal_corre_full_version_2  (self.stream2,0)
-      #self.costmatrix  = myfilter.gauss_filter_s (self.costmatrix) # smooth matrix
-      #self.costmatrix  = cv2.GaussianBlur(self.costmatrix,(5,5),0)
+      self.costmatrix2,self.shift_used2= COSTMtrix.matrix_cal_corre_block_version3_3GPU  (
+                                                              self.stream2[self.strmlen-1,0:211,:] ,
+                                                              self.stream2[self.strmlen-2,0:211,:], 0,
+                                                              block_wid = 7,Down_sample_F = 1,Down_sample_F2 = 1)
+      self.costmatrix = 0.5*(self.costmatrix1+ self.costmatrix2)
+      self.costmatrix  = myfilter.gauss_filter_s (self.costmatrix) # smooth matrix
+      self.costmatrix  = cv2.GaussianBlur(self.costmatrix,(5,5),0)
+      #self.costmatrix = self.costmatrix*1.5 +30
         # down sample the materix and up sample 
       #Hm,Wm= self.costmatrix.shape
       #self.costmatrix = cv2.resize(self.costmatrix, (int(Wm/2),int(Hm/2)), interpolation=cv2.INTER_AREA)

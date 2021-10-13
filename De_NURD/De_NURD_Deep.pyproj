@@ -139,6 +139,9 @@
     <Compile Include="test_model\fusion_nets3.py" />
     <Compile Include="test_model\layer_body_sheath_res2.py" />
     <Compile Include="test_model\loss_MTL.py" />
+    <Compile Include="tools\convert_raw_data.py">
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <InterpreterReference Include="Global|ContinuumAnalytics|Anaconda36-64" />
@@ -151,6 +154,7 @@
     <Folder Include="model\options\" />
     <Folder Include="model\options\__pycache__\" />
     <Folder Include="model\__pycache__\" />
+    <Folder Include="tools\" />
     <Folder Include="pair2path\" />
     <Folder Include="test_model\" />
     <Folder Include="test_model\__pycache__\" />

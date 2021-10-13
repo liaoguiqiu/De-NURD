@@ -56,7 +56,7 @@ class PATH:
        
         #path1 =0.5 * path1 + 0.5 * corre_shifting 
         path_cost1  = 0
-        #path1 = gaussian_filter1d(path1,3) # smooth the path 
+        path1 = gaussian_filter1d(path1,2) # smooth the path 
         return path1
     def search_a_path(img,start_p):
         img=img.astype(float)
@@ -119,7 +119,12 @@ class PATH:
         img =  img.astype(float)
         img = cv2.resize(img, (832,71), interpolation=cv2.INTER_LINEAR)
         img = np.clip(img,0,254)
-         
+        long =  np.zeros(71,832*3)
+        long [:,0:832]  = img
+        long [:,832:832*2]  = img
+        long [:,832*2:832*3]  = img
+
+        img = cv2.resize(long, (832,71), interpolation=cv2.INTER_LINEAR)
         input_batch = np.zeros((1,3,71,832)) # a batch with piece num
 
           
@@ -150,13 +155,14 @@ class PATH:
             path = np.clip(path_upsam,0,Window_LEN-1)
 
             pass
-        path = np.clip(path_upsam,0,Window_LEN-1)
+        path_upsam = signal.resample(path_upsam , W*3)  
+        path_upsam = np.clip(path_upsam,0,Window_LEN-1)
 
         #long_out  = np.append(np.flip(output),output)
         #long_out  = np.append(long_out,np.flip(output))
         #long_out = gaussian_filter1d (long_out ,1)
          
-        path   = signal.resample(path_upsam , W)  
+        path   = path_upsam[W:2*W]
         #path_upsam = long_path_upsam[W:2*W]
         return path, 0
         #apply deep learning to find the path

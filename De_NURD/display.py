@@ -35,8 +35,8 @@ from basic_trans import Basic_oper
 from  matlab import Save_Signal_matlab
 matlab_saver  = Save_Signal_matlab()
 
-read_start = 300
-Padding_H  = 0
+read_start = 5
+Padding_H  = -50
 
 #Padding_H  = 254
 #from  path_finding import PATH
@@ -243,9 +243,12 @@ if Display_signal_flag == True:
     saved_stastics.display()
 def tranfer2circ_padding(img):
     H,W_ini = img.shape
-    padding = np.zeros((Padding_H,W_ini))
     if Padd_zero_top ==True:
-            img  = np.append(padding,img,axis=0)
+            if Padding_H>0:
+                padding = np.zeros((Padding_H,W_ini))
+                img  = np.append(padding,img,axis=0)
+            else:
+                img = img[-Padding_H:H,:]
     circular = tranfer_frome_rec2cir(img)
     return circular
 
