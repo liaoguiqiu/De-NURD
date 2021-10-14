@@ -35,8 +35,8 @@ from basic_trans import Basic_oper
 from  matlab import Save_Signal_matlab
 matlab_saver  = Save_Signal_matlab()
 
-read_start = 5
-Padding_H  = -50
+read_start = 3
+Padding_H  = -5
 
 #Padding_H  = 254
 #from  path_finding import PATH

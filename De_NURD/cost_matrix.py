@@ -22,7 +22,8 @@ from time import time
 #    return  result
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-Window_LEN = 71
+Window_LEN = 100
+Standard_LEN = 71
 Overall_shiftting_WinLen = 71
 Cost_M_sample_flag =True
 #Down_sample_F = 1
@@ -264,7 +265,7 @@ class COSTMtrix:
 ###################
 # use the delayed one to realize   correction  block  correlation 
     def matrix_cal_corre_block_version3_3GPU(present_img,previous_img,window_shift,block_wid = 3,Down_sample_F = 3,Down_sample_F2 = 3):
-       block_wid = 7
+        
        block_cntr  = int(block_wid/2)
 
        window_wid= Window_LEN

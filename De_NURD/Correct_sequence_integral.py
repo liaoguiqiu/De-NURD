@@ -27,7 +27,7 @@ import random
 from  path_finding import PATH
 from median_filter_special import  myfilter
 from cost_matrix import  COSTMtrix
-from cost_matrix import Window_LEN ,Overall_shiftting_WinLen
+from cost_matrix import Window_LEN ,Overall_shiftting_WinLen,Standard_LEN
 from scipy.ndimage import gaussian_filter1d
 from time import time
 import scipy.io
@@ -48,7 +48,7 @@ Debug_flag  = True
 global intergral_flag
 intergral_flag =0
 
-BranchA_flag = True
+BranchA_flag = False
  
 if (Save_signal_flag == True):
     from analy import MY_ANALYSIS
@@ -250,7 +250,7 @@ class VIDEO_PEOCESS:
     def fusion_estimation( shift_integral,path,overall_shift,I):
         #overall_shift =0
         shift_diff= path - int(Window_LEN/2)  # additional compensation 
-        ##shift_diff = gaussian_filter1d(shift_diff,3) # smooth the path 
+        #shift_diff = gaussian_filter1d(shift_diff,3) # smooth the path 
 
         # PI fusion
         #shift_integral = shift_integral + shift_diff  # not += : this is iteration way
@@ -268,13 +268,13 @@ class VIDEO_PEOCESS:
 
             
         else:
-            shift_integral = shift_integral - 0.7*(shift_integral-overall_shift)   - I 
+            shift_integral = shift_integral - 0.15 *(shift_integral-overall_shift)   - I 
         #shift_integral = shift_integral*0 + overall_shift  
 
-        shift_integral = gaussian_filter1d(shift_integral,3) # smooth the path 
+        #shift_integral = gaussian_filter1d(shift_integral,3) # smooth the path 
 
         shift_integral = gaussian_filter1d(shift_integral,10) # smooth the path 
-       
+        
         return shift_integral
 #----------------------#
 #correct and save /display results
@@ -425,7 +425,7 @@ class VIDEO_PEOCESS:
 
                     shift_integral = VIDEO_PEOCESS.fusion_estimation(shift_integral,path,addition_window_shift,Window_ki_error)
 
-                    Window_ki_error =0.000001* (shift_integral-addition_window_shift)+Window_ki_error
+                    Window_ki_error =0.0001* (shift_integral-addition_window_shift)+Window_ki_error
                     #addition_window_shift = np.mean(shift_integral)
 
                     #path = np.zeros(Costmatrix.shape[1])
@@ -436,8 +436,11 @@ class VIDEO_PEOCESS:
                     #                                                                           shift_integral,int(sequence_num),
                     #                                                                  shift_used2  )
 
-                    ori_Corrected_img = VIDEO_PEOCESS.de_distortion_integral2(original_img,shift_integral,sequence_num)
-                    Corrected_img = cv2.resize(ori_Corrected_img, (832,H_ori), interpolation=cv2.INTER_LINEAR)
+                    #ori_Corrected_img = VIDEO_PEOCESS.de_distortion_integral2(original_img,shift_integral,sequence_num)
+                    #Corrected_img = cv2.resize(ori_Corrected_img, (832,H_ori), interpolation=cv2.INTER_LINEAR)
+                    Corrected_img = VIDEO_PEOCESS.de_distortion_integral2(gray_video,shift_integral,sequence_num)
+                    #Corrected_img = cv2.resize(ori_Corrected_img, (832,H_ori), interpolation=cv2.INTER_LINEAR)
+
 
                     path_cost =0
                     #overall_shifting3,shift_used3 = COSTMtrix.Img_fully_shifting_correlation(Corrected_img[H_start:H_end,:],
@@ -484,7 +487,7 @@ class VIDEO_PEOCESS:
                         show1 =  Costmatrix
                      
                         circular = Basic_oper.tranfer_frome_rec2cir(Corrected_img)
-                        path = np.clip(path,0,Window_LEN-1)
+                        path = np.clip(path * Standard_LEN/Window_LEN ,0,Standard_LEN-1) 
                         for i in range ( len(path)):
                             show1[int(path[i]),i]=254 # plot the iterative path
                             #show1[int(shift_integral[i]+int(Window_LEN/2)),i]=128 # plot the intergral

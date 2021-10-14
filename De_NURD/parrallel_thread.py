@@ -2,13 +2,15 @@ from multiprocessing import Process
 import numpy as np
 from threading import Thread
 from cost_matrix import COSTMtrix
+from cost_matrix import Standard_LEN,Window_LEN
+
 from shift_deploy import Shift_Predict
 from median_filter_special import  myfilter
 from path_finding import PATH
 from time import time
 from pair2path import Pair2Path
 import cv2
-Graph_searching_flag = True
+Graph_searching_flag = False
 
 
 class Dual_thread_Overall_shift_NURD(object):
@@ -94,15 +96,19 @@ class Dual_thread_Overall_shift_NURD(object):
       self.costmatrix1,self.shift_used2= COSTMtrix.matrix_cal_corre_block_version3_3GPU  (
                                                               self.stream2[self.strmlen-1,:,:] ,
                                                               self.stream2[self.strmlen-2,:,:], 0,
-                                                              block_wid = 3,Down_sample_F = 3,Down_sample_F2 = 3) 
+                                                              block_wid = 3,Down_sample_F = 2,Down_sample_F2 = 2) 
 
       self.costmatrix2,self.shift_used2= COSTMtrix.matrix_cal_corre_block_version3_3GPU  (
-                                                              self.stream2[self.strmlen-1,0:211,:] ,
-                                                              self.stream2[self.strmlen-2,0:211,:], 0,
-                                                              block_wid = 7,Down_sample_F = 1,Down_sample_F2 = 1)
-      self.costmatrix = 0.5*(self.costmatrix1+ self.costmatrix2)
+                                                              self.stream2[self.strmlen-1,50:211,:] ,
+                                                              self.stream2[self.strmlen-2,50:211,:], 0,
+                                                              block_wid = 3,Down_sample_F = 3,Down_sample_F2 = 3)
+      ##self.costmatrix = self.costmatrix1 
+      self.costmatrix = 0.6*self.costmatrix1+ 0.4*self.costmatrix2 
+      Hm,Wm= self.costmatrix.shape
+      self.costmatrix = cv2.resize(self.costmatrix, (Wm,Standard_LEN), interpolation=cv2.INTER_AREA)
+
       self.costmatrix  = myfilter.gauss_filter_s (self.costmatrix) # smooth matrix
-      self.costmatrix  = cv2.GaussianBlur(self.costmatrix,(5,5),0)
+      #self.costmatrix  = cv2.GaussianBlur(self.costmatrix,(5,5),0)
       #self.costmatrix = self.costmatrix*1.5 +30
         # down sample the materix and up sample 
       #Hm,Wm= self.costmatrix.shape
@@ -116,7 +122,7 @@ class Dual_thread_Overall_shift_NURD(object):
           self.path,pathcost1  = PATH.search_a_path(self.costmatrix,start_point)
       else:
           self.path  =  PATH.get_warping_vextor(self.costmatrix)  # THIS COST 0.03S
-        
+      self.path = self.path * Window_LEN/Standard_LEN
       #self.path = self.path_predictor.predict(self.stream2[self.strmlen-1,:,:],  self.stream2[self.strmlen-2,:,:])
       end_time = time()
      

@@ -19,7 +19,7 @@ from DeepPathsearch import PathNetbody
 from DeepPathsearch.image_trans import BaseTransform 
 from scipy.ndimage import gaussian_filter1d
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-from cost_matrix import Window_LEN 
+from cost_matrix import Window_LEN, Standard_LEN
 #dir_netD  = "../../DeepPathFinding/out/netD_epoch_49.pth"
 #dir_netD  = '../../DeepLearningModel/deep_path_small_window/netD_epoch_2.pth'
 #dir_netD  = '../../DeepLearningModel/deep_path/netD_epoch_2.pth' # train1
@@ -49,7 +49,7 @@ class PATH:
         ##middle_point  =  PATH.calculate_ave_mid(mat)
         #path1,path_cost1=PATH.search_a_path(mat,start_point) # get the path and average cost of the path
         #path1,path_cost1=PATH.search_a_path_deep_multiscal_small_window_fusion2(mat) # get the path and average cost of the path
-        path1,path_cost1=PATH.search_a_path_GPU (mat) # get the path and average cost of the path
+        path1,path_cost1=PATH.search_a_path_GPU_long  (mat) # get the path and average cost of the path
 
        
         #path1 = corre_shifting + path1
@@ -63,7 +63,7 @@ class PATH:
          
         h, w= img.shape
         path = np.ones(w) 
-        path= path* int(Window_LEN/2)
+        path= path* int(Standard_LEN/2)
         last_p  = start_p
         path_cost = 0
         for i in range(w):
@@ -96,14 +96,14 @@ class PATH:
         return path,path_cost/w
 
     def find_the_starting(img):
-        starting_piont=int(Window_LEN/2)
-        new = img[:,0:Window_LEN]
+        starting_piont=int(Standard_LEN/2)
+        new = img[:,0:Standard_LEN]
         line=new.sum(axis=1)
         starting_piont =  np.argmin(line)
         return starting_piont
 
     def calculate_ave_mid(img):
-        starting_piont=int(Window_LEN/2)
+        starting_piont=int(Standard_LEN/2)
         h, w= img.shape
 
         new = img[:,0:2:w]
@@ -118,8 +118,58 @@ class PATH:
         H,W= img.shape  #get size of image
         img =  img.astype(float)
         img = cv2.resize(img, (832,71), interpolation=cv2.INTER_LINEAR)
+        #img = np.clip(img,0,254)
+        
+
+        img = cv2.resize(img, (832,71), interpolation=cv2.INTER_LINEAR)
+        input_batch = np.zeros((1,3,71,832)) # a batch with piece num
+
+          
+        input_batch[0,0,:,:] = (img - 128.0)/128.0
+        input_batch[0,1,:,:] = (img - 128.0)/128.0
+        input_batch[0,2,:,:] = (img - 128.0)/128.0
+        input = torch.from_numpy(np.float32(input_batch)) 
+        input = input.to(device) 
+
+        
+ 
+        #input3d =  np.zeros((3,Resample_size,Resample_size))
+        #input3d[0,:,:]= transform(img2)[0]
+        #input3d[1,:,:]= transform(img2)[0]
+        #input3d[2,:,:]= transform(img2)[0]
+        #input = torch.from_numpy(np.float32(input3d)) 
+        #input = input.to(device) 
+
+        inputv = Variable(input)
+
+        #inputv = Variable(input.unsqueeze(0))
+        output = netD(inputv)
+        #path_upsam = np.zeros(W)
+        output = output.cpu().detach().numpy()
+         
+        path_upsam = output[0]*Standard_LEN
+        if math.isnan(path_upsam[0]):
+            path = np.clip(path_upsam,0,Standard_LEN-1)
+
+            pass
+        #path_upsam = signal.resample(path_upsam , W*3)  
+        #path_upsam = np.clip(path_upsam,0,Standard_LEN-1)
+
+        #long_out  = np.append(np.flip(output),output)
+        #long_out  = np.append(long_out,np.flip(output))
+        #long_out = gaussian_filter1d (long_out ,1)
+         
+        path   = path_upsam 
+        #path_upsam = long_path_upsam[W:2*W]
+        return path, 0
+        #apply deep learning to find the path
+    def search_a_path_GPU_long(img): # input should be torch tensor
+        #img2 = cv2.cvtColor(img2,cv2.COLOR_GRAY2RGB)
+        H,W= img.shape  #get size of image
+        img =  img.astype(float)
+        img = cv2.resize(img, (832,71), interpolation=cv2.INTER_LINEAR)
         img = np.clip(img,0,254)
-        long =  np.zeros(71,832*3)
+        long =  np.zeros((71,832*3))
         long [:,0:832]  = img
         long [:,832:832*2]  = img
         long [:,832*2:832*3]  = img
@@ -150,13 +200,13 @@ class PATH:
         #path_upsam = np.zeros(W)
         output = output.cpu().detach().numpy()
          
-        path_upsam = output[0]*Window_LEN
+        path_upsam = output[0]*Standard_LEN
         if math.isnan(path_upsam[0]):
-            path = np.clip(path_upsam,0,Window_LEN-1)
+            path = np.clip(path_upsam,0,Standard_LEN-1)
 
             pass
         path_upsam = signal.resample(path_upsam , W*3)  
-        path_upsam = np.clip(path_upsam,0,Window_LEN-1)
+        path_upsam = np.clip(path_upsam,0,Standard_LEN-1)
 
         #long_out  = np.append(np.flip(output),output)
         #long_out  = np.append(long_out,np.flip(output))
@@ -172,7 +222,7 @@ class PATH:
         piece_num = 10 # the number of the squers 
         piece_W = int(W/piece_num)
         input_batch = np.zeros((1,3,Resample_size,Resample_size)) # a batch with piece num
-        output  = np.zeros((piece_num,Window_LEN))
+        output  = np.zeros((piece_num,Standard_LEN))
         for  slice_point in range (piece_num):
             img_piece = img[:,slice_point*piece_W:(slice_point+1)*piece_W]
             img_piece = cv2.resize(img_piece, (Resample_size,Resample_size), interpolation=cv2.INTER_AREA)
@@ -193,11 +243,11 @@ class PATH:
         for connect_point in range (piece_num):
             path_upsam[connect_point*piece_W:(connect_point+1)*piece_W] = signal.resample(
                 output[connect_point,:], piece_W)
-        path_upsam = path_upsam *Window_LEN
+        path_upsam = path_upsam *Standard_LEN
         #long_out  = np.append(np.flip(output),output)
         #long_out  = np.append(long_out,np.flip(output))
         #long_out = gaussian_filter1d (long_out ,1)
-        #long_path_upsam  = signal.resample(long_out, 3*W)*Window_LEN
+        #long_path_upsam  = signal.resample(long_out, 3*W)*Standard_LEN
         #path_upsam = long_path_upsam[W:2*W]
         return path_upsam, 0
     def search_a_path_deep_multiscal_small_window(img): # input should be torch tensor
@@ -238,11 +288,11 @@ class PATH:
         for connect_point in range (piece_num):
             path_add3[connect_point*piece_W:(connect_point+1)*piece_W] = signal.resample(
                 output[connect_point,:], piece_W)
-        path_add3 = path_add3 *Window_LEN
+        path_add3 = path_add3 *Standard_LEN
         #long_out  = np.append(np.flip(output),output)
         #long_out  = np.append(long_out,np.flip(output))
         #long_out = gaussian_filter1d (long_out ,1)
-        #long_path_upsam  = signal.resample(long_out, 3*W)*Window_LEN
+        #long_path_upsam  = signal.resample(long_out, 3*W)*Standard_LEN
         path_origin = path_add3[W_origin:2*W_origin]
         path_origin = np.clip(path_origin,0,70)
         return path_origin, 0
@@ -298,18 +348,18 @@ class PATH:
         for connect_point in range (piece_num):
             path_add3[connect_point*piece_W:(connect_point+1)*piece_W] = signal.resample(
                 output[connect_point,:], piece_W)
-        path_add3 = path_add3 *Window_LEN
+        path_add3 = path_add3 *Standard_LEN
 
         path_add3_2 = np.zeros(W)
         output2 = output2.cpu().detach().numpy()
         for connect_point in range (piece_num-1):
             path_add3_2[connect_point*piece_W+int(piece_W/3):(connect_point+1)*piece_W + int(piece_W/3)] = signal.resample(
                 output2[connect_point,:], piece_W)
-        path_add3_2 = path_add3_2 *Window_LEN
+        path_add3_2 = path_add3_2 *Standard_LEN
         #long_out  = np.append(np.flip(output),output)
         #long_out  = np.append(long_out,np.flip(output))
         #long_out = gaussian_filter1d (long_out ,1)
-        #long_path_upsam  = signal.resample(long_out, 3*W)*Window_LEN
+        #long_path_upsam  = signal.resample(long_out, 3*W)*Standard_LEN
         path_origin = (path_add3[W_origin:2*W_origin] + path_add3_2[W_origin:2*W_origin])/2
         path_origin = np.clip(path_origin,0,70)
         return path_origin, 0
@@ -372,18 +422,18 @@ class PATH:
         for connect_point in range (piece_num):
             path_add3[connect_point*piece_W:(connect_point+1)*piece_W] = signal.resample(
                 output[connect_point,:], piece_W)
-        path_add3 = path_add3 *Window_LEN
+        path_add3 = path_add3 *Standard_LEN
 
         path_add3_2 = np.zeros(W)
         output2 = output2.cpu().detach().numpy()
         for connect_point in range (piece_num-1):
             path_add3_2[connect_point*piece_W+int(piece_W/3):(connect_point+1)*piece_W + int(piece_W/3)] = signal.resample(
                 output2[connect_point,:], piece_W)
-        path_add3_2 = path_add3_2 *Window_LEN
+        path_add3_2 = path_add3_2 *Standard_LEN
         #long_out  = np.append(np.flip(output),output)
         #long_out  = np.append(long_out,np.flip(output))
         #long_out = gaussian_filter1d (long_out ,1)
-        #long_path_upsam  = signal.resample(long_out, 3*W)*Window_LEN
+        #long_path_upsam  = signal.resample(long_out, 3*W)*Standard_LEN
         path_origin = (path_add3[W_origin:2*W_origin] + path_add3_2[W_origin:2*W_origin])/2
         path_origin = np.clip(path_origin,0,70)
         return path_origin, 0
@@ -412,11 +462,11 @@ class PATH:
          
 
         path_upsam  = signal.resample(output[0,:], W)
-        path_upsam = path_upsam *Window_LEN
+        path_upsam = path_upsam *Standard_LEN
         #long_out  = np.append(np.flip(output),output)
         #long_out  = np.append(long_out,np.flip(output))
         #long_out = gaussian_filter1d (long_out ,1)
-        #long_path_upsam  = signal.resample(long_out, 3*W)*Window_LEN
+        #long_path_upsam  = signal.resample(long_out, 3*W)*Standard_LEN
         #path_upsam = long_path_upsam[W:2*W]
         return path_upsam, 0
 

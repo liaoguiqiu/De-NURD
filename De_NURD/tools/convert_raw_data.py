@@ -1,4 +1,4 @@
-operatedir = "E:/database/NURD/8th 10 2021 colection for MedIA/raw/phantom7_pull_0.2/"
+operatedir = "E:/database/NURD/8th 10 2021 colection for MedIA/raw/disturb2/"
 
 import cv2
 import math 
