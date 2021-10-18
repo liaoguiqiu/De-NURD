@@ -5,7 +5,7 @@
     <ProjectGuid>07b9d663-4bc8-4016-8977-35b22d05cc4c</ProjectGuid>
     <ProjectHome>
     </ProjectHome>
-    <StartupFile>Correct_sequence_integral.py</StartupFile>
+    <StartupFile>tools\convert_raw_data.py</StartupFile>
     <SearchPath>test_model;pair2path</SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>

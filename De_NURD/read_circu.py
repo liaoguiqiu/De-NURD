@@ -57,8 +57,9 @@ def tranfer_frome_cir2rec(gray):
     return polar_image
 def tranfer_frome_rec2cir(gray):
     H,W = gray.shape
-    value = np.sqrt(((W/2.0)**2.0)+((W/2.0)**2.0))
-    value/=1.5
+    #value = np.sqrt(((W/2.0)**2.0)+((W/2.0)**2.0))
+    value = W/2
+    
     grayr=cv2.rotate(gray,rotateCode = 2) 
     H,W = grayr.shape
 
