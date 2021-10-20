@@ -49,14 +49,14 @@ class PATH:
         ##middle_point  =  PATH.calculate_ave_mid(mat)
         #path1,path_cost1=PATH.search_a_path(mat,start_point) # get the path and average cost of the path
         #path1,path_cost1=PATH.search_a_path_deep_multiscal_small_window_fusion2(mat) # get the path and average cost of the path
-        path1,path_cost1=PATH.search_a_path_GPU_long  (mat) # get the path and average cost of the path
+        path1,path_cost1=PATH.search_a_path_GPU_long(mat) # get the path and average cost of the path
 
        
         #path1 = corre_shifting + path1
        
         #path1 =0.5 * path1 + 0.5 * corre_shifting 
         path_cost1  = 0
-        path1 = gaussian_filter1d(path1,2) # smooth the path 
+        #path1 = gaussian_filter1d(path1,10) # smooth the path 
         return path1
     def search_a_path(img,start_p):
         img=img.astype(float)
@@ -170,9 +170,9 @@ class PATH:
         img = cv2.resize(img, (832,71), interpolation=cv2.INTER_LINEAR)
         img = np.clip(img,0,254)
         long =  np.zeros((71,832*3))
-        long [:,0:832]  = img
+        long [:,0:832]  = cv2.flip(img,1)
         long [:,832:832*2]  = img
-        long [:,832*2:832*3]  = img
+        long [:,832*2:832*3]  = cv2.flip(img,1)
 
         img = cv2.resize(long, (832,71), interpolation=cv2.INTER_LINEAR)
         input_batch = np.zeros((1,3,71,832)) # a batch with piece num

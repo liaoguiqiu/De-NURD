@@ -42,13 +42,13 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 Resample_size =Window_LEN
 Path_length = 128
 #read_start = 100
-read_start = 5
+read_start = 0
 
 Debug_flag  = True
 global intergral_flag
 intergral_flag =0
 
-BranchA_flag = False
+Branch_flag = 0  # 0 fusion, 1 A, 2 B
  
 if (Save_signal_flag == True):
     from analy import MY_ANALYSIS
@@ -263,12 +263,12 @@ class VIDEO_PEOCESS:
 
         #shift_integral = np.clip(shift_integral,overall_shift- Window_LEN/2,overall_shift+ Window_LEN/2)
         #shift_integral = gaussian_filter1d(shift_integral,5) # smooth the path 
-        if BranchA_flag == True:
+        if Branch_flag == 1:
             shift_integral = shift_integral  
-
-            
-        else:
-            shift_integral = shift_integral - 0.15 *(shift_integral-overall_shift)   - I 
+        elif Branch_flag == 0:
+            shift_integral = shift_integral - 0.05 *(shift_integral-overall_shift)   - I 
+        elif Branch_flag == 2:
+             shift_integral = shift_integral*0 + overall_shift  
         #shift_integral = shift_integral*0 + overall_shift  
 
         #shift_integral = gaussian_filter1d(shift_integral,3) # smooth the path 
@@ -358,7 +358,7 @@ class VIDEO_PEOCESS:
         Window_ki_error = 0
         Window_kp_error = 0
         Kp=0 # initial shifting paramerter
-        dual_thread  = Dual_thread_Overall_shift_NURD()
+        dual_thread  = Dual_thread_Overall_shift_NURD(Branch_flag)
         for sequence_num in range(read_start,read_start+seqence_Len):
         #for i in os.listdir("E:/estimagine/vs_project/PythonApplication_data_au/pic/"):
                 # read imag for process 

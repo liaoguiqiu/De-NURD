@@ -10,12 +10,14 @@ from path_finding import PATH
 from time import time
 from pair2path import Pair2Path
 import cv2
+ 
 Graph_searching_flag = False
 
 
 class Dual_thread_Overall_shift_NURD(object):
-    def __init__(self):
+    def __init__(self,BranchFlag):
         #give all parmeter initial(given the Memory for thread)
+        self.branch_flag = BranchFlag 
         self.stream1 =[]
         self.stream2 =[]
         self.stream3 = []
@@ -28,6 +30,11 @@ class Dual_thread_Overall_shift_NURD(object):
         self.add_shift  = []
         self.shift_predictor = Shift_Predict()
         self.path_predictor  = Pair2Path()
+        self.overall_shifting  = 0
+        self.shift_used1 =0
+        self.costmatrix  = np.zeros((71,832))
+        self.shift_used2 =0
+        self.path = np.zeros(832)
         pass
     def input(self,strm1,strm2,strmlen,addshift):
         self.stream1 =strm1
@@ -62,16 +69,18 @@ class Dual_thread_Overall_shift_NURD(object):
        #self.shift_used1 += self.overall_shifting
        #self.overall_shifting,shift_used1 = COSTMtrix.Img_fully_shifting_correlation (img1[0:210,:],
        #                                                       img3[0:210,:],  self.shift_used1)
-       #self.overall_shifting,shift_used1 = COSTMtrix.stack_fully_shifting_correlation (self.stream2[:,0:210,:],
-                                                              #self.stream3[:,0:210,:],  self.shift_used1)
+       #self.overall_shifting,shift_used1 = COSTMtrix.stack_fully_shifting_correlation (self.stream1[:,0:210,:],
+       #                                                       self.stream2[:,0:210,:],  self.shift_used1)
 
-       #self.overall_shifting,shift_used1 = COSTMtrix.Img_fully_shifting_correlation (img1 ,
-       #                                                       img3 ,  self.shift_used1)
+       self.overall_shifting,shift_used1 = COSTMtrix.Img_fully_shifting_correlation (img1 ,
+                                                              img3 ,  self.shift_used1)
 
        #self.shift_used1 += self.overall_shifting
-       img1 = np.roll(img1, self.shift_used1  , axis = 1)     # Positive x rolls right
-       self.overall_shifting = self.shift_predictor.predict(img1,img2,img3) # THIS COST 0.01 s
-       self.overall_shifting = 0.4* self.overall_shifting + 0.6*self.overall_shifting2
+       #img1 = np.roll(img1, self.shift_used1  , axis = 1)     # Positive x rolls right
+       #self.overall_shifting = self.shift_predictor.predict(img1,img2,img3) # THIS COST 0.01 s
+       self.overall_shifting = 0.7* self.overall_shifting + 0.3*self.overall_shifting2
+       #self.overall_shifting =  self.overall_shifting  
+
        #self.overall_shifting = 0.5*self.overall_shifting + 0.5 * self.last_overall_shift
        #self.last_overall_shift = self.overall_shifting
 
@@ -96,18 +105,18 @@ class Dual_thread_Overall_shift_NURD(object):
       self.costmatrix1,self.shift_used2= COSTMtrix.matrix_cal_corre_block_version3_3GPU  (
                                                               self.stream2[self.strmlen-1,:,:] ,
                                                               self.stream2[self.strmlen-2,:,:], 0,
-                                                              block_wid = 3,Down_sample_F = 2,Down_sample_F2 = 2) 
+                                                              block_wid = 3,Down_sample_F = 1,Down_sample_F2 = 1) 
 
       self.costmatrix2,self.shift_used2= COSTMtrix.matrix_cal_corre_block_version3_3GPU  (
                                                               self.stream2[self.strmlen-1,50:211,:] ,
                                                               self.stream2[self.strmlen-2,50:211,:], 0,
-                                                              block_wid = 3,Down_sample_F = 3,Down_sample_F2 = 3)
+                                                              block_wid = 3,Down_sample_F = 5,Down_sample_F2 = 5)
       ##self.costmatrix = self.costmatrix1 
       self.costmatrix = 0.6*self.costmatrix1+ 0.4*self.costmatrix2 
       Hm,Wm= self.costmatrix.shape
       self.costmatrix = cv2.resize(self.costmatrix, (Wm,Standard_LEN), interpolation=cv2.INTER_AREA)
 
-      self.costmatrix  = myfilter.gauss_filter_s (self.costmatrix) # smooth matrix
+      #self.costmatrix  = myfilter.gauss_filter_s (self.costmatrix) # smooth matrix
       #self.costmatrix  = cv2.GaussianBlur(self.costmatrix,(5,5),0)
       #self.costmatrix = self.costmatrix*1.5 +30
         # down sample the materix and up sample 
@@ -131,15 +140,26 @@ class Dual_thread_Overall_shift_NURD(object):
      
      #return x
     def runInParallel( self):
- 
-        p1 = Thread(target=self.func1)
-        p2 = Thread(target=self.func2)
-        p2.start()
+        if self.branch_flag ==0:
+            p1 = Thread(target=self.func1)
+            p2 = Thread(target=self.func2)
+            p2.start()
 
-        p1.start()
-        p2.join()
+            p1.start()
+            p2.join()
         
-        p1.join()
+            p1.join()
+        elif self.branch_flag == 1:
+             
+            p2 = Thread(target=self.func2)
+            p2.start()
+
+           
+            p2.join()
+        elif self.branch_flag == 2 :
+            p1 = Thread(target=self.func1)
+            p1.start()
+            p1.join()
     def ruuInCascade(self):
         self.func1()
         self.func2()

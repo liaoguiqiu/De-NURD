@@ -22,7 +22,7 @@ from time import time
 #    return  result
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-Window_LEN = 100
+Window_LEN = 71
 Standard_LEN = 71
 Overall_shiftting_WinLen = 71
 Cost_M_sample_flag =True
