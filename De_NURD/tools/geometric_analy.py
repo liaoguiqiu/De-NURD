@@ -9,9 +9,56 @@ import random
 from zipfile import ZipFile
 import scipy.signal as signal
 import pandas as pd
-from generator_contour import Save_Contour_pkl
+from pathlib import Path
+def Similarity(tp): # calculate the Eular similarity of the 4 points 
+    vetor1 = tp[0]-tp[1] 
+    vetor2 = tp[3]-tp[2] # the same direction
+    # see the page of 
+    # https://blog.csdn.net/dcrmg/article/details/52416832
+    err1= np.linalg.norm(vetor1 - vetor2) # the error of two vector c = a - b 
 
- 
+    L1 = (np.linalg.norm(vetor1)+ np.linalg.norm(vetor2))/2 # the average distance of the two vetors\
+    # rotate to calculate another group of vector
+    vetor3 = tp[1]-tp[2] 
+    vetor4 = tp[0]-tp[3] # the same direction
+    err2= np.linalg.norm(vetor3 - vetor4) # the error of two vector c = a - b 
+    L2 = (np.linalg.norm(vetor3)+ np.linalg.norm(vetor4))/2 # the average distance of the two vetors
+    S  = (L1 + L2)/(L1+L2+err1+err2)   # Eular similarity
+    return S
+
+def err_90(tp): # calculate the Eular similarity of the 4 points 
+    def angle_err(vetor1,vetor2):
+        unit_vector_1 = vetor1 / np.linalg.norm(vetor1)
+        unit_vector_2 = vetor2 / np.linalg.norm(vetor2)
+        dot_product = np.dot(unit_vector_1, unit_vector_2)
+        angle = abs(np.arccos(dot_product) *180/3.14159)
+        err = abs(90-angle )
+        return err
+    vetor1 = tp[0]-tp[1] 
+    vetor2 = tp[1]-tp[2] # the same direction
+    vetor3 = tp[2]-tp[3] 
+    vetor4 = tp[3]-tp[0] 
+    err1 = angle_err(vetor1,vetor2)
+    err2 = angle_err(vetor2,vetor3)
+    err3 = angle_err(vetor3,vetor4)
+    err4 = angle_err(vetor1,vetor4)
+    return sum([err1,err2,err3,err4]) 
+
+def overall_angle(tp0,tp1): # the overall anggle between inital and now
+    def angle_cal(vetor1,vetor2):
+        unit_vector_1 = vetor1 / np.linalg.norm(vetor1)
+        unit_vector_2 = vetor2 / np.linalg.norm(vetor2)
+        dot_product = np.dot(unit_vector_1, unit_vector_2)
+        angle = abs(np.arccos(dot_product) *180/3.14159)
+        return angle
+    vetor01  = tp0[0]-tp0[2] 
+    vetor02  = tp0[1]-tp0[3] # the same direction
+    vetor11  = tp1[0]-tp1[2] 
+    vetor12  = tp1[1]-tp1[3] # the same direction
+    angle =(angle_cal(vetor01, vetor11)+ angle_cal(vetor02, vetor12))/2
+    return angle
+     
+    
 class  Geometry_Analy(object):
     def __init__(self ):
         #self.image_dir   = "../../OCT/beam_scanning/Data set/pic/NORMAL-BACKSIDE-center/"
@@ -20,49 +67,46 @@ class  Geometry_Analy(object):
         #self.database_root = "../../OCT/beam_scanning/Data Set Reorganize/NORMAL-BACKSIDE-center/"
         #self.database_root = "../../OCT/beam_scanning/Data Set Reorganize/NORMAL-BACKSIDE/"
         
-        self.json_root = "D:/Deep learning/dataset/label data/"
+        self.json_dir ="E:/database/NURD/20th October/correct/object_rect_s3/experiment2/label/"
+        #base_dir =  os.path.basename(os.path.normpath(self.json_dir))
+        path = Path(self.json_dir)
+        self.save_dir =  str(path.parent.absolute()) + "/excel_result/"
+        try:
+            os.stat(self.save_dir)
+        except:
+            os.mkdir(self.save_dir)
+        folder_list = os.listdir(self.json_dir)
+        self.similarity_buff =np.zeros((len(folder_list),2)) 
+        self.err90_buff =np.zeros((len(folder_list),2)) 
+        self.all_angle_buff =np.zeros((len(folder_list),2)) 
 
-       
-         
-        self.contours_x =  [] # no predefines # predefine there are 4 contours
-        self.contours_y =  [] # predefine there are 4 contours
-
-        self.saver = Save_Contour_pkl()
-        self.display_flag = True
-    def draw_coordinates_color(self,img1,vx,vy,color):
-        
-        if color ==0:
-           painter  = [254,0,0]
-        elif color ==1:
-           painter  = [0,254,0]
-        elif color ==2:
-           painter  = [0,0,254]
-        else :
-           painter  = [0,0,0]
-                    #path0  = signal.resample(path0, W)
-        H,W,_ = img1.shape
-        for j in range (len(vx)):
-                #path0l[path0x[j]]
-                dy = np.clip(vy[j],2,H-2)
-                dx = np.clip(vx[j],2,W-2)
-
-                img1[int(dy)+1,int(dx),:]=img1[int(dy),int(dx),:]=painter
-                #img1[int(dy)+1,dx,:]=img1[int(dy)-1,dx,:]=img1[int(dy),dx,:]=painter
-
-
-        return img1
+        self.originalarray =  [] # no predefines # predefine there are 4 contours
+        self.correctedarray =  [] # predefine there are 4 contours
+        self.array_original = []
+        self.array_corrected  = []
+        self.recordedflag = 0
+    def all_angle_err(self,tp1,tp2):
+        if self.recordedflag == 0 :
+           self.array_original =  tp1
+           self.array_corrected =  tp2
+           self.recordedflag =1
+        else:
+            err1  = overall_angle( self.array_original, tp1)
+            err2 =  overall_angle( self.array_corrected, tp2)
+            return err1,err2
     def check_one_folder (self):
-        for i in os.listdir(self.json_dir):
-    #for i in os.listdir("E:\\estimagine\\vs_project\\PythonApplication_data_au\\pic\\"):
-        # separath  the name of json 
+        folder_list = os.listdir(self.json_dir)
+        data_i = 0
+        for i in folder_list:
+   
             a, b = os.path.splitext(i)
             # if it is a json it will have corresponding image 
-            if b == ".json" :
-                img_path = self.image_dir + a + ".jpg"
-                img1 = cv2.imread(img_path)
-                if img1 is None:
-                    print ("no_img for this zip")
-                else:
+            if  b == ".json":
+                #img_path = self.image_dir + a + ".jpg"
+                #img1 = cv2.imread(img_path)
+                #if img1 is None:
+                #    print ("no_img for this zip")
+                #else:
                     json_dir = self.json_dir + a + b
                     with open(json_dir) as f_dir:
                         data = JSON.load(f_dir)
@@ -78,121 +122,44 @@ class  Geometry_Analy(object):
 
                            
                     #rois = read_roi_zip(roi_dir) # get all the coordinates
-                    gray  =   cv2.cvtColor(img1, cv2.COLOR_BGR2GRAY) # transfer into gray image
-                    H,W   = gray.shape
-                    max_buffer  = np.zeros(len_list)
-                    contoursx=[None]*len_list
-                    contoursy=[None]*len_list
-
                     for iter in range(len_list):
-                        # get the name of one contour 
-                        #  iter
-                        coordinates  = shape[iter]["points"]
-                        coordinates = np.array(coordinates)
-                        #line_name  = os.path.splitext(listOfiles[iter].filename)
-                        #line_name =line_name[0] #just use the former one 
-                        #pathy = rois[line_name]['y']
-                        #pathx = rois[line_name]['x']
 
-                        # delete the coordinate out side the boundary of image
-                        len_ori,_ = coordinates.shape
-                        target =0
-                        for j in range(len_ori):
+                        if shape[iter]["label"] == 'original':
+                            tp1 = np.array(shape[iter]["points"])
 
-                            if (coordinates[target,0] < 0 or coordinates[target,0]>(W-1) ) :# check the x coordinates
-                                coordinates= np.delete(coordinates , target,axis=0)
-                            else:
-                                target +=1
+                            S_ori = Similarity(tp1)
+                            angle_err_or = err_90(tp1)
+ 
 
+                        else:
+                            tp2 = np.array(shape[iter]["points"])
 
-                        pathy  = coordinates[:,1]
-                        pathx  = coordinates[:,0]
-
-                        num_points = len(pathx)
-                        path_w  = pathx[num_points-1] - pathx[0]
-                        path_w = int(path_w)
-                        # sometimes the contour is plot in reversed direction  
-                        if  path_w<0:
-                            path_w=-path_w
-                            pathy=pathy[::-1]
-                            pathx=pathx[::-1]
-
-                        pathyl =  np.ones(int(path_w)) * np.nan
-
-                        for j in range (num_points):
-                            #importante sometimes the start point is nnot the lestmost
-                             this_index = np.clip(  pathx[j] - pathx[0], 0,path_w-1)
-                             pathyl[int(this_index)] = float (pathy[j] -1)
-                        add_3   = np.append(pathyl[::-1],pathyl,axis=0) # cascade
-                        add_3   = np.append(add_3,pathyl[::-1],axis=0) # cascade
-                        s = pd.Series(add_3)
-                        pathyl = s.interpolate(method = "linear")
-                        pathyl = pathyl[path_w:2*path_w].to_numpy() 
-                        pathxl = np.arange(int(pathx[0]) , int(pathx[0]) + path_w )
-                       
+                            S_corr = Similarity(tp2)
+                            angle_err_co = err_90(tp2)
+                            pass
+                    all_an_err = self.all_angle_err(tp1,tp2)
+                    self.similarity_buff[data_i] = [S_ori,S_corr]
+                    self. err90_buff [data_i] =  [angle_err_or,angle_err_co]
+                    self. all_angle_buff [data_i] = all_an_err
 
 
-                        if len(pathxl) > 0.96 *W: #  correct  the unperfect label
-            # rememver to add resacle later
-                            pathyl = signal.resample(pathyl, W)
-                            pathxl = np.arange(0, W)
-                            
-
-                        contoursx[iter] = pathxl
-                        contoursy[iter] = pathyl
-                        #max_buffer[iter] = np.min(pathyl)  #  use the minimal value to detemine which contour as the 1st and 2nd .....
-                        max_buffer[iter] = np.max(pathyl)  #  use the mean value to detemine which contour as the 1st and 2nd .....
-                        
-                        pass
+                    DF1 = pd.DataFrame(self.similarity_buff)
+                    DF1.to_csv(self.save_dir+"similarity_buff.csv")
+                    DF2 = pd.DataFrame(self.err90_buff)
+                    DF2.to_csv(self.save_dir+"err90_buff.csv")
+                    DF3 = pd.DataFrame(self.all_angle_buff)
+                    DF3.to_csv(self.save_dir+"all_angle_buff.csv")
+                    print(str(data_i))
+# save the dataframe as a csv file
                     
 
-                     #  use the minimal value to detemine which contour as the 1st and 2nd .....
-                    new_index  = np.argsort( max_buffer)
-                    self.contours_x = [None]*len_list
-                    self.contours_y = [None]*len_list
-
-                    for iter in range(len_list):
-                        self.contours_x[iter] = contoursx[new_index[iter]]
-                        self.contours_y[iter] = contoursy[new_index[iter]]
-                        if self.display_flag == True:
-                            img1 = self.draw_coordinates_color(img1,self.contours_x[iter],
-                                                               self.contours_y[iter],iter)
-
-                    #save this result 
-                    self.img_num = a
-                    #self.contours_x = [path0ln, path1ln, path2ln, path3ln]
-                    #self.saver.append_new_name_contour (self.img_num,self.contours,self.database_root)
-                    self.saver.append_new_name_contour (self.img_num,self.contours_x,self.contours_y,self.save_dir)
-
-                    cv2.imshow('pic',img1)
-                    print(str(a))
-                    cv2.waitKey(10) 
+                    data_i+=1
+            pass
 
 if __name__ == '__main__':
-    #play with JSON gile 
-    #file_dir   = "D:/Deep learning/dataset/label data/label/0.json"
+   
 
-    #with open(file_dir) as f:
-    #    data = JSON.load(f)
-    ## Output: {'name': 'Bob', 'languages': ['English', 'Fench']}
-    #print(data)
-    #newdata   = data 
-    #shape  = data["shapes"]
-    #print(shape)
-    #num_line  = len(shape)
-    #coordinate  = shape[0]["points"]
-    #num_points  = len(coordinate)
-    #for  i in range(num_points):
-    #    coordinate[i][1] = 100
-    #print(coordinate)
-    ### modify the coordinate 
-    #newdata["shapes"][0]["points"]  = coordinate
-    ##save 
-    #with open(file_dir, "w") as jsonFile:
-    #    JSON.dump(newdata, jsonFile)
-
-
-    converter  = Read_read_check_json_label()
-    converter.check_one_folder() # convert the Json file into pkl files 
+    calculator  = Geometry_Analy()
+    calculator.check_one_folder() # convert the Json file into pkl files 
 
 

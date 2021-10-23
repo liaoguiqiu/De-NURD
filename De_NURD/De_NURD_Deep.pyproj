@@ -5,7 +5,7 @@
     <ProjectGuid>07b9d663-4bc8-4016-8977-35b22d05cc4c</ProjectGuid>
     <ProjectHome>
     </ProjectHome>
-    <StartupFile>Correct_sequence_integral.py</StartupFile>
+    <StartupFile>tools\geometric_analy.py</StartupFile>
     <SearchPath>test_model;pair2path</SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
@@ -140,6 +140,9 @@
     <Compile Include="test_model\layer_body_sheath_res2.py" />
     <Compile Include="test_model\loss_MTL.py" />
     <Compile Include="tools\convert_raw_data.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="tools\geometric_analy.py">
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
