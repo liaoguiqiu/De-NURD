@@ -11,7 +11,7 @@ from time import time
 from pair2path import Pair2Path
 import cv2
  
-Graph_searching_flag = False
+Graph_searching_flag = True
 
 
 class Dual_thread_Overall_shift_NURD(object):
@@ -62,7 +62,7 @@ class Dual_thread_Overall_shift_NURD(object):
        img2 = self.stream1[self.strmlen-2,:,:]
        img3 = self.stream1[0,:,:]
        H,W = img1.shape 
-       self.overall_shifting2 = self.shift_predictor.predict_shaking(img1,self.stream2[self.strmlen-2,:,:])
+       #self.overall_shifting2 = self.shift_predictor.predict_shaking(img1,self.stream2[self.strmlen-2,:,:])
 
        #self.overall_shifting,shift_used1 = COSTMtrix.Img_fully_shifting_correlation (img1[200:H,:],
        #                                                       img3[200:H,:],  self.shift_used1 )
@@ -75,10 +75,10 @@ class Dual_thread_Overall_shift_NURD(object):
        self.overall_shifting,shift_used1 = COSTMtrix.Img_fully_shifting_correlation (img1 ,
                                                               img3 ,  self.shift_used1)
 
-       #self.shift_used1 += self.overall_shifting
-       #img1 = np.roll(img1, self.shift_used1  , axis = 1)     # Positive x rolls right
-       #self.overall_shifting = self.shift_predictor.predict(img1,img2,img3) # THIS COST 0.01 s
-       self.overall_shifting = 0.7* self.overall_shifting + 0.3*self.overall_shifting2
+       self.shift_used1 += self.overall_shifting
+       img1 = np.roll(img1, self.shift_used1  , axis = 1)     # Positive x rolls right
+       self.overall_shifting = self.shift_predictor.predict(img1,img2,img3) # THIS COST 0.01 s
+       #self.overall_shifting = 0.7* self.overall_shifting + 0.3*self.overall_shifting2
        #self.overall_shifting =  self.overall_shifting  
 
        #self.overall_shifting = 0.5*self.overall_shifting + 0.5 * self.last_overall_shift
@@ -102,21 +102,21 @@ class Dual_thread_Overall_shift_NURD(object):
       window_wid = self.path_predictor.Original_window_Len
       self.costmatrix = np.zeros ((window_wid, w))
       
-      self.costmatrix1,self.shift_used2= COSTMtrix.matrix_cal_corre_block_version3_3GPU  (
+      self.costmatrix,self.shift_used2= COSTMtrix.matrix_cal_corre_block_version3_3GPU  (
                                                               self.stream2[self.strmlen-1,:,:] ,
                                                               self.stream2[self.strmlen-2,:,:], 0,
-                                                              block_wid = 3,Down_sample_F = 1,Down_sample_F2 = 1) 
+                                                              block_wid = 7,Down_sample_F = 4,Down_sample_F2 = 4) 
 
-      self.costmatrix2,self.shift_used2= COSTMtrix.matrix_cal_corre_block_version3_3GPU  (
-                                                              self.stream2[self.strmlen-1,50:211,:] ,
-                                                              self.stream2[self.strmlen-2,50:211,:], 0,
-                                                              block_wid = 3,Down_sample_F = 5,Down_sample_F2 = 5)
+      #self.costmatrix2,self.shift_used2= COSTMtrix.matrix_cal_corre_block_version3_3GPU  (
+      #                                                        self.stream2[self.strmlen-1,50:211,:] ,
+      #                                                        self.stream2[self.strmlen-2,50:211,:], 0,
+      #                                                        block_wid = 3,Down_sample_F = 5,Down_sample_F2 = 5)
       ##self.costmatrix = self.costmatrix1 
-      self.costmatrix = 0.6*self.costmatrix1+ 0.4*self.costmatrix2 
+      #self.costmatrix = 0.6*self.costmatrix1+ 0.4*self.costmatrix2 
       Hm,Wm= self.costmatrix.shape
       self.costmatrix = cv2.resize(self.costmatrix, (Wm,Standard_LEN), interpolation=cv2.INTER_AREA)
 
-      #self.costmatrix  = myfilter.gauss_filter_s (self.costmatrix) # smooth matrix
+      self.costmatrix  = myfilter.gauss_filter_s (self.costmatrix) # smooth matrix
       #self.costmatrix  = cv2.GaussianBlur(self.costmatrix,(5,5),0)
       #self.costmatrix = self.costmatrix*1.5 +30
         # down sample the materix and up sample 

@@ -1,4 +1,6 @@
-operatedir = "E:/database/NURD/8th 10 2021 colection for MedIA/raw/simple_p3/"
+#operatedir = "E:/database/NURD/8th 10 2021 colection for MedIA"
+root = "E:/database/NURD/20th October/"
+operatedir =   root + "raw/wire1/"
 
 import cv2
 import math 
@@ -19,8 +21,8 @@ from  matlab import Save_Signal_matlab
 from display import tranfer2circ_padding as rec_2_cir
 
 base_dir =  os.path.basename(os.path.normpath(operatedir))
-save_dir =  "E:/database/NURD/8th 10 2021 colection for MedIA/resize/"  + base_dir + "/"
-save_dir_cir =  "E:/database/NURD/8th 10 2021 colection for MedIA/resize_circular/"  + base_dir + "/"
+save_dir =  root + "resize/"  + base_dir + "/"
+save_dir_cir =   root + "resize_circular/"  + base_dir + "/"
 try:
     os.stat(save_dir)
 except:

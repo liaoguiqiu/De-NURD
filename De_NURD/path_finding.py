@@ -49,7 +49,7 @@ class PATH:
         ##middle_point  =  PATH.calculate_ave_mid(mat)
         #path1,path_cost1=PATH.search_a_path(mat,start_point) # get the path and average cost of the path
         #path1,path_cost1=PATH.search_a_path_deep_multiscal_small_window_fusion2(mat) # get the path and average cost of the path
-        path1,path_cost1=PATH.search_a_path_GPU_long(mat) # get the path and average cost of the path
+        path1,path_cost1=PATH.search_a_path_GPU(mat) # get the path and average cost of the path
 
        
         #path1 = corre_shifting + path1

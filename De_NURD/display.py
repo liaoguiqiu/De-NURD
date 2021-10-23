@@ -35,7 +35,7 @@ from basic_trans import Basic_oper
 from  matlab import Save_Signal_matlab
 matlab_saver  = Save_Signal_matlab()
 
-read_start = 0
+#read_start = 0
 Padding_H  = -50
 
 #Padding_H  = 254
@@ -43,7 +43,7 @@ Padding_H  = -50
 Display_STD_flag = False
 Padd_zero_top = True
 Display_signal_flag = False
-Display_Matrix_flag = False
+Display_Matrix_flag = True
 save_matlab_flag = True
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 video_sizeH= 450
@@ -88,7 +88,9 @@ class Derivation_validate(object):
         self.varb =0
         self.maxa=0
         self.maxb =0
-
+        self.currenta=0
+        self.currentb =0
+        self.max_switch = 0
     def  buffer(self,img1,img2):
         self.cnt +=1
         if self.initial ==0:
@@ -158,14 +160,17 @@ class Derivation_validate(object):
         stdb = (torch.sum(mask)+1)
         #stdb=  b_stack.std( dim = 0)
         #stdb = float( stdb.data.mean())
+        self.max_switch = 0
         if self.cnt>self.Len_steam:
             if (stda>self.maxa):
                 self.maxa = stda
             if (stdb>self.maxb):
+                    self.max_switch = 1
                     self.maxb = stdb
             self.std_suma += stda
             self.std_sumb += stdb
-
+            self.currenta  = stda
+            self.currentb  = stdb
             self.avga=self.std_suma /(self.cnt-self.Len_steam)
             self.avgb=self.std_sumb /(self.cnt-self.Len_steam)
   
@@ -218,12 +223,14 @@ class Derivation_validate(object):
         #stdb = float( stdb.data.mean())
         if self.cnt>self.Len_steam:
             if (stda>self.maxa):
+
                 self.maxa = stda
             if (stdb>self.maxb):
                     self.maxb = stdb
             self.std_suma += stda
             self.std_sumb += stdb
-
+            self.currenta  = stda
+            self.currentb  = stdb
             self.avga=self.std_suma /(self.cnt-self.Len_steam)
             self.avgb=self.std_sumb /(self.cnt-self.Len_steam)
   
@@ -267,7 +274,7 @@ def diplay_sequence():
     for i in range(read_start,seqence_Len+read_start):
     #for i in os.listdir("E:/estimagine/vs_project/PythonApplication_data_au/pic/"):
     ##      process
-            img_path1 = savedir_process + str(i+20)+ ".jpg"
+            img_path1 = savedir_process + str(i+5)+ ".jpg"
             video1 = cv2.imread(img_path1)
             gray_video1  =   cv2.cvtColor(video1, cv2.COLOR_BGR2GRAY)
             gray_video1 = gray_video1  
@@ -282,7 +289,7 @@ def diplay_sequence():
             #cv2.imshow('step_process',gray_video1)  
 
             # raws 
-            img_path2 = operatedir_video + str(i+20)+ ".jpg"
+            img_path2 = operatedir_video + str(i+5)+ ".jpg"
             video2 = cv2.imread(img_path2)  
             gray_video2  =   cv2.cvtColor(video2, cv2.COLOR_BGR2GRAY)
             gray_video2 = gray_video2    
@@ -299,13 +306,25 @@ def diplay_sequence():
             #rectan1  = (rectan1 > 111) * rectan1
             #rectan2  = (rectan2 > 111) * rectan2
             if Display_Matrix_flag == True:
-                img_path3 = operatedir_matrix + str(i+10)+ ".jpg"
+                img_path3 = operatedir_matrix + str(i+5)+ ".jpg"
                 MATRIX_RESULT = cv2.imread(img_path3)
                 MATRIX_RESULT  =   cv2.cvtColor(MATRIX_RESULT, cv2.COLOR_BGR2GRAY)
                 Rotate_matr = cv2.rotate(MATRIX_RESULT,rotateCode = 2) 
+                
                 #show_2  = np.append(circular[:,300:W-300],Rotate_matr,axis=1) # cascade
                 #show_2 = np.append(show_2,gray_video1[:,300:W-300],axis=1) # cascade
-                
+                #zero = np.zeros ((circular1.shape[0],10))
+                Rotate_matr = cv2.resize (Rotate_matr, (71,circular1.shape[0]), interpolation=cv2.INTER_AREA)
+                show_2  = np.append(circular[:,:],Rotate_matr,axis=1) # cascade
+                show_2  = np.append(show_2,circular1[:,:],axis=1) # cascade
+
+                #zero = np.zeros ((rectan2.shape[0],50))
+
+                #show_2  = np.append(rectan2[:,:],zero,axis=1) # cascade
+                #show_2  = np.append(show_2,rectan1[:,:],axis=1) # cascade
+
+                #show_2 = cv2.resize(show_2, (int(show_2.shape[1]/1.5),int(show_2.shape[0]/1.5)), interpolation=cv2.INTER_AREA)
+                show_2 = cv2.resize(show_2, (int(show_2.shape[1]/1.1),int(show_2.shape[0]/1.1)), interpolation=cv2.INTER_AREA)
             #cv2.imshow('matrix',MATRIX_RESULT)
             else: 
                 #show_2  = np.append(circular[:,300:W_ini-300],gray_video1[:,300:W_ini-300],axis=1) # cascade
@@ -352,12 +371,15 @@ def diplay_sequence():
             if Display_STD_flag  ==True :
                 STD_call.buffer(rectan1 ,rectan2 )
                 std1,std2=STD_call.calculate()
+                if (STD_call.max_switch ==1):
+                    print("new max appear!")
                 print("correct:"+str(std1)) # 1 is the process
                 print("origin:"+str(std2))
                 print("correct_ave:"+str(STD_call.avga))
                 print("origin_ave:"+str(STD_call.avgb))
                 print("correct_max:"+str(STD_call.maxa))
                 print("origin_max:"+str(STD_call.maxb))
+                
                 if save_matlab_flag == True:
                     matlab_saver.buffer2(std1,std2)
                 pass

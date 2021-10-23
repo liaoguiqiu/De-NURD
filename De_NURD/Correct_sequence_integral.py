@@ -155,7 +155,8 @@ class VIDEO_PEOCESS:
         add_3_img  = np.append(image,image,axis=1) # cascade
         add_3_img = np.append(add_3_img,image,axis=1) # cascade
         new= add_3_img*0
-
+        l = len(shift_integral)
+        shift_integral = shift_integral * w/l
         #shift_integral = shift_integral + shift_diff.astype(int) # not += : this is iteration way
         #shift_integral = np.clip(shift_integral, - 35,35)
         #every line will be moved to a new postion
@@ -255,7 +256,7 @@ class VIDEO_PEOCESS:
         # PI fusion
         #shift_integral = shift_integral + shift_diff  # not += : this is iteration way
         shift_integral = PATH_POST.path_integral(shift_integral,shift_diff)
-        shift_integral = gaussian_filter1d(shift_integral,3)
+        shift_integral = gaussian_filter1d(shift_integral,5)
         #shift_integral = shift_integral - 1*(shift_integral-overall_shift) #  - 0.00001* I
         # EKF fusion
         #shift_integral = myekf.update(shift_diff,overall_shift)
@@ -266,7 +267,7 @@ class VIDEO_PEOCESS:
         if Branch_flag == 1:
             shift_integral = shift_integral  
         elif Branch_flag == 0:
-            shift_integral = shift_integral - 0.05 *(shift_integral-overall_shift)   - I 
+            shift_integral = shift_integral - 0.2 *(shift_integral-overall_shift)   - I 
         elif Branch_flag == 2:
              shift_integral = shift_integral*0 + overall_shift  
         #shift_integral = shift_integral*0 + overall_shift  
@@ -425,7 +426,7 @@ class VIDEO_PEOCESS:
 
                     shift_integral = VIDEO_PEOCESS.fusion_estimation(shift_integral,path,addition_window_shift,Window_ki_error)
 
-                    Window_ki_error =0.0001* (shift_integral-addition_window_shift)+Window_ki_error
+                    Window_ki_error =0.001* (shift_integral-addition_window_shift)+Window_ki_error
                     #addition_window_shift = np.mean(shift_integral)
 
                     #path = np.zeros(Costmatrix.shape[1])
@@ -436,9 +437,9 @@ class VIDEO_PEOCESS:
                     #                                                                           shift_integral,int(sequence_num),
                     #                                                                  shift_used2  )
 
-                    #ori_Corrected_img = VIDEO_PEOCESS.de_distortion_integral2(original_img,shift_integral,sequence_num)
-                    #Corrected_img = cv2.resize(ori_Corrected_img, (832,H_ori), interpolation=cv2.INTER_LINEAR)
-                    Corrected_img = VIDEO_PEOCESS.de_distortion_integral2(gray_video,shift_integral,sequence_num)
+                    ori_Corrected_img = VIDEO_PEOCESS.de_distortion_integral2(original_img,shift_integral,sequence_num)
+                    Corrected_img = cv2.resize(ori_Corrected_img, (832,H_ori), interpolation=cv2.INTER_LINEAR)
+                    #Corrected_img = VIDEO_PEOCESS.de_distortion_integral2(gray_video,shift_integral,sequence_num)
                     #Corrected_img = cv2.resize(ori_Corrected_img, (832,H_ori), interpolation=cv2.INTER_LINEAR)
 
 
