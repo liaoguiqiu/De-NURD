@@ -36,7 +36,7 @@ from  matlab import Save_Signal_matlab
 matlab_saver  = Save_Signal_matlab()
 
 #read_start = 0
-Padding_H  = -50
+Padding_H  = -5
 
 #Padding_H  = 254
 #from  path_finding import PATH

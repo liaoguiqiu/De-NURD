@@ -10,7 +10,51 @@ from zipfile import ZipFile
 import scipy.signal as signal
 import pandas as pd
 from pathlib import Path
+
+def mirror_similarity(tp):
+    # this metric treate the middle line of the two vectors as the symmetric axis/ mirror
+    def getFootPoint(point, line_p1, line_p2):
+ 
+     # need to get the foot note on that line to mirror the points 
+     #https://www.bbsmax.com/A/mo5kgb2L5w/
+         x0 = point[0]
+         y0 = point[1]
+
+         x1 = line_p1[0]
+         y1 = line_p1[1]
+
+         x2 = line_p2[0]
+         y2 = line_p2[1]
+ 
+         k = -((x1 - x0) * (x2 - x1) + (y1 - y0) * (y2 - y1)) / \
+             ((x2 - x1) ** 2 + (y2 - y1) ** 2 )*1.0
+ 
+         xn = k * (x2 - x1) + x1
+         yn = k * (y2 - y1) + y1
+         return (xn, yn)
+    # one pair 
+    def sim_one_pair (p0,p1,p2,p3):
+        # middle line of this pair 
+        m0 = (p0+p2)/2.0
+        m1 = (p1+p3)/2.0
+        # mirror the points according to the lien 
+        fp0 =  getFootPoint(p0,m0,m1)
+        fp1 =  getFootPoint(p1,m0,m1)
+        # symetric mirror the points
+        sp0 = fp0 - p0 + fp0
+        sp1 = fp1 - p1 + fp1
+
+        dis = np.linalg.norm(sp0  - p2) + np.linalg.norm(sp1  - p3)
+        L = (np.linalg.norm(p0  - p1) + np.linalg.norm(p2  - p3))/2.0
+        s = L/(L + dis)
+        return s
+    s1 = sim_one_pair(tp[0],tp[1],tp[3],tp[2])
+    s2 = sim_one_pair(tp[0],tp[3],tp[1],tp[2])
+
+    return (s1+s2)/2.0
+
 def Similarity(tp): # calculate the Eular similarity of the 4 points 
+    # this metric is calculated with directly the Eular distance of of the array
     vetor1 = tp[0]-tp[1] 
     vetor2 = tp[3]-tp[2] # the same direction
     # see the page of 
@@ -67,7 +111,9 @@ class  Geometry_Analy(object):
         #self.database_root = "../../OCT/beam_scanning/Data Set Reorganize/NORMAL-BACKSIDE-center/"
         #self.database_root = "../../OCT/beam_scanning/Data Set Reorganize/NORMAL-BACKSIDE/"
         
-        self.json_dir ="E:/database/NURD/20th October/correct/object_rect_s3/experiment2/label/"
+        #self.json_dir ="E:/database/NURD/20th October/correct/wire1/label/"
+        #self.json_dir = "E:/database/NURD/8th 10 2021 colection for MedIA/correct/simplep1/label/"
+        self.json_dir = "E:/database/NURD/8th 10 2021 colection for MedIA/correct/simplep1/label/"
         #base_dir =  os.path.basename(os.path.normpath(self.json_dir))
         path = Path(self.json_dir)
         self.save_dir =  str(path.parent.absolute()) + "/excel_result/"
@@ -77,8 +123,11 @@ class  Geometry_Analy(object):
             os.mkdir(self.save_dir)
         folder_list = os.listdir(self.json_dir)
         self.similarity_buff =np.zeros((len(folder_list),2)) 
+        self.mirror_similarity_buff =np.zeros((len(folder_list),2)) 
+
         self.err90_buff =np.zeros((len(folder_list),2)) 
         self.all_angle_buff =np.zeros((len(folder_list),2)) 
+
 
         self.originalarray =  [] # no predefines # predefine there are 4 contours
         self.correctedarray =  [] # predefine there are 4 contours
@@ -128,6 +177,7 @@ class  Geometry_Analy(object):
                             tp1 = np.array(shape[iter]["points"])
 
                             S_ori = Similarity(tp1)
+                            MS_ori = mirror_similarity(tp1)
                             angle_err_or = err_90(tp1)
  
 
@@ -135,13 +185,15 @@ class  Geometry_Analy(object):
                             tp2 = np.array(shape[iter]["points"])
 
                             S_corr = Similarity(tp2)
+                            MS_corr = mirror_similarity(tp2)
+
                             angle_err_co = err_90(tp2)
                             pass
                     all_an_err = self.all_angle_err(tp1,tp2)
                     self.similarity_buff[data_i] = [S_ori,S_corr]
                     self. err90_buff [data_i] =  [angle_err_or,angle_err_co]
                     self. all_angle_buff [data_i] = all_an_err
-
+                    self. mirror_similarity_buff[data_i]=  [MS_ori, MS_corr]
 
                     DF1 = pd.DataFrame(self.similarity_buff)
                     DF1.to_csv(self.save_dir+"similarity_buff.csv")
@@ -149,6 +201,8 @@ class  Geometry_Analy(object):
                     DF2.to_csv(self.save_dir+"err90_buff.csv")
                     DF3 = pd.DataFrame(self.all_angle_buff)
                     DF3.to_csv(self.save_dir+"all_angle_buff.csv")
+                    DF4 = pd.DataFrame(self.mirror_similarity_buff)
+                    DF4.to_csv(self.save_dir+"mirror_similarity_buff.csv")
                     print(str(data_i))
 # save the dataframe as a csv file
                     

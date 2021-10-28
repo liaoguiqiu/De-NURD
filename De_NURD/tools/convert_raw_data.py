@@ -1,6 +1,6 @@
-#operatedir = "E:/database/NURD/8th 10 2021 colection for MedIA"
-root = "E:/database/NURD/20th October/"
-operatedir =   root + "raw/wire1/"
+root = "E:/database/NURD/8th 10 2021 colection for MedIA/"
+#root = "E:/database/NURD/20th October/"
+operatedir =   root + "raw/disturb_p6/"
 
 import cv2
 import math 

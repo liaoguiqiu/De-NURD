@@ -56,7 +56,7 @@ class PATH:
        
         #path1 =0.5 * path1 + 0.5 * corre_shifting 
         path_cost1  = 0
-        #path1 = gaussian_filter1d(path1,10) # smooth the path 
+        path1 = gaussian_filter1d(path1,10) # smooth the path 
         return path1
     def search_a_path(img,start_p):
         img=img.astype(float)
