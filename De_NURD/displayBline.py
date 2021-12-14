@@ -44,7 +44,8 @@ from mpl_toolkits.mplot3d import Axes3D
 from Correct_sequence_integral import read_start 
 from read_circu import tranfer_frome_rec2cir
 from PIL import Image, ImageEnhance
-read_start = 174
+crop_start = 50
+read_start = 0
 Padding_H  = 1
 #from  path_finding import PATH
 Display_STD_flag = False
@@ -56,7 +57,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 class Derivation_validate(object):
     def  __init__(self, H,W):
         Len_steam = 8
-        self.crop_start = 20
+        self.crop_start = 200
         self.cropH = int(H/1)
         self.steam1=np.zeros((Len_steam,self.cropH-self.crop_start,W))
         self.steam2=np.zeros((Len_steam, self.cropH-self.crop_start,W))
@@ -124,6 +125,7 @@ def diplay_bline():
     STD_call  = Derivation_validate(H_ini,W_ini)
     enface1 = np.zeros((1,W_ini)) 
     enface2 = np.zeros((1,W_ini)) 
+    max_in = np.mean(np.sum(gray_video2[ crop_start:H_ini,:], axis=0))/(gray_video2.shape[0]-1)*1.2
 
 
     for i in range(read_start,seqence_Len+read_start):
@@ -133,7 +135,6 @@ def diplay_bline():
             video1 = cv2.imread(img_path1)
             gray_video1  =   cv2.cvtColor(video1, cv2.COLOR_BGR2GRAY)
             gray_video1 = cv2.resize(gray_video1, (W_ini,H_ini), interpolation=cv2.INTER_AREA)
-
             rectan1 = gray_video1
             circular1 = tranfer2circ_padding(gray_video1)
             gray_video1 = circular1
@@ -158,10 +159,12 @@ def diplay_bline():
 
             rectan1 = cv2.medianBlur(rectan1,5)
             rectan2 = cv2.medianBlur(rectan2,5)
-            B_line1 = np.sum(rectan1[220:H_ini,:], axis=0)/(rectan1.shape[0]-1)
-            B_line2 = np.sum(rectan2[220:H_ini,:], axis=0)/(rectan2.shape[0]-1)
-            B_line1 = B_line1/np.max(B_line1) *255
-            B_line2 = B_line2/np.max(B_line2) *255
+            B_line1 = np.sum(rectan1[ crop_start:H_ini,:], axis=0)/(rectan1.shape[0]-1)
+            B_line2 = np.sum(rectan2[ crop_start:H_ini,:], axis=0)/(rectan2.shape[0]-1)
+            B_line1 = 250*B_line1/max_in  
+            B_line2 = 250*B_line2/max_in 
+            #B_line1 = B_line1/np.max(B_line1) *255
+            #B_line2 = B_line2/np.max(B_line2) *255
             #B_line1=B_line1*B_line1
             #B_line2=B_line2*B_line2
             #B_line1=B_line1*200
@@ -170,7 +173,9 @@ def diplay_bline():
 
             enface1  = np.append(enface1,[B_line1],axis=0) 
             enface2  = np.append(enface2,[B_line2],axis=0) 
-             
+            #enface1 = enface1*255/np.max(enface1) 
+            #enface2 = enface2*255/np.max(enface2) 
+
             #enface1 = cv2.equalizeHist(enface1)
             #enface2 = cv2.equalizeHist(enface2)
 
@@ -178,8 +183,8 @@ def diplay_bline():
 
             cv2.imshow('process',enface1.astype(np.uint8))
             cv2.imshow('origin',enface2.astype(np.uint8))
-            cv2.imwrite(save_display_dir  +  "0_0.jpg",enface1.astype(np.uint8) )
-            cv2.imwrite(save_display_dir  +  "0_1.jpg",enface2.astype(np.uint8) )
+            cv2.imwrite(save_display_dir  +  "0_process.jpg",enface1.astype(np.uint8) )
+            cv2.imwrite(save_display_dir  +  "0_origin.jpg",enface2.astype(np.uint8) )
             print ("[%s]   bline" % (i ))
 
             if cv2.waitKey(1) & 0xFF == ord('q'):

@@ -51,8 +51,8 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 class Derivation_validate(object):
     def  __init__(self, H,W):
         self.Len_steam = 3
-        self.crop_startH = 400
-        self.cropH = int(700)
+        self.crop_startH = 000
+        self.cropH = int(1000)
         self.crop_startW = 200
         #self.crop_startW = 360
 

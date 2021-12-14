@@ -15,18 +15,38 @@
 #operatedir_video =  "../../OCT/colon/hiperPlastic_2.avi"
 #operatedir_video =  "E:/database/video_dot/22JAN2020AUTO_02_2212020121028-Scale-0_5-41pix_Per_mm_CIRC-Rotated.avi"
 #operatedir_video =  "E:/database/video_dot/tele_221202012329_CIRC.avi"
+root = "E:/database/NURD/capsule/"
 operatedir_video =  "D:/PhD/trying/tradition_method/OCT/shifting distance with previous shealth.mp4"
-operatedir_video =  "D:/PhD/trying/tradition_method/OCT/colon/hiperPlastic_1.avi"
+operatedir_video =  "E:/database/NURD/capsule/Non-clinicalData20211210082935/test-325-tnib2-newRJ-1 10 Test - Circularized-Positive.avi"
+operatedir_video =  "E:/database/NURD/capsule/Non-clinicalData20211210082935/test-325-tnib2-newRJ-1 10 Test - Circularized-Positive.avi"
+operatedir_video = root + "ClinicalData20211214085913/Case A [SITTING UP](1-582) circ.mov" 
  
 
 #phantom-01_2412020121234
 #operatedir_video =  "../../OCT/P-ID_Name_25092019160318VIDEO.avi"
 savedir_matrix  = "../../saved_matrix/"
-savedir_original  = "../../saved_original/"
+savedir_original  = "E:/database/NURD/capsule/resize/test-325-tnib2-newRJ-1 10 Test - Circularized-Positive/"
 savedir_filtered_OCT  = "../../saved_filtered_img/"
-savedir_original_circular = "../../saved_original_circular/"
+savedir_original_circular = "E:/database/NURD/capsule/resize_circular/test-325-tnib2-newRJ-1 10 Test - Circularized-Positive/"
 crop_flag  =True
-reverse_flag =False
+reverse_flag =True
+import os
+
+base_dir =  os.path.basename(os.path.normpath(operatedir_video))
+save_dir =  root + "resize/"  + base_dir + "/"
+save_dir_cir =   root + "resize_circular/"  + base_dir + "/"
+try:
+    os.stat(save_dir)
+except:
+    os.mkdir(save_dir)
+try:
+    os.stat(save_dir_cir)
+except:
+    os.mkdir(save_dir_cir)
+savedir_original = save_dir
+savedir_original_circular = save_dir_cir
+
+
 #used python packages
 import cv2
 import math
@@ -37,7 +57,7 @@ import random
 #from mpl_toolkits.mplot3d import Axes3D
 from median_filter_special import  myfilter
 from cost_matrix import  COSTMtrix
-Down_sample_CNT= 2
+Down_sample_CNT= 1
 #PythonETpackage for xml file edition
 try: 
     import xml.etree.cElementTree as ET 
@@ -58,7 +78,7 @@ def tranfer_frome_cir2rec(gray):
 def tranfer_frome_rec2cir(gray):
     H,W = gray.shape
     #value = np.sqrt(((W/2.0)**2.0)+((W/2.0)**2.0))
-    value = W/2
+    value = H/2
     
     grayr=cv2.rotate(gray,rotateCode = 2) 
     H,W = grayr.shape
@@ -169,12 +189,12 @@ if __name__ == '__main__':
         #H_start = 0
         #H_start = 270
         #H_start = 117
-        H_start = 50
+        H_start = 210+278
 
 
 
         #H_end = 1560
-        H_end = 832
+        H_end = 1000-510+354
 
         #H_end = 1400
         #H_end = 700
@@ -196,8 +216,8 @@ if __name__ == '__main__':
         #circular=circular.astype(np.uint8)
 
         #cv2.imwrite(savedir_matrix  + str(save_sequence_num) +".jpg", Costmatrix)
-        resized = cv2.resize(polar_image, (832,832), interpolation=cv2.INTER_AREA)
-
+        #resized = cv2.resize(polar_image, (832,832), interpolation=cv2.INTER_AREA)
+        resized =  polar_image
         cv2.imwrite(savedir_original  + str(save_sequence_num) +".jpg", resized)
         #cv2.imwrite(savedir_filtered_OCT  + str(save_sequence_num) +".jpg", filter_img)
         cv2.imwrite(savedir_original_circular  + str(save_sequence_num) +".jpg", circular)

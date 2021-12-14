@@ -1,6 +1,16 @@
 root = "E:/database/NURD/8th 10 2021 colection for MedIA/"
+root =  "E:/database/NURD/3rd December Tube/"
 #root = "E:/database/NURD/20th October/"
 operatedir =   root + "raw/disturb_p6/"
+operatedir =   root + "raw/phantom_pull_0.1_dis3/"
+operatedir =   root + "raw/tube1/"
+operatedir =   root + "raw/tube1slow/"
+operatedir =   root + "raw/tube2 slow long/"
+operatedir =   root + "raw/tube3vain/"
+operatedir =   root + "raw/sqr2/"
+
+
+
 
 import cv2
 import math 
@@ -76,9 +86,13 @@ def diplay_sequence():
     ##      process
             img_path1 = operatedir +  dir
             video1 = cv2.imread(img_path1)
+
             grayr=cv2.rotate(video1,rotateCode = cv2.ROTATE_90_CLOCKWISE) 
-            #grayr = cv2.resize(grayr, (832,832), interpolation=cv2.INTER_LINEAR)
             gray_cir  =   cv2.cvtColor(grayr, cv2.COLOR_BGR2GRAY)
+            H,W = gray_cir.shape
+
+            #grayr = cv2.resize(gray_cir, (832,H), interpolation=cv2.INTER_LINEAR)
+
             gray_cir = cv2.resize(gray_cir, (832,832), interpolation=cv2.INTER_LINEAR)
             gray_cir =  rec_2_cir(gray_cir)
             cv2.imwrite(save_dir  + str(this_id) +".jpg",grayr )

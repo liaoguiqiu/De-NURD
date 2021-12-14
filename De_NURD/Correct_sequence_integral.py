@@ -41,14 +41,16 @@ myekf = EKF()
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 Resample_size =Window_LEN
 Path_length = 128
+R_len = 500
+
 #read_start = 100
-read_start = 0
+read_start = 3
 
 Debug_flag  = True
 global intergral_flag
 intergral_flag =0
 
-Branch_flag = 0  # 0 fusion, 1 A, 2 B
+Branch_flag = 0 # 0 fusion, 1 A, 2 B
  
 if (Save_signal_flag == True):
     from analy import MY_ANALYSIS
@@ -256,7 +258,7 @@ class VIDEO_PEOCESS:
         # PI fusion
         #shift_integral = shift_integral + shift_diff  # not += : this is iteration way
         shift_integral = PATH_POST.path_integral(shift_integral,shift_diff)
-        shift_integral = gaussian_filter1d(shift_integral,5)
+        shift_integral = gaussian_filter1d(shift_integral,4)
         #shift_integral = shift_integral - 1*(shift_integral-overall_shift) #  - 0.00001* I
         # EKF fusion
         #shift_integral = myekf.update(shift_diff,overall_shift)
@@ -267,14 +269,14 @@ class VIDEO_PEOCESS:
         if Branch_flag == 1:
             shift_integral = shift_integral  
         elif Branch_flag == 0:
-            shift_integral = shift_integral - 0.2 *(shift_integral-overall_shift)   - I 
+            shift_integral = shift_integral - 0.15 *(shift_integral-overall_shift)   - I 
         elif Branch_flag == 2:
              shift_integral = shift_integral*0 + overall_shift  
         #shift_integral = shift_integral*0 + overall_shift  
 
-        #shift_integral = gaussian_filter1d(shift_integral,3) # smooth the path 
-
         shift_integral = gaussian_filter1d(shift_integral,10) # smooth the path 
+
+        #shift_integral = gaussian_filter1d(shift_integral,3) # smooth the path 
         
         return shift_integral
 #----------------------#
@@ -383,6 +385,9 @@ class VIDEO_PEOCESS:
                     steam=np.append(steam,[gray_video[H_start:H_end,:] ],axis=0) # save sequence
                     # no longer delete the fist  one
                     steam= np.delete(steam , 1,axis=0)
+                     
+                        
+
                     steam2=np.append(steam2,[gray_video[H_start:H_end,:] ],axis=0) # save sequence
                     steam2= np.delete(steam2 , 0,axis=0)
                     start_time  = time()
@@ -426,7 +431,7 @@ class VIDEO_PEOCESS:
 
                     shift_integral = VIDEO_PEOCESS.fusion_estimation(shift_integral,path,addition_window_shift,Window_ki_error)
 
-                    Window_ki_error =0.001* (shift_integral-addition_window_shift)+Window_ki_error
+                    Window_ki_error =0.000001* (shift_integral-addition_window_shift)+Window_ki_error
                     #addition_window_shift = np.mean(shift_integral)
 
                     #path = np.zeros(Costmatrix.shape[1])
@@ -468,7 +473,10 @@ class VIDEO_PEOCESS:
                     steam=np.append(steam,[Corrected_img[H_start:H_end,:] ],axis=0) # save sequence
                     # no longer delete the fist  one
                     steam= np.delete(steam , 1,axis=0)
+                    if (sequence_num % R_len ==0):
 
+                        steam[0,:,:] = Corrected_img[H_start:H_end,:]
+                    
                     #steam2=np.append(steam2,[Corrected_img ],axis=0) # save sequence
                     ## no longer delete the fist  one
                     #steam2= np.delete(steam2 , 0,axis=0)

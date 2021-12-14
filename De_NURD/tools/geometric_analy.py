@@ -113,7 +113,7 @@ class  Geometry_Analy(object):
         
         #self.json_dir ="E:/database/NURD/20th October/correct/wire1/label/"
         #self.json_dir = "E:/database/NURD/8th 10 2021 colection for MedIA/correct/simplep1/label/"
-        self.json_dir = "E:/database/NURD/8th 10 2021 colection for MedIA/correct/simplep1/label/"
+        self.json_dir = "E:/database/NURD/8th 10 2021 colection for MedIA/correct/new_shape2/GS/experiment2/label/"
         #base_dir =  os.path.basename(os.path.normpath(self.json_dir))
         path = Path(self.json_dir)
         self.save_dir =  str(path.parent.absolute()) + "/excel_result/"

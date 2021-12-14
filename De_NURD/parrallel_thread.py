@@ -11,7 +11,7 @@ from time import time
 from pair2path import Pair2Path
 import cv2
  
-Graph_searching_flag = True
+Graph_searching_flag = False
 
 
 class Dual_thread_Overall_shift_NURD(object):
@@ -105,7 +105,7 @@ class Dual_thread_Overall_shift_NURD(object):
       self.costmatrix,self.shift_used2= COSTMtrix.matrix_cal_corre_block_version3_3GPU  (
                                                               self.stream2[self.strmlen-1,:,:] ,
                                                               self.stream2[self.strmlen-2,:,:], 0,
-                                                              block_wid = 7,Down_sample_F = 4,Down_sample_F2 = 4) 
+                                                              block_wid = 3,Down_sample_F = 1,Down_sample_F2 = 2) 
 
       #self.costmatrix2,self.shift_used2= COSTMtrix.matrix_cal_corre_block_version3_3GPU  (
       #                                                        self.stream2[self.strmlen-1,50:211,:] ,
@@ -116,8 +116,8 @@ class Dual_thread_Overall_shift_NURD(object):
       Hm,Wm= self.costmatrix.shape
       self.costmatrix = cv2.resize(self.costmatrix, (Wm,Standard_LEN), interpolation=cv2.INTER_AREA)
 
-      self.costmatrix  = myfilter.gauss_filter_s (self.costmatrix) # smooth matrix
-      #self.costmatrix  = cv2.GaussianBlur(self.costmatrix,(5,5),0)
+      #self.costmatrix  = myfilter.gauss_filter_s (self.costmatrix) # smooth matrix
+      #self.costmatrix  = cv2.GaussianBlur(self.costmatrix,(3,3),0)
       #self.costmatrix = self.costmatrix*1.5 +30
         # down sample the materix and up sample 
       #Hm,Wm= self.costmatrix.shape
