@@ -40,11 +40,10 @@ myekf = EKF()
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 Resample_size =Window_LEN
-Path_length = 128
-R_len = 500
+R_len = 20
 
 #read_start = 100
-read_start = 3
+read_start =0
 
 Debug_flag  = True
 global intergral_flag
@@ -258,7 +257,7 @@ class VIDEO_PEOCESS:
         # PI fusion
         #shift_integral = shift_integral + shift_diff  # not += : this is iteration way
         shift_integral = PATH_POST.path_integral(shift_integral,shift_diff)
-        shift_integral = gaussian_filter1d(shift_integral,4)
+        #shift_integral = gaussian_filter1d(shift_integral,4)
         #shift_integral = shift_integral - 1*(shift_integral-overall_shift) #  - 0.00001* I
         # EKF fusion
         #shift_integral = myekf.update(shift_diff,overall_shift)
@@ -269,14 +268,14 @@ class VIDEO_PEOCESS:
         if Branch_flag == 1:
             shift_integral = shift_integral  
         elif Branch_flag == 0:
-            shift_integral = shift_integral - 0.15 *(shift_integral-overall_shift)   - I 
+            shift_integral = shift_integral - 0.05 *(shift_integral-overall_shift)   - I 
         elif Branch_flag == 2:
              shift_integral = shift_integral*0 + overall_shift  
         #shift_integral = shift_integral*0 + overall_shift  
 
-        shift_integral = gaussian_filter1d(shift_integral,10) # smooth the path 
+        shift_integral = gaussian_filter1d(shift_integral,4) # smooth the path 
 
-        #shift_integral = gaussian_filter1d(shift_integral,3) # smooth the path 
+        #shift_integral = gaussian_filter1d(shift_integral,20) # smooth the path 
         
         return shift_integral
 #----------------------#
@@ -315,7 +314,7 @@ class VIDEO_PEOCESS:
 
 
         
-        
+        shift_integral = np.clip(shift_integral,-W,W)
 
 
         #cv2.imshow('step_process',show1.astype(np.uint8)) 
@@ -394,11 +393,11 @@ class VIDEO_PEOCESS:
 
 
 
-                    dual_thread.input(steam,steam2,Len_steam,addition_window_shift)
+                    dual_thread.input(steam,steam2,Len_steam, addition_window_shift)
+
+                    #dual_thread.runInParallel()
 
                     dual_thread.runInParallel()
-
-                    #dual_thread.ruuInCascade()
 
                     test_time_point = time()
                     
@@ -442,7 +441,7 @@ class VIDEO_PEOCESS:
                     #                                                                           shift_integral,int(sequence_num),
                     #                                                                  shift_used2  )
 
-                    ori_Corrected_img = VIDEO_PEOCESS.de_distortion_integral2(original_img,shift_integral,sequence_num)
+                    ori_Corrected_img = VIDEO_PEOCESS.de_distortion_integral2(gray_video,shift_integral,sequence_num)
                     Corrected_img = cv2.resize(ori_Corrected_img, (832,H_ori), interpolation=cv2.INTER_LINEAR)
                     #Corrected_img = VIDEO_PEOCESS.de_distortion_integral2(gray_video,shift_integral,sequence_num)
                     #Corrected_img = cv2.resize(ori_Corrected_img, (832,H_ori), interpolation=cv2.INTER_LINEAR)
@@ -473,11 +472,18 @@ class VIDEO_PEOCESS:
                     steam=np.append(steam,[Corrected_img[H_start:H_end,:] ],axis=0) # save sequence
                     # no longer delete the fist  one
                     steam= np.delete(steam , 1,axis=0)
-                    if (sequence_num % R_len ==0):
-
-                        steam[0,:,:] = Corrected_img[H_start:H_end,:]
+                    if ((sequence_num -read_start+2 )% 1 ==0):
+                        if (abs(np.mean(shift_integral))<10): # change
+                        #steam[0,:,:] = 0.7*Corrected_img[H_start:H_end,:] + 0.3*steam[Len_steam-2,H_start:H_end,:]  
+                            steam[0,:,:] = 0.5*Corrected_img[H_start:H_end,:] + 0.5*steam[Len_steam-3,H_start:H_end,:]  
+                        #steam[0,:,:] = 0.6*Corrected_img[H_start:H_end,:] + 0.4*steam[Len_steam-3,H_start:H_end,:] 
+                    if ((sequence_num -read_start+2 )% R_len ==0):
+                        if (abs(np.mean(shift_integral))<10):
+                        #steam[0,:,:] = 0.7*Corrected_img[H_start:H_end,:] + 0.3*steam[Len_steam-2,H_start:H_end,:]  
+                            steam[0,:,:] = 0.4*Corrected_img[H_start:H_end,:] + 0.3*steam[Len_steam-3,H_start:H_end,:] +  0.3*steam[Len_steam-2,H_start:H_end,:] 
+                        #steam[0,:,:] = 0.6*Corrected_img[H_start:H_end,:] + 0.4*steam[Len_steam-3,H_start:H_end,:] 
                     
-                    #steam2=np.append(steam2,[Corrected_img ],axis=0) # save sequence
+                        #steam2=np.append(steam2,[Corrected_img ],axis=0) # save sequence
                     ## no longer delete the fist  one
                     #steam2= np.delete(steam2 , 0,axis=0)
                     if Debug_flag ==True:

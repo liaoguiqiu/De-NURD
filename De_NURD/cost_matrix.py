@@ -402,12 +402,21 @@ class COSTMtrix:
 #########################
 ###################
 # use the delayed one to realize full image correction
-    def Img_fully_shifting_correlation(present_img,previous_img,window_shift):
+    def Img_fully_shifting_correlation(present_img,previous_img,window_shift,Down_sample_F = 1,Down_sample_F2 = 3):
 
        window_wid= Overall_shiftting_WinLen
        window_cntr= int(Overall_shiftting_WinLen/2)  # check
        h,w = present_img.shape
+        
+       h1,w1 = present_img.shape
 
+       if Cost_M_sample_flag ==True:
+           present_img = cv2.resize(present_img, (int(w1/Down_sample_F2),int(h1/Down_sample_F)), interpolation=cv2.INTER_LINEAR)
+           previous_img = cv2.resize(previous_img, (int(w1/Down_sample_F2),int(h1/Down_sample_F)), interpolation=cv2.INTER_LINEAR)
+
+           h,w = present_img.shape
+           window_wid= int(Overall_shiftting_WinLen/Down_sample_F2)
+           window_cntr= int(window_wid/2) 
        #present_img = sequence[len-1,:,:]
        ##previous_img = sequence[len-2,:,:] #  use the corrected  near img
        #previous_img = sequence[0,:,:] #  use the first Img
@@ -425,11 +434,11 @@ class COSTMtrix:
        for j in range(window_wid): #sub_loop for shift distance
             a_stack[j,:,:] =present_img[:,:]  # dupicate for many time for shifting correlation
             # shifting cropping for connected image
-            crop_start  = -window_cntr+j+w + int(window_shift)
+            crop_start  = -window_cntr+j+w + int(window_shift/Down_sample_F2)
             crop_end  =  crop_start + w
             b_stack[j,:,:] =add_3_img[:,crop_start:crop_end]
-       a_stack  =  torch.from_numpy(a_stack)
-       b_stack  =  torch.from_numpy(b_stack)  
+       a_stack  =  torch.from_numpy(a_stack/250.0)
+       b_stack  =  torch.from_numpy(b_stack/250.0)  
        suma = torch.sum(a_stack,dim=2)
        sumb = torch.sum(b_stack,dim=2)
        sumab = torch.sum(a_stack*b_stack,dim=2)
@@ -454,8 +463,8 @@ class COSTMtrix:
 
  
        matrix = gaussian_filter1d(matrix,3) # smooth the path 
-       mid_point =  np.argmin(matrix)
-       return mid_point,int(window_shift)
+       mid_point =  np.argmin(matrix) * Down_sample_F2
+       return mid_point,int(window_shift),matrix
 #########################
 
 ###################

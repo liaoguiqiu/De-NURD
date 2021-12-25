@@ -17,8 +17,8 @@ class Shift_Predict(object):
     def __init__(self ):
         dir_netD  = "../../DeepLearningModel/shift/netD_epoch_2.pth"
 
-        self.Crop_start = 0
-        self.Crop_end  = 180
+        self.Crop_start = 27
+        self.Crop_end  = 83
         self.Resample_size =512
         self.Resample_size2 =200
         self. Original_window_Len  = 71
@@ -54,17 +54,17 @@ class Shift_Predict(object):
         pair2  =   img3[self.Crop_start:self.Crop_end,:] 
         #pair1  =   img1[self.Crop_end:H,:] 
         #pair2  =   img3[self.Crop_end:H,:] 
-        #pair3  =   img1
-        #pair4  =   img2
+        pair3  =   img1
+        pair4  =   img2
         #pair3  =   img2
         #pair4  =   img1
-        pair3  =   pair1
-        pair4  =   pair2
+        #pair3  =   pair1
         #pair4  =   pair2
-        pair1  =  cv2.resize(pair1, (self.Resample_size,self.Resample_size2), interpolation=cv2.INTER_AREA)   -104.0
-        pair2  =  cv2.resize(pair2, (self.Resample_size,self.Resample_size2), interpolation=cv2.INTER_AREA)   -104.0
-        pair3  =  cv2.resize(pair3, (self.Resample_size,self.Resample_size2), interpolation=cv2.INTER_AREA)   -104.0
-        pair4  =  cv2.resize(pair4, (self.Resample_size,self.Resample_size2), interpolation=cv2.INTER_AREA)   -104.0
+        #pair4  =   pair2
+        pair1  =  cv2.resize(pair1, (self.Resample_size,self.Resample_size2), interpolation=cv2.INTER_LINEAR)   -104.0
+        pair2  =  cv2.resize(pair2, (self.Resample_size,self.Resample_size2), interpolation=cv2.INTER_LINEAR)   -104.0
+        pair3  =  cv2.resize(pair3, (self.Resample_size,self.Resample_size2), interpolation=cv2.INTER_LINEAR)   -104.0
+        pair4  =  cv2.resize(pair4, (self.Resample_size,self.Resample_size2), interpolation=cv2.INTER_LINEAR)   -104.0
         
         #pair1  =  cv2.resize(self.image2_append(pair1), (self.Resample_size,self.Resample_size2), interpolation=cv2.INTER_AREA)   -104.0
         #pair2  =  cv2.resize(self.image2_append(pair2), (self.Resample_size,self.Resample_size2), interpolation=cv2.INTER_AREA)   -104.0

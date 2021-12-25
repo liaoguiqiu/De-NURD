@@ -45,7 +45,7 @@ from Correct_sequence_integral import read_start
 from read_circu import tranfer_frome_rec2cir
 from PIL import Image, ImageEnhance
 crop_start = 50
-read_start = 0
+#read_start = 0
 Padding_H  = 1
 #from  path_finding import PATH
 Display_STD_flag = False
@@ -125,7 +125,7 @@ def diplay_bline():
     STD_call  = Derivation_validate(H_ini,W_ini)
     enface1 = np.zeros((1,W_ini)) 
     enface2 = np.zeros((1,W_ini)) 
-    max_in = np.mean(np.sum(gray_video2[ crop_start:H_ini,:], axis=0))/(gray_video2.shape[0]-1)*1.2
+    max_in = np.mean(np.sum(gray_video2[ crop_start:H_ini,:], axis=0))/(gray_video2.shape[0]-1)*1.5
 
 
     for i in range(read_start,seqence_Len+read_start):

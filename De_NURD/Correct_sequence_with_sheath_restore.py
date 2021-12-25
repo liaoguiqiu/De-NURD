@@ -423,7 +423,8 @@ class VIDEO_PEOCESS:
 
                     dual_thread.input(steam,steam2,Len_steam,addition_window_shift)
                     dual_thread.inputaddition(steam3)
-                    dual_thread.runInParallel()
+                    #dual_thread.runInParallel()
+                    dual_thread.ruuInCascade()
                     
                     overall_shifting,shift_used1 = dual_thread.output_overall()
                     shift_mean_error = int(overall_shifting)- int(Overall_shiftting_WinLen/2)

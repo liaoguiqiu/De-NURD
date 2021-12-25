@@ -19,7 +19,7 @@ root = "E:/database/NURD/capsule/"
 operatedir_video =  "D:/PhD/trying/tradition_method/OCT/shifting distance with previous shealth.mp4"
 operatedir_video =  "E:/database/NURD/capsule/Non-clinicalData20211210082935/test-325-tnib2-newRJ-1 10 Test - Circularized-Positive.avi"
 operatedir_video =  "E:/database/NURD/capsule/Non-clinicalData20211210082935/test-325-tnib2-newRJ-1 10 Test - Circularized-Positive.avi"
-operatedir_video = root + "ClinicalData20211214085913/Case A [SITTING UP](1-582) circ.mov" 
+operatedir_video = root + "ClinicalData20211214085913/Case C 09.34.00[U1](1-1205) circ.mov" 
  
 
 #phantom-01_2412020121234
@@ -189,7 +189,7 @@ if __name__ == '__main__':
         #H_start = 0
         #H_start = 270
         #H_start = 117
-        H_start = 210+278
+        H_start = 210+199  
 
 
 

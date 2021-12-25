@@ -69,10 +69,10 @@ class PATH:
         for i in range(w):
             
             #detemin search region
-            k0=last_p-1;
+            k0=last_p-5;
             if(k0<0):
               k0=0
-            k1=last_p+2;
+            k1=last_p+6;
             if(k1>h):
               k1=h
             # find the min point
