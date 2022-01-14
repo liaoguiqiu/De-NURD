@@ -19,7 +19,7 @@ The following steps are required in order to run CEnet:
 	
 	folder structure should be like this:
 
-	-Root(my is "E:deeplearning")/
+	-Root 
 
 		--Root/dataset/
 
