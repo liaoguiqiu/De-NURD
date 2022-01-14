@@ -15,7 +15,7 @@ The following steps are required in order to run CEnet:
         [pip install packages](https://packaging.python.org/en/latest/tutorials/installing-packages/)
         or
         [conda install packages](https://docs.anaconda.com/anaconda/user-guide/tasks/install-packages/)
-1.  Organize all the dataset from raw set following the [data set chapter of this instruction](https://docs.google.com/document/d/1mBG2aeF13Qqxt48tZfYnptq_DKhZpqHj/edit?usp=sharing&ouid=104923533845283983955&rtpof=true&sd=true)
+1.  Organize the raw  dataset 
 	
 	folder structure should be like this:
 
