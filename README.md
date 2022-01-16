@@ -23,21 +23,21 @@ The following steps are required in order to run CEnet:
 
 		--Root/dataset/
 
-			---Root/dataset/for IVUS
+			---Root/dataset/for NURD
 
-				---Root/dataset/for IVUS/train
+				---Root/dataset/for NURD/train
 
-					---Root/dataset/for IVUS/train/img
+					---Root/dataset/for NURD/train/img
 
-					---Root/dataset/for IVUS/train/label
+					---Root/dataset/for NURD/train/label
 
 
 
-				---Root/dataset/for IVUS/test
+				---Root/dataset/for NURD/test
 
-					---Root/dataset/for IVUS/test/label
+					---Root/dataset/for NURD/test/label
 
-					---Root/dataset/for IVUS/test/label
+					---Root/dataset/for NURD/test/label
 
 
 		--Root/out
@@ -56,20 +56,21 @@ If run in terminal of linux or anaconda prompt, run as module, using following c
 1.    toolfolder:
 
 
-	*   cover_raw_data.py: convert raw data to fixed format for algorithm
+	*   cover_raw_data.py: convert raw data to fixed format for the algorithm
 
  
 
 
 1.  In main folder/project folder  : 
 
-    most of these scripts are used to predict contour, specifically:
+    most of these scripts are directly runnable, specifically:
  
 	*   Dataset Generator.py is used to generate separated image pairs and image arrays for training two branches
 
-	*   Dataset Generator_OLG.py is an exension of the Dataset Generator.py that deploy to generate the data on the fly
+	*   Dataset Generator_OLG.py is an exension of the Dataset Generator.py that deploy to generate the data on the fly (note that in training this script should be runing in parallel with the trainer code)
 
-	*   Crrect_sequence_integral.py is used to correct the NURD by a integral estimation scheme
+	*   Crrect_sequence_integral.py is used to correct the NURD by a integral estimation scheme (recommended)
 
 	*   Crrect_sequence_iteration.py is used to correct the NURD with a iterative estimation scheme
+
 
