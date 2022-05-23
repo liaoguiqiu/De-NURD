@@ -475,7 +475,7 @@ class VIDEO_PEOCESS:
                     #if ((sequence_num -read_start+2 )%  R_len  ==0): # change
                     #    #steam[0,:,:] = 0.7*Corrected_img[H_start:H_end,:] + 0.3*steam[Len_steam-2,H_start:H_end,:]  
                     #        steam[0,:,:] =  Corrected_img[H_start:H_end,:] 
-                    if ((sequence_num -read_start+2 )% 1 ==0):
+                    if ((sequence_num -read_start+2 )% R_len ==0):
                         if (abs(np.mean(shift_integral))<50): # change
                             steam[0,:,:] = 0.5*Corrected_img[H_start:H_end,:] + 0.5*steam[Len_steam-2,H_start:H_end,:]  
                     #        steam[0,:,:] = 0.5*Corrected_img[H_start:H_end,:] + 0.5*steam[Len_steam-3,H_start:H_end,:]  

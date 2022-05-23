@@ -1,4 +1,12 @@
 # De-NURD
+![image](fig/Method_relplot12.png)
+
+> [**Distortion and Instability Compensation with Deep Learning for Rotational Scanning Endoscopic Optical Coherence Tomography**](https://www.sciencedirect.com/science/article/pii/S1361841522000081),
+> Liao, Guiqiu and Caravaca-Mora, Oscar and Rosa, Benoit and Zanne, Philippe and Alba, Diego Dall and Fiorini, Paolo and de Mathelin, Michel and Nageotte, Florent and Gora, Michalina J
+> *MedIA 2022*
+
+![image](fig/enface_polyp.png)
+
 This package provides an implementation of the inference and training data generation pipeline of A two-branch Nonuiform rotational distortion (NURD) compensation networks for rotational scanning catheter,
 This is the more acurate version that relys on Correlation Matrix, in comparison to end-to-end version
 . For simplicity the model in referred as De-NURD nets.
@@ -53,7 +61,7 @@ if using the visual studio (not vs code) or pycharm, it can be run directly.
 If using vs code, please run scripts as module.
 If run in terminal of linux or anaconda prompt, run as module, using following command: python3 -m subfoler.scripts(i.e. python3 -m tool.convert)
 
-1.    toolfolder:
+1.    De_NURD/toolfolder:
 
 
 	*   cover_raw_data.py: convert raw data to fixed format for the algorithm
@@ -61,7 +69,7 @@ If run in terminal of linux or anaconda prompt, run as module, using following c
  
 
 
-1.  In main folder/project folder  : 
+1.  In main folder(De_NURD) folder  : 
 
     most of these scripts are directly runnable, specifically:
  
@@ -69,8 +77,20 @@ If run in terminal of linux or anaconda prompt, run as module, using following c
 
 	*   Dataset Generator_OLG.py is an exension of the Dataset Generator.py that deploy to generate the data on the fly (note that in training this script should be runing in parallel with the trainer code)
 
-	*   Crrect_sequence_integral.py is used to correct the NURD by a integral estimation scheme (recommended)
+	*   Correct_sequence_integral.py is used to correct the NURD by a integral estimation scheme (recommended)
 
-	*   Crrect_sequence_iteration.py is used to correct the NURD with a iterative estimation scheme
+	*   Correct_sequence_iteration.py is used to correct the NURD with a iterative estimation scheme
 
 
+## Reference
+
+```bibtex
+@article{liao2022distortion,
+  title={Distortion and Instability Compensation with Deep Learning for Rotational Scanning Endoscopic Optical Coherence Tomography},
+  author={Liao, Guiqiu and Caravaca-Mora, Oscar and Rosa, Benoit and Zanne, Philippe and Alba, Diego Dall and Fiorini, Paolo and de Mathelin, Michel and Nageotte, Florent and Gora, Michalina J},
+  journal={Medical Image Analysis},
+  pages={102355},
+  year={2022},
+  publisher={Elsevier}
+}
+```
