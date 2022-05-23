@@ -23,7 +23,7 @@ from cost_matrix import Window_LEN, Standard_LEN
 #dir_netD  = "../../DeepPathFinding/out/netD_epoch_49.pth"
 #dir_netD  = '../../DeepLearningModel/deep_path_small_window/netD_epoch_2.pth'
 #dir_netD  = '../../DeepLearningModel/deep_path/netD_epoch_2.pth' # train1
-dir_netD  = '../../DeepLearningModel/deep_path/netD_epoch_5.pth'# train2
+dir_netD  = '../../../DeepLearningModel/deep_path/netD_epoch_5.pth'# train2
 
 
 transform = BaseTransform(  Resample_size,[104])

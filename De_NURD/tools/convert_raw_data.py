@@ -1,5 +1,7 @@
-root = "E:/database/NURD/8th 10 2021 colection for MedIA/"
+root =  "E:/database/NURD/8th 10 2021 colection for MedIA/"
 root =  "E:/database/NURD/3rd December Tube/"
+root =  "E:/database/Polyp detection/"
+
 #root = "E:/database/NURD/20th October/"
 operatedir =   root + "raw/disturb_p6/"
 operatedir =   root + "raw/phantom_pull_0.1_dis3/"
@@ -8,7 +10,7 @@ operatedir =   root + "raw/tube1slow/"
 operatedir =   root + "raw/tube2 slow long/"
 operatedir =   root + "raw/tube3vain/"
 operatedir =   root + "raw/sqr2/"
-
+operatedir =   root + "raw/video1/"
 
 
 
@@ -24,7 +26,7 @@ from scipy.stats.stats import pearsonr
 import random
 from matplotlib.pyplot import *
 from mpl_toolkits.mplot3d import Axes3D
-from Correct_sequence_integral import read_start 
+# from Correct_sequence_integral import read_start
 from read_circu import tranfer_frome_rec2cir
 from basic_trans import Basic_oper
 from  matlab import Save_Signal_matlab
@@ -36,16 +38,16 @@ save_dir_cir =   root + "resize_circular/"  + base_dir + "/"
 try:
     os.stat(save_dir)
 except:
-    os.mkdir(save_dir)
+    os.makedirs(save_dir)
 
 try:
     os.stat(save_dir_cir)
 except:
-    os.mkdir(save_dir_cir)
+    os.makedirs(save_dir_cir)
 read_start1 = 79
 read_start2 = 79
 
-Padding_H  = 31
+Padding_H  = 0
 
 #Padding_H  = 254
 #from  path_finding import PATH
@@ -80,7 +82,7 @@ def diplay_sequence():
     read_sequence = os.listdir(operatedir)
     
 
-    this_id  = 0
+    this_id  = 1
     for dir in read_sequence:
     #for i in os.listdir("E:/estimagine/vs_project/PythonApplication_data_au/pic/"):
     ##      process

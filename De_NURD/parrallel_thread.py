@@ -8,7 +8,7 @@ from shift_deploy import Shift_Predict
 from median_filter_special import  myfilter
 from path_finding import PATH
 from time import time
-from pair2path import Pair2Path
+from pair2path.pair2path import Pair2Path
 import cv2
 import matplotlib.pyplot as plt
 Graph_searching_flag = False
@@ -82,12 +82,12 @@ class Dual_thread_Overall_shift_NURD(object):
        #self.overall_shifting,shift_used1 = COSTMtrix.stack_fully_shifting_correlation (self.stream1[:,0:210,:],
        #                                                       self.stream2[:,0:210,:],  self.shift_used1)
        img1 = np.roll(img1, int(self.shift_used1 ) , axis = 1)     # Positive x rolls right
-       crop1 = img1[27:83,:]
-       crop3 = img3 [27:83,:]
-       crop1=cv2.resize(crop1, (int(W/3) , 30), interpolation=cv2.INTER_LINEAR)
-       crop3=cv2.resize(crop3, ( int(W/3),30), interpolation=cv2.INTER_LINEAR)
-       crop1=cv2.resize(crop1, (int(W ) , 90), interpolation=cv2.INTER_LINEAR)
-       crop3=cv2.resize(crop3, ( int(W ),90), interpolation=cv2.INTER_LINEAR)
+       crop1 = img1[27:210,:]
+       crop3 = img3 [27:210,:]
+       crop1=cv2.resize(crop1, (int(W/2) , 100), interpolation=cv2.INTER_LINEAR)
+       crop3=cv2.resize(crop3, ( int(W/2),100), interpolation=cv2.INTER_LINEAR)
+       crop1=cv2.resize(crop1, (int(W ) , 210), interpolation=cv2.INTER_LINEAR)
+       crop3=cv2.resize(crop3, ( int(W ),210), interpolation=cv2.INTER_LINEAR)
        self.overall_shifting,_,matrix= COSTMtrix.Img_fully_shifting_correlation (crop1 ,
                                                               crop3, 0)
             
@@ -172,7 +172,7 @@ class Dual_thread_Overall_shift_NURD(object):
       self.costmatrix,self.shift_used2= COSTMtrix.matrix_cal_corre_block_version3_3GPU  (
                                                               self.stream2[self.strmlen-1,:,:] ,
                                                               self.stream2[self.strmlen-2,:,:], 0,
-                                                              block_wid = 3,Down_sample_F = 1,Down_sample_F2 = 2) 
+                                                              block_wid = 3,Down_sample_F = 3,Down_sample_F2 = 3) 
 
       #self.costmatrix2,self.shift_used2= COSTMtrix.matrix_cal_corre_block_version3_3GPU  (
       #                                                        self.stream2[self.strmlen-1,50:211,:] ,

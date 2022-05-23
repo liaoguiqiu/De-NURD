@@ -40,7 +40,7 @@ myekf = EKF()
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 Resample_size =Window_LEN
-R_len = 20
+R_len = 1000
 
 #read_start = 100
 read_start =0
@@ -268,14 +268,14 @@ class VIDEO_PEOCESS:
         if Branch_flag == 1:
             shift_integral = shift_integral  
         elif Branch_flag == 0:
-            shift_integral = shift_integral - 0.05 *(shift_integral-overall_shift)   - I 
+            shift_integral = shift_integral - 0.2 *(shift_integral-overall_shift)   - I 
         elif Branch_flag == 2:
              shift_integral = shift_integral*0 + overall_shift  
         #shift_integral = shift_integral*0 + overall_shift  
 
         shift_integral = gaussian_filter1d(shift_integral,4) # smooth the path 
 
-        #shift_integral = gaussian_filter1d(shift_integral,20) # smooth the path 
+        shift_integral = gaussian_filter1d(shift_integral,20) # smooth the path 
         
         return shift_integral
 #----------------------#
@@ -472,15 +472,18 @@ class VIDEO_PEOCESS:
                     steam=np.append(steam,[Corrected_img[H_start:H_end,:] ],axis=0) # save sequence
                     # no longer delete the fist  one
                     steam= np.delete(steam , 1,axis=0)
+                    #if ((sequence_num -read_start+2 )%  R_len  ==0): # change
+                    #    #steam[0,:,:] = 0.7*Corrected_img[H_start:H_end,:] + 0.3*steam[Len_steam-2,H_start:H_end,:]  
+                    #        steam[0,:,:] =  Corrected_img[H_start:H_end,:] 
                     if ((sequence_num -read_start+2 )% 1 ==0):
-                        if (abs(np.mean(shift_integral))<10): # change
-                        #steam[0,:,:] = 0.7*Corrected_img[H_start:H_end,:] + 0.3*steam[Len_steam-2,H_start:H_end,:]  
-                            steam[0,:,:] = 0.5*Corrected_img[H_start:H_end,:] + 0.5*steam[Len_steam-3,H_start:H_end,:]  
-                        #steam[0,:,:] = 0.6*Corrected_img[H_start:H_end,:] + 0.4*steam[Len_steam-3,H_start:H_end,:] 
-                    if ((sequence_num -read_start+2 )% R_len ==0):
-                        if (abs(np.mean(shift_integral))<10):
-                        #steam[0,:,:] = 0.7*Corrected_img[H_start:H_end,:] + 0.3*steam[Len_steam-2,H_start:H_end,:]  
-                            steam[0,:,:] = 0.4*Corrected_img[H_start:H_end,:] + 0.3*steam[Len_steam-3,H_start:H_end,:] +  0.3*steam[Len_steam-2,H_start:H_end,:] 
+                        if (abs(np.mean(shift_integral))<50): # change
+                            steam[0,:,:] = 0.5*Corrected_img[H_start:H_end,:] + 0.5*steam[Len_steam-2,H_start:H_end,:]  
+                    #        steam[0,:,:] = 0.5*Corrected_img[H_start:H_end,:] + 0.5*steam[Len_steam-3,H_start:H_end,:]  
+                    #    #steam[0,:,:] = 0.6*Corrected_img[H_start:H_end,:] + 0.4*steam[Len_steam-3,H_start:H_end,:] 
+                    #if ((sequence_num -read_start+2 )% R_len ==0):
+                    #    if (abs(np.mean(shift_integral))<10):
+                    #    #steam[0,:,:] = 0.7*Corrected_img[H_start:H_end,:] + 0.3*steam[Len_steam-2,H_start:H_end,:]  
+                    #        steam[0,:,:] = 0.4*Corrected_img[H_start:H_end,:] + 0.3*steam[Len_steam-3,H_start:H_end,:] +  0.3*steam[Len_steam-2,H_start:H_end,:] 
                         #steam[0,:,:] = 0.6*Corrected_img[H_start:H_end,:] + 0.4*steam[Len_steam-3,H_start:H_end,:] 
                     
                         #steam2=np.append(steam2,[Corrected_img ],axis=0) # save sequence

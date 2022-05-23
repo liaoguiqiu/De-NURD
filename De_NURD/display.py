@@ -36,7 +36,7 @@ from  matlab import Save_Signal_matlab
 matlab_saver  = Save_Signal_matlab()
 
 #read_start = 0
-Padding_H  = 150
+Padding_H  = 0
 
 #Padding_H  = 254
 #from  path_finding import PATH
@@ -249,6 +249,8 @@ if Display_signal_flag == True:
     saved_stastics=saved_stastics.read_my_signal_results()
     saved_stastics.display()
 def tranfer2circ_padding(img):
+    img = cv2.resize(img, (500,500), interpolation=cv2.INTER_AREA)
+
     H,W_ini = img.shape
     if Padd_zero_top ==True:
             if Padding_H>0:
