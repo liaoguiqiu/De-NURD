@@ -2,7 +2,7 @@
 ![image](fig/Method_relplot12.png)
 
 > [**Distortion and Instability Compensation with Deep Learning for Rotational Scanning Endoscopic Optical Coherence Tomography**](https://www.sciencedirect.com/science/article/pii/S1361841522000081),
-> Liao, Guiqiu and Caravaca-Mora, Oscar and Rosa, Benoit and Zanne, Philippe and Alba, Diego Dall and Fiorini, Paolo and de Mathelin, Michel and Nageotte, Florent and Gora, Michalina J
+> Liao, Guiqiu and Caravaca-Mora, Oscar and Rosa, Benoit and Zanne, Philippe and Alba, Diego Dall and Fiorini, Paolo and de Mathelin, Michel and Nageotte, Florent and Gora, Michalina J,
 > *MedIA 2022*
 
 ![image](fig/enface_polyp.png)
